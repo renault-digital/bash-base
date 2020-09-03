@@ -1,0 +1,89 @@
+name: cicd
+
+# Run the workflow when a Pull Request is opened or when changes are pushed to master
+on:
+  pull_request:
+  push:
+    branches: [ master ]
+
+jobs:
+  lint-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v1
+      - name: commitsar
+        uses: docker://aevea/commitsar
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Install
+        run: npm ci
+
+      - name: shellcheck-shfmt
+        run: npm run lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      # Fetch the latest commit
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # Run tests
+      - name: shellspec-kcov
+        run: docker run -i --rm -v "$(pwd)":/bash-base -w /bash-base shellspec/shellspec:master-kcov --kcov --kcov-options "--include-path=src" -f t spec/*.sh
+
+      - name: codecov.io
+        run: bash <(curl -s https://codecov.io/bash)
+
+      - name: failed if coverage not 100%
+        run: |
+          cat coverage/coverage.json
+          if [ $(jq '.percent_covered|tonumber' coverage/coverage.json) -lt 100 ]; then
+            echo "The coverage should be 100%."
+            exit 1
+          fi
+
+  semantic-release:
+    runs-on: ubuntu-latest
+    # Waits for test jobs to complete
+    needs: [lint-commit,lint,test]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Install
+        run: npm ci
+
+      - name: semantic-release dry run to preview of the pending release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: npx semantic-release --dry-run
+
+      - name: semantic-release
+        # Only release on push to master
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: npx semantic-release
