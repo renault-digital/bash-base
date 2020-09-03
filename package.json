@@ -1,0 +1,70 @@
+{
+  "name": "@renault-digital/bash-base",
+  "version": "1.0.0",
+  "description": "A common lib for creating bash script easily.",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "preferGlobal": true,
+  "files": [
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "package-lock.json",
+    "scripts/verify-by-spec.sh",
+    "src/",
+    "docs/",
+    "man/",
+    "spec/"
+  ],
+  "main": "src/bash-base.sh",
+  "bin": "src/bash-base.sh",
+  "man": "man/bash-base.1",
+  "directories": {
+    "doc": "docs",
+    "example": "example",
+    "test": "spec"
+  },
+  "scripts": {
+    "preinstall": "npx npm-force-resolutions || true",
+    "shellcheck": "docker run --rm -v \"$(pwd)\":/bash-base -w /bash-base koalaman/shellcheck:latest src/*.sh scripts/*.sh example/*.sh",
+    "shfmt": "docker run --rm -v \"$(pwd)\":/bash-base -w /bash-base mvdan/shfmt -l -w src/*.sh scripts/*.sh example/*.sh",
+    "lint:commit": "docker run -v \"$(pwd)\":/bash-base -w /bash-base aevea/commitsar",
+    "lint:comment": "./scripts/lint-comment.sh",
+    "lint": "npm run shellcheck && npm run shfmt && npm run lint:comment",
+    "test": "./scripts/verify-by-spec.sh",
+    "test:focus": "docker run -it --rm -v \"$(pwd)\":/bash-base -w /bash-base shellspec/shellspec:master-kcov --shell bash --focus spec/*.sh #execute only fIt/fDescribe",
+    "test:coverage": "docker run -it --rm -v \"$(pwd)\":/bash-base -w /bash-base shellspec/shellspec:master-kcov --kcov --kcov-options \"--include-path=src\" -f t spec/*.sh",
+    "livedoc": "./scripts/bashdoc.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/renault-digital/bash-base.git"
+  },
+  "keywords": [
+    "bash-base",
+    "renault digital"
+  ],
+  "author": "Hongjie ZHANG <hongjie.zhang@renault.com> (https://github.com/zhang-hongjie)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/renault-digital/bash-base/issues"
+  },
+  "homepage": "https://github.com/renault-digital/bash-base#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^9.1.2",
+    "@commitlint/config-conventional": "^9.1.2",
+    "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/exec": "^5.0.0",
+    "@semantic-release/git": "^9.0.0",
+    "commitizen": "^4.1.2",
+    "cz-conventional-changelog": "^3.2.0",
+    "husky": "^4.2.5",
+    "semantic-release-docker": "^2.2.0"
+  },
+  "dependencies": {},
+  "resolutions": {
+    "lodash": "4.17.19",
+    "dot-prop": "5.2.0"
+  }
+}
