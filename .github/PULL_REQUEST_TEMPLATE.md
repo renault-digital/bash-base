@@ -10,8 +10,13 @@
 - [ ] Feature change
 - [ ] Refactor
 - [ ] Documentation
+- [ ] CI/CD
+- [ ] Test
+- [ ] Build
+- [ ] Style
+- [ ] Chore
 
-### Issue (for type 'bug fix'/'feature change')
+### Issue (only for type `bug fix`/`feature change`)
 
 <!--
 
@@ -27,6 +32,6 @@ We must be able to understand the design of your change from this description.
 
 -->
 
-### Possible Drawbacks (not for type 'documentation')
+### Possible Drawbacks
 
 <!-- What are the possible side-effects or negative impacts of the code change? -->
