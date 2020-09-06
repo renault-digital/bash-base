@@ -37,13 +37,14 @@ else
 			docker run --rm -v "$(pwd)":/bash-base -w /bash-base shellspec/shellspec:master-kcov --shell bash spec/*.sh >&2
 		fi
 
+    # transfer file content of bash-base.sh to 'source' command of client script by stdout
 		cat "${installDir}"/src/bash-base.sh
 
 		ln -fs "${installDir}"/src/bash-base.sh ${binDir}/bash-base."${version}"
 		ln -fs "${installDir}"/man/bash-base.1 ${manDir}/bash-base."${version}".1
 		cat >&2 <<-EOF
 			# the man page of this version: 'man bash-base.${version}', and you can import this version in one line in your script:
-			# source bash-base.v2.3.3 2>/dev/null || source <(curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- ${version})
+			# source bash-base.${version} 2>/dev/null || source <(curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- ${version})
 
 		EOF
 
