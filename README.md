@@ -7,7 +7,7 @@
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 [![GitHub release](https://img.shields.io/github/release/renault-digital/bash-base.svg)](https://github.com/renault-digital/bash-base/releases/latest)
-[![npm package](https://img.shields.io/npm/v/bash-base.svg)](https://www.npmjs.com/package/@renault-digital/bash-base)
+[![npm package](https://img.shields.io/npm/v/@renault-digital/bash-base.svg)](https://www.npmjs.com/package/@renault-digital/bash-base)
 [![Docker Cloud Build Status](https://img.shields.io/docker/pulls/renaultdigital/bash-base.svg)](https://hub.docker.com/r/renaultdigital/bash-base)
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/renault-digital/bash-base/latest)
 
@@ -29,74 +29,22 @@ See [CHANGELOG.md](CHANGELOG.md)
 
 ## How to use
 
-### Get from github
+#### 1. Install from docker
 
-#### Import bash-base directly from github during every execution
+See [docker hub](https://hub.docker.com/r/renaultdigital/bash-base)
 
-Simply write in console or script:
-
-If to import latest version:
 ```
-source <(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/master/src/bash-base.sh)
-or
-eval "$(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/master/src/bash-base.sh)"
+source <(docker run --rm renaultdigital/bash-base)
+``` 
+
+Or specific a fixed version
+
 ```
-
-If to import specific version:
-```
-source <(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/v2.3.1/src/bash-base.sh)
-or
-eval "$(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/v2.3.1/src/bash-base.sh)
-```
-
-Verify the import in console:
-```
-string_trim ' hello '
-```
-
-###### Notes
-this way, your script need to access github when each time it launched.
-
-#### Import bash-base using install.sh
-
-The directory installed is `~/.bash-base`.
-
-##### source or install the specific version in console or shell script:
-
-- the man page of version v2.3.3:  `man bash-base.${version}`, 
-- you can import this version in one line in your script:
-```
-source bash-base.v2.3.3 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- v2.3.3"
+source <(docker run --rm renaultdigital/bash-base:2.3.2)
 ```
 
 
-##### but if you want always the latest version, source or install the latest version in console or shell script:
-- the man page is: `man bash-base`,
-- and import like this:
-```
-source bash-base 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash
-or
-source bash-base 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- latest
-```
-
-###### Notes:
-this way, your script will access github to check whether a newer version published during every time it launched.
-if you don't like this behavior, you need to specify a fixed version to use in your script.
-
-
-##### Using param `verify` to check all functions of bash-base is compatible with your environment:
-```
-source bash-base 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- latest verify
-or
-source bash-base 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- v2.3.3 verify
-```
-
-##### To uninstall all versions of bash-base from your system:
-```
-curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- uninstall
-```
-
-### Install from NPM
+#### 2. Install from NPM
 
 See [npm repackage](https://www.npmjs.com/package/bash-base)
 ```
@@ -119,34 +67,96 @@ To uninstall:
 npm uninstall -g bash-base
 ```
 
-### Install from docker
 
-See [docker hub](https://hub.docker.com/r/renaultdigital/bash-base)
+#### 3. Install from GitHub
 
+The directory installed is `~/.bash-base`.
+
+##### install if not existed the specific version in console / shell script:
+
+- the man page of version v2.3.3:  `man bash-base.v2.3.3`, 
+- you can import this version in one line in your script:
 ```
-source <(docker run --rm renaultdigital/bash-base)
-``` 
-
-Or specific a fixed version
-
-```
-source <(docker run --rm renaultdigital/bash-base:2.3.2)
+source bash-base.v2.3.3 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- v2.3.3"
 ```
 
-### Download only
+
+##### If you always prefer to use the latest version, install if not existed the latest version in console / shell script:
+- the man page is: `man bash-base`,
+- and import like this:
+```
+source bash-base 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash
+```
+or
+```
+source bash-base 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- latest
+```
+
+###### Notes:
+this way, your script will access github to check whether a newer version published during every time it launched.
+if you don't like this behavior, you need to specify a fixed version to use in your script.
+
+
+##### If you want to check all functions of bash-base is compatible with your environment when install, using param `verify` :
+```
+source bash-base 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- latest verify
+```
+or
+```
+source bash-base 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- v2.3.3 verify
+```
+
+##### To uninstall all versions of bash-base from your system:
+```
+curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- uninstall
+```
+
+
+#### 4. Import bash-base from GitHub when execute
+
+Simply write in console or script:
+
+If to import latest version:
+```
+source <(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/master/src/bash-base.sh)
+```
+or
+```
+eval "$(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/master/src/bash-base.sh)"
+```
+
+If to import specific version:
+```
+source <(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/v2.3.1/src/bash-base.sh)
+```
+or
+```
+eval "$(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/v2.3.1/src/bash-base.sh)
+```
+
+Verify the import in console:
+```
+string_trim ' hello '
+```
+
+###### Notes
+this way, your script need to access github when each time it launched.
+
+
+#### 5. Download only
 
 download a specific version:
 
 - from NPM: https://registry.npmjs.org/bash-base/-/bash-base-2.3.2.tgz
 - from github: https://github.com/renault-digital/bash-base/archive/v2.3.3.tar.gz
 
-### Example
+## Example
 See [example](example) folder
 
-### Reference
+## Reference
 See [reference](docs/references.md)
 
-### Specification
+## Specification
 See [spec](spec) folder
 
 ## Contributing
