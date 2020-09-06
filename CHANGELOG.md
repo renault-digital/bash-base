@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/renault-digital/bash-base/compare/v1.0.1...v1.0.2) (2020-09-06)
+
+
+### Bug Fixes
+
+* the script install.sh ([a85deb8](https://github.com/renault-digital/bash-base/commit/a85deb80a107a61966597a42658703da304d3122)), closes [#4](https://github.com/renault-digital/bash-base/issues/4)
+
 # 1.0.0 (2020-09-05)
 
 
