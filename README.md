@@ -22,6 +22,7 @@ A common lib for creating bash script easily like other program language.
 - Make your script more compact & readability
 - Available on github/npm/dockerhub
 
+![bash-base.gif](bash-base.gif)
 
 ## Latest Update
 See [CHANGELOG.md](CHANGELOG.md)
