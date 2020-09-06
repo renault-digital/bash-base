@@ -7,7 +7,7 @@
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 [![GitHub release](https://img.shields.io/github/release/renault-digital/bash-base.svg)](https://github.com/renault-digital/bash-base/releases/latest)
-[![npm package](https://img.shields.io/npm/v/bash-base.svg)](https://www.npmjs.com/package/bash-base)
+[![npm package](https://img.shields.io/npm/v/bash-base.svg)](https://www.npmjs.com/package/@renault-digital/bash-base)
 [![Docker Cloud Build Status](https://img.shields.io/docker/pulls/renaultdigital/bash-base.svg)](https://hub.docker.com/r/renaultdigital/bash-base)
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/renault-digital/bash-base/latest)
 
