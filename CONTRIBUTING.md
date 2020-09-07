@@ -38,7 +38,7 @@ A pull request should remain focused in scope and avoid containing unrelated com
     - Help input commit message 
         - CLI: with [Husky](https://github.com/typicode/husky) and [Commitizen](http://commitizen.github.io/cz-cli)
         - IntelliJ IDEA: plugin [Git Commit Template](https://plugins.jetbrains.com/plugin/9861-git-commit-template)
-    - Audit commit message with [Commitlint](https://commitlint.js.org) for local and CI/CD pipeline
+    - Audit commit message with [Commitsar](https://commitsar.tech) for local lint and [Commitlint](https://commitlint.js.org) for CI/CD pipeline and local git hook `commit-msg`
     
 - LiveDoc:
     - The comment of functions respect the [man page](https://en.wikipedia.org/wiki/Man_page) standards and conventions and use the 5 basic sections (NAME, SYNOPSIS, DESCRIPTION, EXAMPLES, SEE ALSO) 
