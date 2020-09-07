@@ -20,10 +20,11 @@ Firstly, search if your idea is not already created by others, then fill the inf
 If you want, aside from submitting a github issue, a good pull request is a fantastic help.
 
 A pull request should remain focused in scope and avoid containing unrelated commits.
- 
+
 #### Understand the technology stack
 
-- Works with docker, git
+- Works with git, npm and docker
+
 - Bash best practices
     - Audit shell script with [shellcheck](https://www.shellcheck.net/)
     - Format shell script with [shfmt](https://github.com/mvdan/sh)
@@ -37,7 +38,7 @@ A pull request should remain focused in scope and avoid containing unrelated com
     - Help input commit message 
         - CLI: with [Husky](https://github.com/typicode/husky) and [Commitizen](http://commitizen.github.io/cz-cli)
         - IntelliJ IDEA: plugin [Git Commit Template](https://plugins.jetbrains.com/plugin/9861-git-commit-template)
-    - Audit commit message with [Commitlint](https://commitlint.js.org) for local and [Commitsar](https://commitsar.tech) for CI/CD pipeline
+    - Audit commit message with [Commitlint](https://commitlint.js.org) for local and CI/CD pipeline
     
 - LiveDoc:
     - The comment of functions respect the [man page](https://en.wikipedia.org/wiki/Man_page) standards and conventions and use the 5 basic sections (NAME, SYNOPSIS, DESCRIPTION, EXAMPLES, SEE ALSO) 
@@ -48,9 +49,9 @@ A pull request should remain focused in scope and avoid containing unrelated com
 - Automatically release a new version with [semantic release](https://semantic-release.gitbook.io/) if need:
     - Analyser the commit message to decide the new version
     - Generate release note
-    - Generate CHANGELOG.md
+    - Generate&Update CHANGELOG.md
     - Build docker image
-    - lint man-styled script comment
+    - Lint man-styled script comment
     - Generate docs/references.md and man/bash-base.1
     - Tag and Release on Github
     - Push new release to [npm Registry](https://www.npmjs.com)
@@ -84,7 +85,8 @@ A pull request should remain focused in scope and avoid containing unrelated com
     ```
     npm test
     npm run lint
-    npm run test:coverage
+    npm run lint:commit
+    npm run test:coverage # to be sure coverage 100%
     ```
 
 1. Commit your changes in logical chunks. Please see the [commit message guidelines](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines).
