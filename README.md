@@ -41,15 +41,15 @@ source <(docker run --rm renaultdigital/bash-base)
 Or specific a fixed version
 
 ```
-source <(docker run --rm renaultdigital/bash-base:2.3.2)
+source <(docker run --rm renaultdigital/bash-base:1.0.2)
 ```
 
 
 #### 2. Install from NPM
 
-See [npm repackage](https://www.npmjs.com/package/bash-base)
+See [npm repackage](https://www.npmjs.com/package/@renault-digital/bash-base)
 ```
-npm install -g bash-base
+npm install -g @renault-digital/bash-base
 ```
 
 verify the installation
@@ -60,12 +60,12 @@ man bash-base
 or one line in your script:
 ```
 # import, and install bash-base from npmjs only if not installed:
-source bash-base 2>/dev/null || npm install -g bash-base && source bash-base
+source bash-base 2>/dev/null || npm install -g @renault-digital/bash-base && source bash-base
 ```
 
 To uninstall:
 ```
-npm uninstall -g bash-base
+npm uninstall -g @renault-digital/bash-base
 ```
 
 
@@ -75,10 +75,10 @@ The directory installed is `~/.bash-base`.
 
 ##### install if not existed the specific version in console / shell script:
 
-- the man page of version v2.3.3:  `man bash-base.v2.3.3`, 
+- the man page of version v1.0.2:  `man bash-base.v1.0.2`, 
 - you can import this version in one line in your script:
 ```
-source bash-base.v2.3.3 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- v2.3.3"
+source bash-base.v1.0.2 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- v1.0.2"
 ```
 
 
@@ -104,7 +104,7 @@ source bash-base 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/re
 ```
 or
 ```
-source bash-base 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- v2.3.3 verify
+source bash-base 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- v1.0.2 verify
 ```
 
 ##### To uninstall all versions of bash-base from your system:
@@ -128,11 +128,11 @@ eval "$(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/m
 
 If to import specific version:
 ```
-source <(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/v2.3.1/src/bash-base.sh)
+source <(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/v1.0.2/src/bash-base.sh)
 ```
 or
 ```
-eval "$(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/v2.3.1/src/bash-base.sh)
+eval "$(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/v1.0.2/src/bash-base.sh)
 ```
 
 Verify the import in console:
@@ -148,8 +148,8 @@ this way, your script need to access github when each time it launched.
 
 download a specific version:
 
-- from NPM: https://registry.npmjs.org/bash-base/-/bash-base-2.3.2.tgz
-- from github: https://github.com/renault-digital/bash-base/archive/v2.3.3.tar.gz
+- from NPM: https://registry.npmjs.org/@renault-digital/bash-base/-/bash-base-1.0.2.tgz
+- from github: https://github.com/renault-digital/bash-base/archive/v1.0.2.tar.gz
 
 ## Example
 See [example](example) folder
