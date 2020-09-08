@@ -38,7 +38,7 @@ A pull request should remain focused in scope and avoid containing unrelated com
     - Help input commit message 
         - CLI: with [Husky](https://github.com/typicode/husky) and [Commitizen](http://commitizen.github.io/cz-cli)
         - IntelliJ IDEA: plugin [Git Commit Template](https://plugins.jetbrains.com/plugin/9861-git-commit-template)
-    - Audit commit message with [Commitsar](https://commitsar.tech) for local lint and [Commitlint](https://commitlint.js.org) for CI/CD pipeline and local git hook `commit-msg`
+    - Audit commit message with [Commitlint](https://commitlint.js.org) for CI/CD pipeline, local lint and git hook `commit-msg`
         - Note 1: default issuePrefixes: ['#']
         - Note 2: even we explicitly provide commit message, the prepare-commit-msg hook will still be revoked and the commitizen will show the prompts. We can just press Ctrl + C to skip it and it comes to commit-msg hook.
     
