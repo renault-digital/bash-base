@@ -1228,7 +1228,7 @@ function reflect_search_variable() {
 #     docker run -it --rm -v "$(pwd):/src" -w /src mvdan/shfmt -l -w "${shellScriptFile}"
 #     doc_lint_script_comment "${shellScriptFile}"
 # @SEE_ALSO
-#     doc_comment_to_markdown, doc_markdown_to_manpage
+#     doc_comment_to_markdown
 function doc_lint_script_comment() {
 	local shellScriptFile="$1"
 	local element strAllFunctionsAndTheirTags arrAllFunctionsAndTheirTags manTags strFunctionAndItsTags arrFunctionAndItsTags intersection counter
@@ -1274,7 +1274,7 @@ function doc_lint_script_comment() {
 # @EXAMPLES
 #     doc_comment_to_markdown src/bash-base.sh docs/reference.md
 # @SEE_ALSO
-#     doc_markdown_to_manpage, doc_check_script_comment
+#     doc_lint_script_comment
 function doc_comment_to_markdown() {
 	local fromShellFile="$1"
 	local toMarkdownFile="$2"
