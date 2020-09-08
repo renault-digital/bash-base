@@ -2,6 +2,6 @@
   "hooks": {
     "prepare-commit-msg": "exec < /dev/tty && node_modules/.bin/git-cz --hook || true",
     "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-    "pre-push": "npm test & npm run lint || exit"
+    "pre-push": "npm test < /dev/tty && npm run lint || exit 1"
   }
 }

@@ -82,15 +82,6 @@ A pull request should remain focused in scope and avoid containing unrelated com
 
 1. Modify the code. Remember to write / update the tests for the proposed evolution, 100% test coverage is required, as every function will be used by users, we need to ensure its accuracy.
 
-1. Verify the result in local:
-
-    ```
-    npm test
-    npm run lint
-    npm run lint:commit
-    npm run test:coverage # to be sure coverage 100%
-    ```
-
 1. Commit your changes in logical chunks. Please see the [commit message guidelines](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#-git-commit-guidelines).
 
     ```
@@ -104,6 +95,13 @@ A pull request should remain focused in scope and avoid containing unrelated com
     
     ![intellij_plugin_icon](docs/intellij_plugin_dialog.png)
     
-1. Push your changes
+1. Push your changes and the hook will verify the result in local:
+                                       
+   ```
+   npm test
+   npm run lint
+   # npm run lint:commit
+   # npm run test:coverage # to be sure coverage 100%
+   ```
     
 1. Open a pull request with a clear title and description.
