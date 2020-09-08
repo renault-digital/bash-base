@@ -1437,7 +1437,7 @@ doc_lint_script_comment \[dq]${shellScriptFile}\[dq]
 .fi
 .SS SEE_ALSO
 .PP
-doc_comment_to_markdown, doc_markdown_to_manpage
+doc_comment_to_markdown
 .PP
    *   *   *   *   *
 .SS NAME
@@ -1460,12 +1460,12 @@ doc_comment_to_markdown fromShellFile toMarkdownFile
 .IP
 .nf
 \f[C]
-doc_comment_to_markdown src/bash-base.sh docs/reference.md
+doc_comment_to_markdown src/bash-base.sh docs/references.md
 \f[R]
 .fi
 .SS SEE_ALSO
 .PP
-doc_markdown_to_manpage, doc_check_script_comment
+doc_lint_script_comment
 .PP
    *   *   *   *   *
 .SS NAME
@@ -1548,8 +1548,7 @@ stop_if_failed \[dq]ERROR: can\[aq]t delete the directory \[aq]${destProjectPath
    *   *   *   *   *
 .SS NAME
 .PP
-declare_heredoc \[en] stop the execute if last command exit with fail
-code (no zero)
+declare_heredoc \[en] define a variable and init its value from heredoc
 .SS SYNOPSIS
 .IP
 .nf

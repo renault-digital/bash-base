@@ -1114,7 +1114,7 @@ doc_lint_script_comment "${shellScriptFile}"
 ```
 
 ##### SEE_ALSO
-doc_comment_to_markdown, doc_markdown_to_manpage
+doc_comment_to_markdown
 
 ---
 
@@ -1132,11 +1132,11 @@ doc_comment_to_markdown fromShellFile toMarkdownFile
 
 ##### EXAMPLES
 ```
-doc_comment_to_markdown src/bash-base.sh docs/reference.md
+doc_comment_to_markdown src/bash-base.sh docs/references.md
 ```
 
 ##### SEE_ALSO
-doc_markdown_to_manpage, doc_check_script_comment
+doc_lint_script_comment
 
 ---
 
@@ -1206,7 +1206,7 @@ stop_if_failed "ERROR: can't delete the directory '${destProjectPath}' !"
 ---
 
 ##### NAME
-declare_heredoc -- stop the execute if last command exit with fail code (no zero)
+declare_heredoc -- define a variable and init its value from heredoc
 
 ##### SYNOPSIS
 ```
