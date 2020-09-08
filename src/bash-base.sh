@@ -1272,7 +1272,7 @@ function doc_lint_script_comment() {
 #     **fromShellFile** the path of source shell script file
 #     **toMarkdownFile** the path of destination markdown file
 # @EXAMPLES
-#     doc_comment_to_markdown src/bash-base.sh docs/reference.md
+#     doc_comment_to_markdown src/bash-base.sh docs/references.md
 # @SEE_ALSO
 #     doc_lint_script_comment
 function doc_comment_to_markdown() {
