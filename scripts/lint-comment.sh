@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
-source src/bash-base.sh
+source src/document.sh
+source src/tool.sh
 
-shellScriptFile="src/bash-base.sh"
+shellScriptFile="bin/bash-base.sh"
 
-# format script code
-docker run --rm -v "$(pwd):/src" -w /src mvdan/shfmt -l -w "${shellScriptFile}"
+print_header 'format source code'
+npm run shfmt
 
-# lint script comment
+print_header 'lint script comment'
 doc_lint_script_comment "${shellScriptFile}"
 stop_if_failed 'the comment is not valid'

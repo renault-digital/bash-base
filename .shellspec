@@ -1,0 +1,6 @@
+--require spec_helper
+--shell bash
+
+## kcov (coverage) options
+--kcov-options "--include-path=src"
+
