@@ -24,6 +24,5 @@ module.exports = {
     ["semantic-release-docker", {
       "name": "renaultdigital/bash-base"
     }]
-  ],
-  "preset": "conventionalcommits"
+  ]
 }
