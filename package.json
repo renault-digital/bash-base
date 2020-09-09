@@ -11,14 +11,15 @@
     "CODE_OF_CONDUCT.md",
     "CONTRIBUTING.md",
     "package-lock.json",
-    "scripts/verify-by-spec.sh",
+    "scripts/test.sh",
     "src/",
+    "bin/",
     "docs/",
     "man/",
     "spec/"
   ],
-  "main": "src/bash-base.sh",
-  "bin": "src/bash-base.sh",
+  "main": "bin/bash-base.sh",
+  "bin": "bin/bash-base.sh",
   "man": "man/bash-base.1",
   "directories": {
     "doc": "docs",
@@ -32,10 +33,10 @@
     "lint:commit": " commitlint --from=$(git rev-list --max-parents=0 HEAD)",
     "lint:comment": "./scripts/lint-comment.sh",
     "lint": "npm run shellcheck && npm run lint:comment",
-    "test": "./scripts/verify-by-spec.sh",
-    "test:focus": "docker run -it --rm -v \"$(pwd)\":/bash-base -w /bash-base shellspec/shellspec:master-kcov --shell bash --focus spec/*.sh #execute only fIt/fDescribe",
-    "test:coverage": "docker run -it --rm -v \"$(pwd)\":/bash-base -w /bash-base shellspec/shellspec:master-kcov --kcov --kcov-options \"--include-path=src\" -f t spec/*.sh",
-    "livedoc": "./scripts/bashdoc.sh"
+    "test": "./scripts/test.sh",
+    "test:focus": "npm test -- --focus #execute only fIt/fDescribe",
+    "test:coverage": "npm test -- --kcov -f t",
+    "build": "./scripts/build.sh"
   },
   "repository": {
     "type": "git",

@@ -49,7 +49,7 @@ source <(docker run --rm renaultdigital/bash-base:1.0.2)
 
 See [npm repackage](https://www.npmjs.com/package/@renault-digital/bash-base)
 ```
-npm install -g @renault-digital/bash-base
+npm i -g @renault-digital/bash-base
 ```
 
 verify the installation
@@ -60,7 +60,7 @@ man bash-base
 or one line in your script:
 ```
 # import, and install bash-base from npmjs only if not installed:
-source bash-base 2>/dev/null || npm install -g @renault-digital/bash-base && source bash-base
+source bash-base 2>/dev/null || npm i -g @renault-digital/bash-base && source bash-base
 ```
 
 To uninstall:
@@ -119,20 +119,20 @@ Simply write in console or script:
 
 If to import latest version:
 ```
-source <(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/master/src/bash-base.sh)
+source <(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/master/bin/bash-base.sh)
 ```
 or
 ```
-eval "$(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/master/src/bash-base.sh)"
+eval "$(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/master/bin/bash-base.sh)"
 ```
 
 If to import specific version:
 ```
-source <(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/v1.0.2/src/bash-base.sh)
+source <(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/v1.0.2/bin/bash-base.sh)
 ```
 or
 ```
-eval "$(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/v1.0.2/src/bash-base.sh)
+eval "$(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/v1.0.2/bin/bash-base.sh)
 ```
 
 Verify the import in console:

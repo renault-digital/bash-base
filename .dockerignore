@@ -4,8 +4,9 @@
 !README.md
 !CODE_OF_CONDUCT.md
 !CONTRIBUTING.md
-!scripts/verify-by-spec.sh
+!scripts/test.sh
 !docs
 !man
 !spec
 !src
+!bin

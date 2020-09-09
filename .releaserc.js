@@ -15,7 +15,7 @@ module.exports = {
     "@semantic-release/changelog",
     "@semantic-release/npm",
     ["@semantic-release/exec", {
-      "prepareCmd": "docker build -t renaultdigital/bash-base . && npm run livedoc"
+      "prepareCmd": "npm run build && docker build -t renaultdigital/bash-base ."
     }],
     ["@semantic-release/git", {
       "assets": ['CHANGELOG.md', 'package.json', 'package-lock.json', 'npm-shrinkwrap.json', 'src', 'docs', 'man'],
