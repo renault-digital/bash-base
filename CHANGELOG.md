@@ -1,3 +1,5 @@
+### [1.0.4](https://github.com/renault-digital/bash-base/compare/v1.0.3...v1.0.4) (2020-09-09)
+
 ## [1.0.3](https://github.com/renault-digital/bash-base/compare/v1.0.2...v1.0.3) (2020-09-08)
 
 ## [1.0.2](https://github.com/renault-digital/bash-base/compare/v1.0.1...v1.0.2) (2020-09-06)
