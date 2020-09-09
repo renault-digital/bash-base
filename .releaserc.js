@@ -19,11 +19,11 @@ module.exports = {
     }],
     ["@semantic-release/git", {
       "assets": ['CHANGELOG.md', 'package.json', 'package-lock.json', 'npm-shrinkwrap.json', 'src', 'docs', 'man'],
-      "message": "chore(release): ${nextRelease.version} [skip ci]"
     }],
     "@semantic-release/github",
     ["semantic-release-docker", {
       "name": "renaultdigital/bash-base"
     }]
-  ]
+  ],
+  "preset": "conventionalcommits"
 }
