@@ -13,7 +13,7 @@ source src/array.sh
 #
 #     **shellScriptFile** the path of shell script file
 # @EXAMPLES
-#     shellScriptFile="bin/bash-base.sh"
+#     shellScriptFile="src/reflection.sh"
 #     docker run -it --rm -v "$(pwd):/src" -w /src mvdan/shfmt -l -w "${shellScriptFile}"
 #     doc_lint_script_comment "${shellScriptFile}"
 # @SEE_ALSO
@@ -61,7 +61,7 @@ function doc_lint_script_comment() {
 #     **fromShellFile** the path of source shell script file
 #     **toMarkdownFile** the path of destination markdown file
 # @EXAMPLES
-#     doc_comment_to_markdown bin/bash-base.sh docs/references.md
+#     doc_comment_to_markdown src/reflection.sh docs/references.md
 # @SEE_ALSO
 #     doc_lint_script_comment
 function doc_comment_to_markdown() {
