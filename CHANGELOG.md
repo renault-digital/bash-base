@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/renault-digital/bash-base/compare/v1.1.0...v1.1.1) (2020-09-10)
+
+
+### Bug Fixes
+
+* correct the markdown generator ([31af0a7](https://github.com/renault-digital/bash-base/commit/31af0a777815406216757eae6e05f7865b26db81)), closes [#18](https://github.com/renault-digital/bash-base/issues/18)
+
 # [1.1.0](https://github.com/renault-digital/bash-base/compare/v1.0.4...v1.1.0) (2020-09-09)
 
 ### [1.0.4](https://github.com/renault-digital/bash-base/compare/v1.0.3...v1.0.4) (2020-09-09)

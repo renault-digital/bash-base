@@ -5,7 +5,7 @@ args_parse -- parse the script argument values to positional variable names, pro
 
 ##### SYNOPSIS
 ```
-args_parse $# "$##### " positionalVarName...
+args_parse $# "$@" positionalVarName...
 ```
 
 ##### DESCRIPTION
@@ -13,7 +13,7 @@ args_parse $# "$##### " positionalVarName...
 
 ##### EXAMPLES
 ```
-args_parse $# "$##### " newVar1 newVar2 newVar3
+args_parse $# "$@" newVar1 newVar2 newVar3
 ```
 
 ##### SEE_ALSO
