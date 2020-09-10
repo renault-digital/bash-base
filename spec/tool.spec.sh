@@ -28,6 +28,22 @@ Describe 'print_header'
 End
 
 
+Describe 'print_success'
+    It '-'
+        When call print_success abc
+        The output should eq "${COLOR_BOLD_GREEN}OK: abc ${COLOR_END}"
+    End
+End
+
+
+Describe 'print_warn'
+    It '-'
+        When call print_warn abc
+        The output should eq "${COLOR_BOLD_YELLOW}WARN: abc ${COLOR_END}"
+    End
+End
+
+
 Describe 'print_error'
     It '-'
         When call print_error abc
