@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/renault-digital/bash-base/compare/v1.1.1...v1.2.0) (2020-09-10)
+
+
+### Features
+
+* add function print_warn and print_success ([b827d06](https://github.com/renault-digital/bash-base/commit/b827d061907005c5cbac1b66696976dd484a219e)), closes [#20](https://github.com/renault-digital/bash-base/issues/20)
+
 ## [1.1.1](https://github.com/renault-digital/bash-base/compare/v1.1.0...v1.1.1) (2020-09-10)
 
 

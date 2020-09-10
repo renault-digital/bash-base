@@ -557,7 +557,7 @@ It's better format your shell script by `shfmt` firstly before using this functi
 
 ##### EXAMPLES
 ```
-shellScriptFile="bin/bash-base.sh"
+shellScriptFile="src/reflection.sh"
 docker run -it --rm -v "$(pwd):/src" -w /src mvdan/shfmt -l -w "${shellScriptFile}"
 doc_lint_script_comment "${shellScriptFile}"
 ```
@@ -581,7 +581,7 @@ doc_comment_to_markdown fromShellFile toMarkdownFile
 
 ##### EXAMPLES
 ```
-doc_comment_to_markdown bin/bash-base.sh docs/references.md
+doc_comment_to_markdown src/reflection.sh docs/references.md
 ```
 
 ##### SEE_ALSO
@@ -1158,7 +1158,49 @@ print_header "My header1"
 ```
 
 ##### SEE_ALSO
-print_error
+print_error, print_success, print_warn
+
+---
+
+##### NAME
+print_success -- print the success message with prefix 'OK:' and font color green
+
+##### SYNOPSIS
+```
+print_success string
+```
+
+##### DESCRIPTION
+- **string** the message
+
+##### EXAMPLES
+```
+print_success "my message"
+```
+
+##### SEE_ALSO
+print_header, print_error, print_warn
+
+---
+
+##### NAME
+print_warn -- print the warning message with prefix 'WARN:' and font color yellow
+
+##### SYNOPSIS
+```
+print_warn string
+```
+
+##### DESCRIPTION
+- **string** the message
+
+##### EXAMPLES
+```
+print_warn "my message"
+```
+
+##### SEE_ALSO
+print_header, print_error, print_success
 
 ---
 
@@ -1179,7 +1221,7 @@ print_error "my error message"
 ```
 
 ##### SEE_ALSO
-print_header
+print_header, print_success, print_warn
 
 ---
 

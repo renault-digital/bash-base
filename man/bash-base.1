@@ -729,7 +729,7 @@ before using this function.
 .IP
 .nf
 \f[C]
-shellScriptFile=\[dq]bin/bash-base.sh\[dq]
+shellScriptFile=\[dq]src/reflection.sh\[dq]
 docker run -it --rm -v \[dq]$(pwd):/src\[dq] -w /src mvdan/shfmt -l -w \[dq]${shellScriptFile}\[dq]
 doc_lint_script_comment \[dq]${shellScriptFile}\[dq]
 \f[R]
@@ -759,7 +759,7 @@ doc_comment_to_markdown fromShellFile toMarkdownFile
 .IP
 .nf
 \f[C]
-doc_comment_to_markdown bin/bash-base.sh docs/references.md
+doc_comment_to_markdown src/reflection.sh docs/references.md
 \f[R]
 .fi
 .SS SEE_ALSO
@@ -1491,7 +1491,59 @@ print_header \[dq]My header1\[dq]
 .fi
 .SS SEE_ALSO
 .PP
-print_error
+print_error, print_success, print_warn
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
+print_success \[en] print the success message with prefix `OK:' and font
+color green
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+print_success string
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B]string\f[R] the message
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+print_success \[dq]my message\[dq]
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+print_header, print_error, print_warn
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
+print_warn \[en] print the warning message with prefix `WARN:' and font
+color yellow
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+print_warn string
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B]string\f[R] the message
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+print_warn \[dq]my message\[dq]
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+print_header, print_error, print_success
 .PP
    *   *   *   *   *
 .SS NAME
@@ -1517,7 +1569,7 @@ print_error \[dq]my error message\[dq]
 .fi
 .SS SEE_ALSO
 .PP
-print_header
+print_header, print_success, print_warn
 .PP
    *   *   *   *   *
 .SS NAME
