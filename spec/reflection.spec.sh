@@ -111,19 +111,27 @@ End
 
 Describe 'reflect_function_names_of_file'
     It '-'
-        When call reflect_function_names_of_file bin/bash-base.sh
+        shellScriptFile="bash-base-for-test.sh"
+        rm -fr "${shellScriptFile}"
+        for filename in src/*.sh; do
+          sed -E -e 's/^[[:space:]]*\#\!\/.*$//g' -e 's/^[[:space:]]*source .*$//g' "${filename}" >>"${shellScriptFile}"
+        done
+
+        When call reflect_function_names_of_file "${shellScriptFile}"
         The status should eq "0"
-        The output should include "args_confirm"
-        The lines of output should eq 53
+        The output should include "reflect_nth_arg"
+        The lines of output should eq 55
+
+        rm -fr "${shellScriptFile}"
     End
 End
 
 
 Describe 'reflect_function_definitions_of_file'
     It '-'
-        When call reflect_function_definitions_of_file bin/bash-base.sh
+        When call reflect_function_definitions_of_file src/reflection.sh
         The status should eq "0"
-        The output should include "args_confirm() {"
+        The output should include "reflect_nth_arg() {"
     End
 End
 
