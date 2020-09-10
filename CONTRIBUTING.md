@@ -39,8 +39,6 @@ A pull request should remain focused in scope and avoid containing unrelated com
         - CLI: with [Husky](https://github.com/typicode/husky) and [Commitizen](http://commitizen.github.io/cz-cli)
         - IntelliJ IDEA: plugin [Git Commit Template](https://plugins.jetbrains.com/plugin/9861-git-commit-template)
     - Audit commit message with [Commitlint](https://commitlint.js.org) for CI/CD pipeline, local lint and git hook `commit-msg`
-        - Note 1: default issuePrefixes: ['#']
-        - Note 2: even we explicitly provide commit message, the prepare-commit-msg hook will still be revoked and the commitizen will show the prompts. We can just press Ctrl + C to skip it and it comes to commit-msg hook.
     
 - LiveDoc:
     - The comment of functions respect the [man page](https://en.wikipedia.org/wiki/Man_page) standards and conventions and use the 5 basic sections (NAME, SYNOPSIS, DESCRIPTION, EXAMPLES, SEE ALSO) 
@@ -52,6 +50,7 @@ A pull request should remain focused in scope and avoid containing unrelated com
     - Analyser the commit message to decide the new version
     - Generate release note
     - Generate&Update CHANGELOG.md
+    - Generate&Update bin/bash-base.sh from src/*.sh
     - Build docker image
     - Lint man-styled script comment
     - Generate docs/references.md and man/bash-base.1
@@ -61,6 +60,15 @@ A pull request should remain focused in scope and avoid containing unrelated com
     
 - CICD Workflow config with [NPM](https://docs.npmjs.com/about-npm/) and [Github actions](https://docs.github.com/en/actions)
     
+
+#### Notes
+
+- in commit message template, the default issuePrefixes: ['#']
+
+- in CLI (not intelliJ plugin), even we explicitly provide commit message, the prepare-commit-msg hook will still be revoked and the commitizen will show the prompts. We can just press Ctrl + C to skip it and it comes to commit-msg hook.
+
+- Don't modify the files bin/, man/ and docs/references.md, they will generated automatically by semantic-release.
+
 
 #### How to do it ?
 
@@ -104,4 +112,4 @@ A pull request should remain focused in scope and avoid containing unrelated com
    # npm run test:coverage # to be sure coverage 100%
    ```
     
-1. Open a pull request with a clear title and description.
+1. Open a pull request with a clear title and description in template
