@@ -18,7 +18,7 @@ module.exports = {
       "prepareCmd": "npm run build && docker build -t renaultdigital/bash-base ."
     }],
     ["@semantic-release/git", {
-      "assets": ['CHANGELOG.md', 'package.json', 'package-lock.json', 'npm-shrinkwrap.json', 'src', 'docs', 'man'],
+      "assets": ['CHANGELOG.md', 'package.json', 'package-lock.json', 'npm-shrinkwrap.json', 'src', 'docs', 'man', 'bin'],
     }],
     "@semantic-release/github",
     ["semantic-release-docker", {
