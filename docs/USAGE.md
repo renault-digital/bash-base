@@ -20,7 +20,7 @@ docker rmi -f renaultdigital/bash-base
 
 #### 2. Install from NPM
 
-See [npm repackage](https://www.npmjs.com/package/@renault-digital/bash-base)
+See [npm package](https://www.npmjs.com/package/@renault-digital/bash-base)
 ```
 npm i -g @renault-digital/bash-base
 ```

@@ -63,11 +63,11 @@ A pull request should remain focused in scope and avoid containing unrelated com
 
 #### Notes
 
-- in commit message template, the default issuePrefixes: ['#']
+- in commit message template, the default issuePrefixes: `['#']`
 
-- in CLI (not intelliJ plugin), even we explicitly provide commit message, the prepare-commit-msg hook will still be revoked and the commitizen will show the prompts. We can just press Ctrl + C to skip it and it comes to commit-msg hook.
+- in CLI (not intelliJ plugin), even we explicitly provide commit message, the `prepare-commit-msg` hook will still be revoked and the `commitizen` will show the prompts. We can just press `Ctrl + C` to skip it and it comes to `commit-msg` hook.
 
-- Don't modify the files bin/, man/ and docs/references.md, they will generated automatically by semantic-release.
+- Don't modify the files `bin/`, `man/` and `docs/references.md`, they will generated automatically by semantic-release.
 
 
 #### How to do it ?
@@ -79,7 +79,7 @@ A pull request should remain focused in scope and avoid containing unrelated com
 1. Create your branch:
 
     ```
-    git checkout -b dev/<issue-number>-<issue-name>
+    git checkout -b <your-branch-name>
     ```
    
 1. Setup dev environement
