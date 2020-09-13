@@ -20,6 +20,7 @@ Bash-base does this for you, you can just call the function here which is well t
 
 ## Quick start
 
+Creat a sample script `example_docker.sh` with the following content:
 ```shell
 #!/usr/bin/env bash
 
@@ -39,13 +40,18 @@ args_valid_or_select country countryNames "Which country"
 print_success "Hello $sex $(string_upper_first "$firstName"), you are in $country, and your age is $age, nice to meet you."
 ```
 
-Generated help usage:
+Assign the `execute` right to it:
+```
+chmod +x example_docker.sh
+```
+
+Print the generated help usage with the option `-h`:
 ![help.gif](docs/help.gif)
 
 Run it:
 ![run.gif](docs/run.gif)
 
-Available on github, npm and dockerhub, see [other ways of usage](docs/USAGE.md).
+Available on [github](https://github.com/renault-digital/bash-base), [npm](https://www.npmjs.com/package/@renault-digital/bash-base) and [dockerhub](https://hub.docker.com/r/renaultdigital/bash-base), see [other ways of usage](docs/USAGE.md).
 
 ## Example
 See [example](example) folder
