@@ -46,7 +46,10 @@
     "bash-base",
     "renault digital"
   ],
-  "author": "Hongjie ZHANG <hongjie.zhang@renault.com> (https://github.com/zhang-hongjie)",
+  "contributors": [
+    "Hongjie ZHANG <hongjie.zhang@renault.com> (https://github.com/zhang-hongjie)",
+    "Romain DARY <romain.dary@gmail.com> (https://github.com/merlindorin)"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/renault-digital/bash-base/issues"
