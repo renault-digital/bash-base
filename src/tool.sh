@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 source src/constant.sh
+source src/output.sh
 
 # @NAME
 #     stop_if_failed -- stop the execute if last command exit with fail code (no zero)

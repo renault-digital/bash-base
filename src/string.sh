@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source src/tool.sh
+
 # @NAME
 #     string_trim -- remove the white chars from prefix and suffix
 # @SYNOPSIS
