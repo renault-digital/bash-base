@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-shopt -s expand_aliases
 source src/constant.sh
 source src/out.sh
 
@@ -53,7 +52,6 @@ function confirm_to_continue() {
 		esac
 	fi
 }
-alias args_confirm='confirm_to_continue' # for compatibility
 
 # @NAME
 #     declare_heredoc -- define a variable and init its value from heredoc
