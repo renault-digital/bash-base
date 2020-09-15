@@ -7,7 +7,6 @@ module.exports = {
           { breaking: true, release: 'major' },
           { type: 'feat', release: 'minor' },
           { type: 'perf', release: 'minor' },
-          { type: 'refactor', release: 'minor' },
           { type: '*', release: 'patch' },
         ],
     }],
