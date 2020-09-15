@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
+shopt -s expand_aliases
 source src/constant.sh
-source src/output.sh
+source src/out.sh
 
 # @NAME
 #     stop_if_failed -- stop the execute if last command exit with fail code (no zero)
@@ -14,13 +15,45 @@ source src/output.sh
 #     rm -fr "${destProjectPath}"
 #     stop_if_failed "ERROR: can't delete the directory '${destProjectPath}' !"
 # @SEE_ALSO
-#     args_confirm
+#     confirm_to_continue
 function stop_if_failed() {
 	if [[ $? -ne 0 ]]; then
 		print_error "$*"
 		exit 1
 	fi
 }
+
+# @NAME
+#     confirm_to_continue -- show the name and value of variables, and continue execute if confirm_to_continueed by user, or exit if not
+# @SYNOPSIS
+#     confirm_to_continue variableName...
+# @DESCRIPTION
+#     **variableName...** some existed variable names to show its value
+# @EXAMPLES
+#     a="correct value"
+#     b="wrong value"
+#     confirm_to_continue a b
+# @SEE_ALSO
+#     print_args, stop_if_failed
+function confirm_to_continue() {
+	local response
+	print_args "$@"
+	if ! [ "${modeQuiet}" == true ]; then
+		read -r -p "Continue ? [y/N] " response
+
+		case "${response}" in
+		[yY][eE][sS] | [yY])
+			echo -e "Starting..."
+			sleep 1s
+			;;
+		*)
+			echo -e "Exiting..."
+			exit 1
+			;;
+		esac
+	fi
+}
+alias args_confirm='confirm_to_continue' # for compatibility
 
 # @NAME
 #     declare_heredoc -- define a variable and init its value from heredoc

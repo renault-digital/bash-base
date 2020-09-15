@@ -2,9 +2,9 @@
 
 source src/constant.sh
 
-THIS_SCRIPT_NAME="$(basename "$0")" # the main script name
-SHORT_DESC=''                       # redefine it to show your script short description in the 'NAME' field of generated -h response
-USAGE=''                            # redefine it in your script only if the generated -h response is not good for you
+THIS_SCRIPT_NAME="$(basename "$0")"        # the main script name
+SHORT_DESC='a bash script using bash-base' # redefine it to show your script short description in the 'NAME' field of generated -h response
+USAGE=''                                   # redefine it in your script only if the generated -h response is not good for you
 
 # @NAME
 #     args_parse -- parse the script argument values to positional variable names, process firstly the optional param help(-h) / quiet(-q) if existed
@@ -84,18 +84,18 @@ function args_parse() {
 	done
 
 	declare_heredoc defaultUsage <<-EOF
-		${COLOR_BOLD_BLACK}NAME${COLOR_END}
-		    ${THIS_SCRIPT_NAME} -- ${SHORT_DESC:-a bash script using bash-base}
+		${COLOR_BOLD_YELLOW}NAME${COLOR_END}
+		    ${THIS_SCRIPT_NAME} -- ${SHORT_DESC}
 
-		${COLOR_BOLD_BLACK}SYNOPSIS${COLOR_END}
+		${COLOR_BOLD_YELLOW}SYNOPSIS${COLOR_END}
 		    ./${THIS_SCRIPT_NAME} [-qh] $(array_join ' ' positionalVarNames)
 
-		${COLOR_BOLD_BLACK}DESCRIPTION${COLOR_END}
+		${COLOR_BOLD_YELLOW}DESCRIPTION${COLOR_END}
 		    [-h]                help, print the usage
 		    [-q]                optional, Run quietly, no confirmation
 		${descriptions}
 
-		${COLOR_BOLD_BLACK}EXAMPLES${COLOR_END}
+		${COLOR_BOLD_YELLOW}EXAMPLES${COLOR_END}
 		    help, print the usage:
 		        ./${THIS_SCRIPT_NAME} -h
 
@@ -143,7 +143,7 @@ function args_valid_or_select() {
 		echo -e "\n${prompt} ?"
 		[[ -n "${value}" ]] && print_error "the input '${value}' is not valid."
 
-		PS3="choose one by ${COLOR_BOLD_BLACK}number${COLOR_END} [1|2|...] ? "
+		PS3="choose one by ${COLOR_BOLD_YELLOW}number${COLOR_END} [1|2|...] ? "
 		select value in "${!validValues}"; do
 			break
 		done
@@ -212,57 +212,4 @@ function args_valid_or_read() {
 	done
 	eval "${1}='${value}'"
 	printf "Inputted value: ${COLOR_BLUE}'%s'${COLOR_END}\n" "$(eval echo '$'"${1}")"
-}
-
-# @NAME
-#     args_print -- show the name and value of variables
-# @SYNOPSIS
-#     args_print variableName...
-# @DESCRIPTION
-#     **variableName...** some existed variable names to show its value
-# @EXAMPLES
-#     var1="value 1"
-#     var2="value 2"
-#     args_print var1 var2
-# @SEE_ALSO
-#     args_confirm, print_header, print_error, print_success, print_warn, print_info
-function args_print() {
-	local varName varValue varValueOutput
-	for varName in "$@"; do
-		varValue=$(eval echo '$'"${varName}")
-		varValueOutput=$([[ -z "${varValue}" ]] && print_error "<NULL>" || echo "${COLOR_BLUE}${varValue}${COLOR_END}")
-		printf "%-30.30s%s\n" "${varName}:" "${varValueOutput}"
-	done
-}
-alias print_args='args_print'
-
-# @NAME
-#     args_confirm -- show the name and value of variables, and continue execute if confirmed by user, or exit if not
-# @SYNOPSIS
-#     args_confirm variableName...
-# @DESCRIPTION
-#     **variableName...** some existed variable names to show its value
-# @EXAMPLES
-#     a="correct value"
-#     b="wrong value"
-#     args_confirm a b
-# @SEE_ALSO
-#     args_print, stop_if_failed
-function args_confirm() {
-	local response
-	args_print "$@"
-	if ! [ "${modeQuiet}" == true ]; then
-		read -r -p "Continue ? [y/N] " response
-
-		case "${response}" in
-		[yY][eE][sS] | [yY])
-			echo -e "Starting..."
-			sleep 1s
-			;;
-		*)
-			echo -e "Exiting..."
-			exit 1
-			;;
-		esac
-	fi
 }

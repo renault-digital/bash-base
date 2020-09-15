@@ -45,3 +45,40 @@ Describe 'stop_if_failed'
         The status should be failure
     End
 End
+
+
+Describe 'confirm_to_continue'
+    var1="value 1"
+    var2="value 2"
+
+    It 'modeQuiet true'
+        modeQuiet="true"
+        func() { actual=$(confirm_to_continue var1 var2 && echo 'Excuting following code'); }
+        When run func
+        The value "$(echo ${actual} | sed -e 's/ //g' -e 's/\n//g')" should eq "var1:${COLOR_BLUE}value1${COLOR_END}var2:${COLOR_BLUE}value2${COLOR_END}Excutingfollowingcode"
+    End
+
+    It 'alias args_confirm'
+        modeQuiet="true"
+        func() { actual=$(args_confirm var1 var2 && echo 'Excuting following code'); }
+        When run func
+        The value "$(echo ${actual} | sed -e 's/ //g' -e 's/\n//g')" should eq "var1:${COLOR_BLUE}value1${COLOR_END}var2:${COLOR_BLUE}value2${COLOR_END}Excutingfollowingcode"
+    End
+
+    It 'modeQuiet false and input y'
+        modeQuiet="false"
+        func() { actual=$(yes | confirm_to_continue var1 var2 && echo 'Excuting following code'); }
+        When run func
+        The value "$(echo ${actual} | sed -e 's/ //g' -e 's/\n//g')" should eq "var1:${COLOR_BLUE}value1${COLOR_END}var2:${COLOR_BLUE}value2${COLOR_END}Starting...Excutingfollowingcode"
+    End
+
+    It 'modeQuiet false and input n'
+        modeQuiet="false"
+        func() { eval "yes 'n' | confirm_to_continue var1 var2 && echo 'Excuting following code'"; }
+        When run func
+        The output should include "var1:                         ${COLOR_BLUE}value 1${COLOR_END}"
+        The output should include "var2:                         ${COLOR_BLUE}value 2${COLOR_END}"
+        The output should end with "Exiting..."
+        The status should be failure
+    End
+End

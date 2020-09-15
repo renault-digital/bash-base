@@ -65,7 +65,7 @@ A pull request should remain focused in scope and avoid containing unrelated com
 
 - in commit message template, the default issuePrefixes: `['#']`
 
-- in CLI (not intelliJ plugin), even we explicitly provide commit message, the `prepare-commit-msg` hook will still be revoked and the `commitizen` will show the prompts. We can just press `Ctrl + C` to skip it and it comes to `commit-msg` hook.
+- in CLI (not intelliJ plugin), when do a `git commit`, `git merge`, `git rebase` or other operation, even we explicitly provide commit message, the `prepare-commit-msg` hook will still be revoked and the `commitizen` will show the prompts. We can just press `Ctrl + C` to skip it and it comes to `commit-msg` hook.
 
 - Don't modify the files `bin/`, `man/` and `docs/references.md`, they will generated automatically by semantic-release.
 
