@@ -8,6 +8,7 @@
 
 - [ ] Bug fix 
 - [ ] Feature change
+- [ ] Performance
 - [ ] Refactor
 - [ ] Documentation
 - [ ] CI/CD
