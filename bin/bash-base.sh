@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-THIS_SCRIPT_NAME="$(basename "$0")" # the main script name
-SHORT_DESC=''                       # redefine it to show your script short description in the 'NAME' field of generated -h response
-USAGE=''                            # redefine it in your script only if the generated -h response is not good for you
+THIS_SCRIPT_NAME="$(basename "$0")"        # the main script name
+SHORT_DESC='a bash script using bash-base' # redefine it to show your script short description in the 'NAME' field of generated -h response
+USAGE=''                                   # redefine it in your script only if the generated -h response is not good for you
 
 # @NAME
 #     args_parse -- parse the script argument values to positional variable names, process firstly the optional param help(-h) / quiet(-q) if existed
@@ -82,18 +82,18 @@ function args_parse() {
 	done
 
 	declare_heredoc defaultUsage <<-EOF
-		${COLOR_BOLD_BLACK}NAME${COLOR_END}
-		    ${THIS_SCRIPT_NAME} -- ${SHORT_DESC:-a bash script using bash-base}
+		${COLOR_BOLD_YELLOW}NAME${COLOR_END}
+		    ${THIS_SCRIPT_NAME} -- ${SHORT_DESC}
 
-		${COLOR_BOLD_BLACK}SYNOPSIS${COLOR_END}
+		${COLOR_BOLD_YELLOW}SYNOPSIS${COLOR_END}
 		    ./${THIS_SCRIPT_NAME} [-qh] $(array_join ' ' positionalVarNames)
 
-		${COLOR_BOLD_BLACK}DESCRIPTION${COLOR_END}
+		${COLOR_BOLD_YELLOW}DESCRIPTION${COLOR_END}
 		    [-h]                help, print the usage
 		    [-q]                optional, Run quietly, no confirmation
 		${descriptions}
 
-		${COLOR_BOLD_BLACK}EXAMPLES${COLOR_END}
+		${COLOR_BOLD_YELLOW}EXAMPLES${COLOR_END}
 		    help, print the usage:
 		        ./${THIS_SCRIPT_NAME} -h
 
@@ -141,7 +141,7 @@ function args_valid_or_select() {
 		echo -e "\n${prompt} ?"
 		[[ -n "${value}" ]] && print_error "the input '${value}' is not valid."
 
-		PS3="choose one by ${COLOR_BOLD_BLACK}number${COLOR_END} [1|2|...] ? "
+		PS3="choose one by ${COLOR_BOLD_YELLOW}number${COLOR_END} [1|2|...] ? "
 		select value in "${!validValues}"; do
 			break
 		done
@@ -210,58 +210,6 @@ function args_valid_or_read() {
 	done
 	eval "${1}='${value}'"
 	printf "Inputted value: ${COLOR_BLUE}'%s'${COLOR_END}\n" "$(eval echo '$'"${1}")"
-}
-
-# @NAME
-#     args_print -- show the name and value of variables
-# @SYNOPSIS
-#     args_print variableName...
-# @DESCRIPTION
-#     **variableName...** some existed variable names to show its value
-# @EXAMPLES
-#     var1="value 1"
-#     var2="value 2"
-#     args_print var1 var2
-# @SEE_ALSO
-#     args_confirm
-function args_print() {
-	local varName varValue varValueOutput
-	for varName in "$@"; do
-		varValue=$(eval echo '$'"${varName}")
-		varValueOutput=$([[ -z "${varValue}" ]] && print_error "<NULL>" || echo "${COLOR_BLUE}${varValue}${COLOR_END}")
-		printf "%-30.30s%s\n" "${varName}:" "${varValueOutput}"
-	done
-}
-
-# @NAME
-#     args_confirm -- show the name and value of variables, and continue execute if confirmed by user, or exit if not
-# @SYNOPSIS
-#     args_confirm variableName...
-# @DESCRIPTION
-#     **variableName...** some existed variable names to show its value
-# @EXAMPLES
-#     a="correct value"
-#     b="wrong value"
-#     args_confirm a b
-# @SEE_ALSO
-#     args_print
-function args_confirm() {
-	local response
-	args_print "$@"
-	if ! [ "${modeQuiet}" == true ]; then
-		read -r -p "Continue ? [y/N] " response
-
-		case "${response}" in
-		[yY][eE][sS] | [yY])
-			echo -e "Starting..."
-			sleep 1s
-			;;
-		*)
-			echo -e "Exiting..."
-			exit 1
-			;;
-		esac
-	fi
 }
 
 # @NAME
@@ -743,13 +691,22 @@ function array_filter() {
 }
 
 NEW_LINE_SED="\\$(echo -e '\r\n')" # Constant: the return and new line character, used with sed
-COLOR_BOLD_BLACK=$'\e[1;30m'       # Constant: color for printing Header
-COLOR_BOLD_RED=$'\e[1;91m'         # Constant: color for printing message of Error/KO
-COLOR_BOLD_YELLOW=$'\e[0;33m'      # Constant: color for printing message of Warning
-COLOR_BOLD_GREEN=$'\e[1;32m'       # Constant: color for printing message of OK
-COLOR_BLUE=$'\e[0;34m'             # Constant: color for printing Value
-COLOR_END=$'\e[0m'                 # Constant: color for others, reset to default
-export NEW_LINE_SED COLOR_BOLD_BLACK COLOR_BOLD_RED COLOR_BOLD_YELLOW COLOR_BOLD_GREEN COLOR_BLUE COLOR_END
+export NEW_LINE_SED
+
+COLOR_BOLD_MAGENTA=$'\e[1;35m' # Constant: color for printing Header
+COLOR_GRAY=$'\e[0;37m'         # Constant: color for printing message of Debug
+COLOR_BOLD_RED=$'\e[1;91m'     # Constant: color for printing message of Error/KO
+COLOR_BOLD_YELLOW=$'\e[0;33m'  # Constant: color for printing message of Warning
+COLOR_BOLD_GREEN=$'\e[1;32m'   # Constant: color for printing message of OK
+COLOR_BLUE=$'\e[0;34m'         # Constant: color for printing Value
+COLOR_END=$'\e[0m'             # Constant: color for printing message of INFO and others, reset to default
+export COLOR_BOLD_MAGENTA COLOR_GRAY COLOR_BOLD_RED COLOR_BOLD_YELLOW COLOR_BOLD_GREEN COLOR_BLUE COLOR_END
+
+LOG_LEVEL_ERROR=4
+LOG_LEVEL_WARN=3
+LOG_LEVEL_INFO=2
+LOG_LEVEL_DEBUG=1
+export LOG_LEVEL_DEBUG LOG_LEVEL_INFO LOG_LEVEL_WARN LOG_LEVEL_ERROR
 
 # @NAME
 #     doc_lint_script_comment -- format the shell script, and check whether the comment is corrected man-styled
@@ -834,6 +791,127 @@ function doc_comment_to_markdown() {
 		string_replace_regex '@([A-Z]+)' "##### \1" >"${toMarkdownFile}"
 }
 
+LOG_LEVEL=$LOG_LEVEL_INFO # override this default value in your script if you want to change the log level.
+
+# @NAME
+#     print_info -- print the information message with font color gray
+# @SYNOPSIS
+#     print_info string
+# @DESCRIPTION
+#     **string** the message
+# @EXAMPLES
+#     print_info "my message"
+# @SEE_ALSO
+#     print_header, print_error, print_success, print_warn, print_args, print_info
+function print_debug() {
+	if [[ $LOG_LEVEL -le $LOG_LEVEL_DEBUG ]]; then
+		echo -e "${COLOR_GRAY}DEBUG: $*${COLOR_END}"
+	fi
+}
+
+# @NAME
+#     print_info -- print the information message with font color default
+# @SYNOPSIS
+#     print_info string
+# @DESCRIPTION
+#     **string** the message
+# @EXAMPLES
+#     print_info "my message"
+# @SEE_ALSO
+#     print_header, print_error, print_success, print_warn, print_args, print_debug
+function print_info() {
+	if [[ $LOG_LEVEL -le $LOG_LEVEL_INFO ]]; then
+		echo -e "${COLOR_END}INFO: $*"
+	fi
+}
+
+# @NAME
+#     print_warn -- print the warning message with prefix 'WARN:' and font color yellow
+# @SYNOPSIS
+#     print_warn string
+# @DESCRIPTION
+#     **string** the message
+# @EXAMPLES
+#     print_warn "my message"
+# @SEE_ALSO
+#     print_header, print_error, print_success, print_info, print_args, print_debug
+function print_warn() {
+	if [[ $LOG_LEVEL -le $LOG_LEVEL_WARN ]]; then
+		echo -e "${COLOR_BOLD_YELLOW}WARN: $* ${COLOR_END}"
+	fi
+}
+
+# @NAME
+#     print_error -- print the error message with prefix 'ERROR:' and font color red
+# @SYNOPSIS
+#     print_error string
+# @DESCRIPTION
+#     **string** the error message
+# @EXAMPLES
+#     print_error "my error message"
+# @SEE_ALSO
+#     print_header, print_success, print_warn, print_info, print_args, print_debug
+function print_error() {
+	if [[ $LOG_LEVEL -le $LOG_LEVEL_ERROR ]]; then
+		echo -e "${COLOR_BOLD_RED}ERROR: $* ${COLOR_END}"
+	fi
+}
+
+# @NAME
+#     print_success -- print the success message with prefix 'OK:' and font color green
+# @SYNOPSIS
+#     print_success string
+# @DESCRIPTION
+#     **string** the message
+# @EXAMPLES
+#     print_success "my message"
+# @SEE_ALSO
+#     print_header, print_error, print_warn, print_info, print_args, print_debug
+function print_success() {
+	if [[ $LOG_LEVEL -le $LOG_LEVEL_WARN ]]; then
+		echo -e "${COLOR_BOLD_GREEN}OK: $* ${COLOR_END}"
+	fi
+}
+
+# @NAME
+#     print_args -- show the name and value of variables
+# @SYNOPSIS
+#     print_args variableName...
+# @DESCRIPTION
+#     **variableName...** some existed variable names to show its value
+# @EXAMPLES
+#     var1="value 1"
+#     var2="value 2"
+#     print_args var1 var2
+# @SEE_ALSO
+#     print_header, print_error, print_success, print_warn, print_info, print_debug
+function print_args() {
+	if [[ $LOG_LEVEL -le $LOG_LEVEL_WARN ]]; then
+		local varName varValue varValueOutput
+		for varName in "$@"; do
+			varValue=$(eval echo '$'"${varName}")
+			varValueOutput=$([[ -z "${varValue}" ]] && print_error "<NULL>" || echo "${COLOR_BLUE}${varValue}${COLOR_END}")
+			printf "%-30.30s%s\n" "${varName}:" "${varValueOutput}"
+		done
+	fi
+}
+
+# @NAME
+#     print_header -- print the header value with prefix '\n###' and bold font
+# @SYNOPSIS
+#     print_header string
+# @DESCRIPTION
+#     **string** the string of header title
+# @EXAMPLES
+#     print_header "My header1"
+# @SEE_ALSO
+#     print_error, print_success, print_warn, print_info, print_args, print_debug
+function print_header() {
+	if [[ $LOG_LEVEL -le $LOG_LEVEL_ERROR ]]; then
+		echo -e "${COLOR_BOLD_MAGENTA}\n### $* ${COLOR_END}"
+	fi
+}
+
 # @NAME
 #     reflect_nth_arg -- parse a string of arguments, then extract the nth argument
 # @SYNOPSIS
@@ -865,7 +943,7 @@ function reflect_nth_arg() {
 # @DESCRIPTION
 #     **functionName** the specified function name
 # @EXAMPLES
-#     reflect_get_function_definition args_confirm
+#     reflect_get_function_definition confirm_to_continue
 # @SEE_ALSO
 #     reflect_function_names_of_file
 function reflect_get_function_definition() {
@@ -1300,61 +1378,7 @@ function string_pick_to_array() {
 	fi
 }
 
-# @NAME
-#     print_header -- print the header value with prefix '\n###' and bold font
-# @SYNOPSIS
-#     print_header string
-# @DESCRIPTION
-#     **string** the string of header title
-# @EXAMPLES
-#     print_header "My header1"
-# @SEE_ALSO
-#     print_error, print_success, print_warn
-function print_header() {
-	echo -e "${COLOR_BOLD_BLACK}\n### $* ${COLOR_END}"
-}
-
-# @NAME
-#     print_success -- print the success message with prefix 'OK:' and font color green
-# @SYNOPSIS
-#     print_success string
-# @DESCRIPTION
-#     **string** the message
-# @EXAMPLES
-#     print_success "my message"
-# @SEE_ALSO
-#     print_header, print_error, print_warn
-function print_success() {
-	echo -e "${COLOR_BOLD_GREEN}OK: $* ${COLOR_END}"
-}
-
-# @NAME
-#     print_warn -- print the warning message with prefix 'WARN:' and font color yellow
-# @SYNOPSIS
-#     print_warn string
-# @DESCRIPTION
-#     **string** the message
-# @EXAMPLES
-#     print_warn "my message"
-# @SEE_ALSO
-#     print_header, print_error, print_success
-function print_warn() {
-	echo -e "${COLOR_BOLD_YELLOW}WARN: $* ${COLOR_END}"
-}
-
-# @NAME
-#     print_error -- print the error message with prefix 'ERROR:' and font color red
-# @SYNOPSIS
-#     print_error string
-# @DESCRIPTION
-#     **string** the error message
-# @EXAMPLES
-#     print_error "my error message"
-# @SEE_ALSO
-#     print_header, print_success, print_warn
-function print_error() {
-	echo -e "${COLOR_BOLD_RED}ERROR: $* ${COLOR_END}"
-}
+shopt -s expand_aliases
 
 # @NAME
 #     stop_if_failed -- stop the execute if last command exit with fail code (no zero)
@@ -1367,12 +1391,45 @@ function print_error() {
 #     rm -fr "${destProjectPath}"
 #     stop_if_failed "ERROR: can't delete the directory '${destProjectPath}' !"
 # @SEE_ALSO
+#     confirm_to_continue
 function stop_if_failed() {
 	if [[ $? -ne 0 ]]; then
-		print_error "${1}"
+		print_error "$*"
 		exit 1
 	fi
 }
+
+# @NAME
+#     confirm_to_continue -- show the name and value of variables, and continue execute if confirm_to_continueed by user, or exit if not
+# @SYNOPSIS
+#     confirm_to_continue variableName...
+# @DESCRIPTION
+#     **variableName...** some existed variable names to show its value
+# @EXAMPLES
+#     a="correct value"
+#     b="wrong value"
+#     confirm_to_continue a b
+# @SEE_ALSO
+#     print_args, stop_if_failed
+function confirm_to_continue() {
+	local response
+	print_args "$@"
+	if ! [ "${modeQuiet}" == true ]; then
+		read -r -p "Continue ? [y/N] " response
+
+		case "${response}" in
+		[yY][eE][sS] | [yY])
+			echo -e "Starting..."
+			sleep 1s
+			;;
+		*)
+			echo -e "Exiting..."
+			exit 1
+			;;
+		esac
+	fi
+}
+alias args_confirm='confirm_to_continue' # for compatibility
 
 # @NAME
 #     declare_heredoc -- define a variable and init its value from heredoc

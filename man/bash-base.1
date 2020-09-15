@@ -140,63 +140,6 @@ args_valid_or_select, args_valid_or_select_pipe
    *   *   *   *   *
 .SS NAME
 .PP
-args_print \[en] show the name and value of variables
-.SS SYNOPSIS
-.IP
-.nf
-\f[C]
-args_print variableName...
-\f[R]
-.fi
-.SS DESCRIPTION
-.IP \[bu] 2
-\f[B]variableName\&...\f[R] some existed variable names to show its
-value
-.SS EXAMPLES
-.IP
-.nf
-\f[C]
-var1=\[dq]value 1\[dq]
-var2=\[dq]value 2\[dq]
-args_print var1 var2
-\f[R]
-.fi
-.SS SEE_ALSO
-.PP
-args_confirm
-.PP
-   *   *   *   *   *
-.SS NAME
-.PP
-args_confirm \[en] show the name and value of variables, and continue
-execute if confirmed by user, or exit if not
-.SS SYNOPSIS
-.IP
-.nf
-\f[C]
-args_confirm variableName...
-\f[R]
-.fi
-.SS DESCRIPTION
-.IP \[bu] 2
-\f[B]variableName\&...\f[R] some existed variable names to show its
-value
-.SS EXAMPLES
-.IP
-.nf
-\f[C]
-a=\[dq]correct value\[dq]
-b=\[dq]wrong value\[dq]
-args_confirm a b
-\f[R]
-.fi
-.SS SEE_ALSO
-.PP
-args_print
-.PP
-   *   *   *   *   *
-.SS NAME
-.PP
 array_join \[en] join an array to string using delimiter string
 .SS SYNOPSIS
 .IP
@@ -769,6 +712,195 @@ doc_lint_script_comment
    *   *   *   *   *
 .SS NAME
 .PP
+print_info \[en] print the information message with font color gray
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+print_info string
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B]string\f[R] the message
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+print_info \[dq]my message\[dq]
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+print_header, print_error, print_success, print_warn, print_args,
+print_info
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
+print_info \[en] print the information message with font color default
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+print_info string
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B]string\f[R] the message
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+print_info \[dq]my message\[dq]
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+print_header, print_error, print_success, print_warn, print_args,
+print_debug
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
+print_warn \[en] print the warning message with prefix `WARN:' and font
+color yellow
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+print_warn string
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B]string\f[R] the message
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+print_warn \[dq]my message\[dq]
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+print_header, print_error, print_success, print_info, print_args,
+print_debug
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
+print_error \[en] print the error message with prefix `ERROR:' and font
+color red
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+print_error string
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B]string\f[R] the error message
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+print_error \[dq]my error message\[dq]
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+print_header, print_success, print_warn, print_info, print_args,
+print_debug
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
+print_success \[en] print the success message with prefix `OK:' and font
+color green
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+print_success string
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B]string\f[R] the message
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+print_success \[dq]my message\[dq]
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+print_header, print_error, print_warn, print_info, print_args,
+print_debug
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
+print_args \[en] show the name and value of variables
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+print_args variableName...
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B]variableName\&...\f[R] some existed variable names to show its
+value
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+var1=\[dq]value 1\[dq]
+var2=\[dq]value 2\[dq]
+print_args var1 var2
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+print_header, print_error, print_success, print_warn, print_info,
+print_debug
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
+print_header \[en] print the header value with prefix \[cq] ###\[cq] and
+bold font
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+print_header string
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B]string\f[R] the string of header title
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+print_header \[dq]My header1\[dq]
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+print_error, print_success, print_warn, print_info, print_args,
+print_debug
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
 reflect_nth_arg \[en] parse a string of arguments, then extract the nth
 argument
 .SS SYNOPSIS
@@ -815,7 +947,7 @@ reflect_get_function_definition functionName
 .IP
 .nf
 \f[C]
-reflect_get_function_definition args_confirm
+reflect_get_function_definition confirm_to_continue
 \f[R]
 .fi
 .SS SEE_ALSO
@@ -1470,110 +1602,6 @@ array_join, array_describe, array_from_describe, string_split_to_array
    *   *   *   *   *
 .SS NAME
 .PP
-print_header \[en] print the header value with prefix \[cq] ###\[cq] and
-bold font
-.SS SYNOPSIS
-.IP
-.nf
-\f[C]
-print_header string
-\f[R]
-.fi
-.SS DESCRIPTION
-.IP \[bu] 2
-\f[B]string\f[R] the string of header title
-.SS EXAMPLES
-.IP
-.nf
-\f[C]
-print_header \[dq]My header1\[dq]
-\f[R]
-.fi
-.SS SEE_ALSO
-.PP
-print_error, print_success, print_warn
-.PP
-   *   *   *   *   *
-.SS NAME
-.PP
-print_success \[en] print the success message with prefix `OK:' and font
-color green
-.SS SYNOPSIS
-.IP
-.nf
-\f[C]
-print_success string
-\f[R]
-.fi
-.SS DESCRIPTION
-.IP \[bu] 2
-\f[B]string\f[R] the message
-.SS EXAMPLES
-.IP
-.nf
-\f[C]
-print_success \[dq]my message\[dq]
-\f[R]
-.fi
-.SS SEE_ALSO
-.PP
-print_header, print_error, print_warn
-.PP
-   *   *   *   *   *
-.SS NAME
-.PP
-print_warn \[en] print the warning message with prefix `WARN:' and font
-color yellow
-.SS SYNOPSIS
-.IP
-.nf
-\f[C]
-print_warn string
-\f[R]
-.fi
-.SS DESCRIPTION
-.IP \[bu] 2
-\f[B]string\f[R] the message
-.SS EXAMPLES
-.IP
-.nf
-\f[C]
-print_warn \[dq]my message\[dq]
-\f[R]
-.fi
-.SS SEE_ALSO
-.PP
-print_header, print_error, print_success
-.PP
-   *   *   *   *   *
-.SS NAME
-.PP
-print_error \[en] print the error message with prefix `ERROR:' and font
-color red
-.SS SYNOPSIS
-.IP
-.nf
-\f[C]
-print_error string
-\f[R]
-.fi
-.SS DESCRIPTION
-.IP \[bu] 2
-\f[B]string\f[R] the error message
-.SS EXAMPLES
-.IP
-.nf
-\f[C]
-print_error \[dq]my error message\[dq]
-\f[R]
-.fi
-.SS SEE_ALSO
-.PP
-print_header, print_success, print_warn
-.PP
-   *   *   *   *   *
-.SS NAME
-.PP
 stop_if_failed \[en] stop the execute if last command exit with fail
 code (no zero)
 .SS SYNOPSIS
@@ -1596,6 +1624,37 @@ stop_if_failed \[dq]ERROR: can\[aq]t delete the directory \[aq]${destProjectPath
 \f[R]
 .fi
 .SS SEE_ALSO
+.PP
+confirm_to_continue
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
+confirm_to_continue \[en] show the name and value of variables, and
+continue execute if confirm_to_continueed by user, or exit if not
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+confirm_to_continue variableName...
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B]variableName\&...\f[R] some existed variable names to show its
+value
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+a=\[dq]correct value\[dq]
+b=\[dq]wrong value\[dq]
+confirm_to_continue a b
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+print_args, stop_if_failed
 .PP
    *   *   *   *   *
 .SS NAME

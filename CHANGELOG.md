@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/renault-digital/bash-base/compare/v1.2.3...v1.3.0) (2020-09-15)
+
+
+### Features
+
+* add function print_info and alias print_args-> args_print ([656cfdd](https://github.com/renault-digital/bash-base/commit/656cfdd3c5b7692539ae1e4303f9775cb9f1b066)), closes [#25](https://github.com/renault-digital/bash-base/issues/25)
+
 ## [1.2.3](https://github.com/renault-digital/bash-base/compare/v1.2.2...v1.2.3) (2020-09-13)
 
 ## [1.2.2](https://github.com/renault-digital/bash-base/compare/v1.2.1...v1.2.2) (2020-09-13)

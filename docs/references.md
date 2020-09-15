@@ -6,8 +6,6 @@
 - args_valid_or_select
 - args_valid_or_select_pipe
 - args_valid_or_read
-- args_print
-- args_confirm
 - array_join
 - array_describe
 - array_from_describe
@@ -27,6 +25,13 @@
 - array_filter
 - doc_lint_script_comment
 - doc_comment_to_markdown
+- print_debug
+- print_info
+- print_warn
+- print_error
+- print_success
+- print_args
+- print_header
 - reflect_nth_arg
 - reflect_get_function_definition
 - reflect_function_names_of_file
@@ -51,11 +56,8 @@
 - string_after_first
 - string_split_to_array
 - string_pick_to_array
-- print_header
-- print_success
-- print_warn
-- print_error
 - stop_if_failed
+- confirm_to_continue
 - declare_heredoc
 
 ### Usage:
@@ -154,52 +156,6 @@ args_valid_or_read destRootPackage '^.+$' "Destination root package" "${defaultD
 
 ##### SEE_ALSO
 args_valid_or_select, args_valid_or_select_pipe
-
----
-
-##### NAME
-args_print -- show the name and value of variables
-
-##### SYNOPSIS
-```
-args_print variableName...
-```
-
-##### DESCRIPTION
-- **variableName...** some existed variable names to show its value
-
-##### EXAMPLES
-```
-var1="value 1"
-var2="value 2"
-args_print var1 var2
-```
-
-##### SEE_ALSO
-args_confirm
-
----
-
-##### NAME
-args_confirm -- show the name and value of variables, and continue execute if confirmed by user, or exit if not
-
-##### SYNOPSIS
-```
-args_confirm variableName...
-```
-
-##### DESCRIPTION
-- **variableName...** some existed variable names to show its value
-
-##### EXAMPLES
-```
-a="correct value"
-b="wrong value"
-args_confirm a b
-```
-
-##### SEE_ALSO
-args_print
 
 ---
 
@@ -650,6 +606,156 @@ doc_lint_script_comment
 ---
 
 ##### NAME
+print_info -- print the information message with font color gray
+
+##### SYNOPSIS
+```
+print_info string
+```
+
+##### DESCRIPTION
+- **string** the message
+
+##### EXAMPLES
+```
+print_info "my message"
+```
+
+##### SEE_ALSO
+print_header, print_error, print_success, print_warn, print_args, print_info
+
+---
+
+##### NAME
+print_info -- print the information message with font color default
+
+##### SYNOPSIS
+```
+print_info string
+```
+
+##### DESCRIPTION
+- **string** the message
+
+##### EXAMPLES
+```
+print_info "my message"
+```
+
+##### SEE_ALSO
+print_header, print_error, print_success, print_warn, print_args, print_debug
+
+---
+
+##### NAME
+print_warn -- print the warning message with prefix 'WARN:' and font color yellow
+
+##### SYNOPSIS
+```
+print_warn string
+```
+
+##### DESCRIPTION
+- **string** the message
+
+##### EXAMPLES
+```
+print_warn "my message"
+```
+
+##### SEE_ALSO
+print_header, print_error, print_success, print_info, print_args, print_debug
+
+---
+
+##### NAME
+print_error -- print the error message with prefix 'ERROR:' and font color red
+
+##### SYNOPSIS
+```
+print_error string
+```
+
+##### DESCRIPTION
+- **string** the error message
+
+##### EXAMPLES
+```
+print_error "my error message"
+```
+
+##### SEE_ALSO
+print_header, print_success, print_warn, print_info, print_args, print_debug
+
+---
+
+##### NAME
+print_success -- print the success message with prefix 'OK:' and font color green
+
+##### SYNOPSIS
+```
+print_success string
+```
+
+##### DESCRIPTION
+- **string** the message
+
+##### EXAMPLES
+```
+print_success "my message"
+```
+
+##### SEE_ALSO
+print_header, print_error, print_warn, print_info, print_args, print_debug
+
+---
+
+##### NAME
+print_args -- show the name and value of variables
+
+##### SYNOPSIS
+```
+print_args variableName...
+```
+
+##### DESCRIPTION
+- **variableName...** some existed variable names to show its value
+
+##### EXAMPLES
+```
+var1="value 1"
+var2="value 2"
+print_args var1 var2
+```
+
+##### SEE_ALSO
+print_header, print_error, print_success, print_warn, print_info, print_debug
+
+---
+
+##### NAME
+print_header -- print the header value with prefix '
+###' and bold font
+
+##### SYNOPSIS
+```
+print_header string
+```
+
+##### DESCRIPTION
+- **string** the string of header title
+
+##### EXAMPLES
+```
+print_header "My header1"
+```
+
+##### SEE_ALSO
+print_error, print_success, print_warn, print_info, print_args, print_debug
+
+---
+
+##### NAME
 reflect_nth_arg -- parse a string of arguments, then extract the nth argument
 
 ##### SYNOPSIS
@@ -686,7 +792,7 @@ reflect_get_function_definition functionName
 
 ##### EXAMPLES
 ```
-reflect_get_function_definition args_confirm
+reflect_get_function_definition confirm_to_continue
 ```
 
 ##### SEE_ALSO
@@ -1201,91 +1307,6 @@ array_join, array_describe, array_from_describe, string_split_to_array
 ---
 
 ##### NAME
-print_header -- print the header value with prefix '
-###' and bold font
-
-##### SYNOPSIS
-```
-print_header string
-```
-
-##### DESCRIPTION
-- **string** the string of header title
-
-##### EXAMPLES
-```
-print_header "My header1"
-```
-
-##### SEE_ALSO
-print_error, print_success, print_warn
-
----
-
-##### NAME
-print_success -- print the success message with prefix 'OK:' and font color green
-
-##### SYNOPSIS
-```
-print_success string
-```
-
-##### DESCRIPTION
-- **string** the message
-
-##### EXAMPLES
-```
-print_success "my message"
-```
-
-##### SEE_ALSO
-print_header, print_error, print_warn
-
----
-
-##### NAME
-print_warn -- print the warning message with prefix 'WARN:' and font color yellow
-
-##### SYNOPSIS
-```
-print_warn string
-```
-
-##### DESCRIPTION
-- **string** the message
-
-##### EXAMPLES
-```
-print_warn "my message"
-```
-
-##### SEE_ALSO
-print_header, print_error, print_success
-
----
-
-##### NAME
-print_error -- print the error message with prefix 'ERROR:' and font color red
-
-##### SYNOPSIS
-```
-print_error string
-```
-
-##### DESCRIPTION
-- **string** the error message
-
-##### EXAMPLES
-```
-print_error "my error message"
-```
-
-##### SEE_ALSO
-print_header, print_success, print_warn
-
----
-
-##### NAME
 stop_if_failed -- stop the execute if last command exit with fail code (no zero)
 
 ##### SYNOPSIS
@@ -1304,6 +1325,30 @@ stop_if_failed "ERROR: can't delete the directory '${destProjectPath}' !"
 ```
 
 ##### SEE_ALSO
+confirm_to_continue
+
+---
+
+##### NAME
+confirm_to_continue -- show the name and value of variables, and continue execute if confirm_to_continueed by user, or exit if not
+
+##### SYNOPSIS
+```
+confirm_to_continue variableName...
+```
+
+##### DESCRIPTION
+- **variableName...** some existed variable names to show its value
+
+##### EXAMPLES
+```
+a="correct value"
+b="wrong value"
+confirm_to_continue a b
+```
+
+##### SEE_ALSO
+print_args, stop_if_failed
 
 ---
 
