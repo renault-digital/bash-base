@@ -225,7 +225,7 @@ function args_valid_or_read() {
 #     var2="value 2"
 #     args_print var1 var2
 # @SEE_ALSO
-#     args_confirm
+#     args_confirm, print_header, print_error, print_success, print_warn, print_info
 function args_print() {
 	local varName varValue varValueOutput
 	for varName in "$@"; do
@@ -234,6 +234,7 @@ function args_print() {
 		printf "%-30.30s%s\n" "${varName}:" "${varValueOutput}"
 	done
 }
+alias print_args='args_print'
 
 # @NAME
 #     args_confirm -- show the name and value of variables, and continue execute if confirmed by user, or exit if not
@@ -246,7 +247,7 @@ function args_print() {
 #     b="wrong value"
 #     args_confirm a b
 # @SEE_ALSO
-#     args_print
+#     args_print, stop_if_failed
 function args_confirm() {
 	local response
 	args_print "$@"
