@@ -1,5 +1,7 @@
 ## How to use
 
+## How to install or import
+
 #### 1. Install from docker
 
 See [docker hub](https://hub.docker.com/r/renaultdigital/bash-base)
@@ -123,3 +125,30 @@ download a specific version:
 
 - from NPM: https://registry.npmjs.org/@renault-digital/bash-base/-/bash-base-1.0.2.tgz
 - from github: https://github.com/renault-digital/bash-base/archive/v1.0.2.tar.gz
+
+## How to config
+
+#### LOG_LEVEL
+```
+LOG_LEVEL=$LOG_LEVEL_INFO
+```
+override this default value in your script if you want to change the log level, the possible values are:
+
+- LOG_LEVEL_ERROR=4
+- LOG_LEVEL_WARN=3
+- LOG_LEVEL_INFO=2
+- LOG_LEVEL_DEBUG=1
+
+
+#### SHORT_DESC
+```
+SHORT_DESC='a bash script using bash-base'
+```
+redefine it to show your script short description in the 'NAME' field of generated -h response
+
+
+#### USAGE
+```
+USAGE=''
+```
+redefine it in your script only if the generated -h response is not good for you

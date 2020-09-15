@@ -31,7 +31,7 @@ function reflect_nth_arg() {
 # @DESCRIPTION
 #     **functionName** the specified function name
 # @EXAMPLES
-#     reflect_get_function_definition args_confirm
+#     reflect_get_function_definition confirm_to_continue
 # @SEE_ALSO
 #     reflect_function_names_of_file
 function reflect_get_function_definition() {

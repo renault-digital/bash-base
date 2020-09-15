@@ -69,13 +69,13 @@ Describe args_parse
         chmod +x my_script.sh
 
         declare_heredoc expected <<-EOF
-					${COLOR_BOLD_BLACK}NAME${COLOR_END}
+					${COLOR_BOLD_YELLOW}NAME${COLOR_END}
 					    my_script.sh -- this is a script for test generated help usage
 
-					${COLOR_BOLD_BLACK}SYNOPSIS${COLOR_END}
+					${COLOR_BOLD_YELLOW}SYNOPSIS${COLOR_END}
 					    ./my_script.sh [-qh] myVar1 myVar2 myVar3 myVar4 myVar5 myVar44 fromEnv varWithoutValidation
 
-					${COLOR_BOLD_BLACK}DESCRIPTION${COLOR_END}
+					${COLOR_BOLD_YELLOW}DESCRIPTION${COLOR_END}
 					    [-h]                help, print the usage
 					    [-q]                optional, Run quietly, no confirmation
 
@@ -88,7 +88,7 @@ Describe args_parse
 					    fromEnv             Which env of DCP Alpine, possible values: int|qua|sta|rec|ope
 					    varWithoutValidation a valid value for varWithoutValidation
 
-					${COLOR_BOLD_BLACK}EXAMPLES${COLOR_END}
+					${COLOR_BOLD_YELLOW}EXAMPLES${COLOR_END}
 					    help, print the usage:
 					        ./my_script.sh -h
 
@@ -228,46 +228,5 @@ Describe args_valid_or_read
         irn="70033"
         When call eval "yes '' | args_valid_or_read irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' 70088 | grep 'Inputted'"
         The output should eq "Inputted value: ${COLOR_BLUE}'70033'${COLOR_END}"
-    End
-End
-
-
-Describe 'args_print'
-    It '-'
-        var1="value 1"
-        var2="value 2"
-        func() { actual=$(args_print var1 var2); }
-        When run func
-        The value "$(echo ${actual} | sed -e 's/ //g' -e 's/\n//g')" should eq "var1:${COLOR_BLUE}value1${COLOR_END}var2:${COLOR_BLUE}value2${COLOR_END}"
-    End
-End
-
-
-Describe 'args_confirm'
-    var1="value 1"
-    var2="value 2"
-
-    It 'modeQuiet true'
-        modeQuiet="true"
-        func() { actual=$(args_confirm var1 var2 && echo 'Excuting following code'); }
-        When run func
-        The value "$(echo ${actual} | sed -e 's/ //g' -e 's/\n//g')" should eq "var1:${COLOR_BLUE}value1${COLOR_END}var2:${COLOR_BLUE}value2${COLOR_END}Excutingfollowingcode"
-    End
-
-    It 'modeQuiet false and input y'
-        modeQuiet="false"
-        func() { actual=$(yes | args_confirm var1 var2 && echo 'Excuting following code'); }
-        When run func
-        The value "$(echo ${actual} | sed -e 's/ //g' -e 's/\n//g')" should eq "var1:${COLOR_BLUE}value1${COLOR_END}var2:${COLOR_BLUE}value2${COLOR_END}Starting...Excutingfollowingcode"
-    End
-
-    It 'modeQuiet false and input n'
-        modeQuiet="false"
-        func() { eval "yes 'n' | args_confirm var1 var2 && echo 'Excuting following code'"; }
-        When run func
-        The output should include "var1:                         ${COLOR_BLUE}value 1${COLOR_END}"
-        The output should include "var2:                         ${COLOR_BLUE}value 2${COLOR_END}"
-        The output should end with "Exiting..."
-        The status should be failure
     End
 End

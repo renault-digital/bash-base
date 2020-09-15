@@ -18,7 +18,7 @@ response=$(curl -sS 'https://restcountries.eu/rest/v2/regionalbloc/eu' --compres
 string_pick_to_array '{"name":"' '","topLevelDomain' countryNames "$response"
 args_valid_or_select country countryNames "Which country"
 
-args_confirm firstName lastName age sex country
+confirm_to_continue firstName lastName age sex country
 
 print_header say hello
 cat <<-EOF
