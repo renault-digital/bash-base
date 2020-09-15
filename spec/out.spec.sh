@@ -7,8 +7,14 @@ AfterRun preserve
 
 
 Describe 'print_header'
-    It '-'
+    It 'parameter'
         When call print_header abc
+        The output should eq "${COLOR_BOLD_MAGENTA}
+### abc ${COLOR_END}"
+    End
+
+    It 'pipe'
+        When call eval "echo abc | print_header"
         The output should eq "${COLOR_BOLD_MAGENTA}
 ### abc ${COLOR_END}"
     End
