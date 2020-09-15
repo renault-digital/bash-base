@@ -41,7 +41,7 @@ function print_success() {
 # @SEE_ALSO
 #     print_header, print_error, print_success, print_warn, args_print
 function print_info() {
-	echo -e "${COLOR_END} $*"
+	echo -e "${COLOR_END}$*"
 }
 
 # @NAME

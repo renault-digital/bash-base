@@ -26,7 +26,7 @@ End
 Describe 'print_info'
     It '-'
         When call print_info abc
-        The output should eq "${COLOR_BOLD_END} abc"
+        The output should eq "${COLOR_END}abc"
     End
 End
 
