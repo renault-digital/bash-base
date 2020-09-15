@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+shopt -s expand_aliases # This file is for compatibility with previous versions
+
+alias args_confirm='confirm_to_continue'
+alias args_print='print_args'
+
 THIS_SCRIPT_NAME="$(basename "$0")"        # the main script name
 SHORT_DESC='a bash script using bash-base' # redefine it to show your script short description in the 'NAME' field of generated -h response
 USAGE=''                                   # redefine it in your script only if the generated -h response is not good for you
@@ -1378,8 +1383,6 @@ function string_pick_to_array() {
 	fi
 }
 
-shopt -s expand_aliases
-
 # @NAME
 #     stop_if_failed -- stop the execute if last command exit with fail code (no zero)
 # @SYNOPSIS
@@ -1429,7 +1432,6 @@ function confirm_to_continue() {
 		esac
 	fi
 }
-alias args_confirm='confirm_to_continue' # for compatibility
 
 # @NAME
 #     declare_heredoc -- define a variable and init its value from heredoc
