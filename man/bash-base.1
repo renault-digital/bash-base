@@ -717,12 +717,13 @@ print_info \[en] print the information message with font color gray
 .IP
 .nf
 \f[C]
-print_info string
+print_info [string]
 \f[R]
 .fi
 .SS DESCRIPTION
 .IP \[bu] 2
-\f[B]string\f[R] the message
+\f[B][string]\f[R] the message, if absent, it will be read from the
+standard input (CTRL+D to end)
 .SS EXAMPLES
 .IP
 .nf
@@ -743,12 +744,13 @@ print_info \[en] print the information message with font color default
 .IP
 .nf
 \f[C]
-print_info string
+print_info [string]
 \f[R]
 .fi
 .SS DESCRIPTION
 .IP \[bu] 2
-\f[B]string\f[R] the message
+\f[B][string]\f[R] message, if absent, it will be read from the standard
+input (CTRL+D to end)
 .SS EXAMPLES
 .IP
 .nf
@@ -770,12 +772,13 @@ color yellow
 .IP
 .nf
 \f[C]
-print_warn string
+print_warn [string]
 \f[R]
 .fi
 .SS DESCRIPTION
 .IP \[bu] 2
-\f[B]string\f[R] the message
+\f[B][string]\f[R] message, if absent, it will be read from the standard
+input (CTRL+D to end)
 .SS EXAMPLES
 .IP
 .nf
@@ -797,12 +800,13 @@ color red
 .IP
 .nf
 \f[C]
-print_error string
+print_error [string]
 \f[R]
 .fi
 .SS DESCRIPTION
 .IP \[bu] 2
-\f[B]string\f[R] the error message
+\f[B][string]\f[R] the error message, if absent, it will be read from
+the standard input (CTRL+D to end)
 .SS EXAMPLES
 .IP
 .nf
@@ -824,12 +828,13 @@ color green
 .IP
 .nf
 \f[C]
-print_success string
+print_success [string]
 \f[R]
 .fi
 .SS DESCRIPTION
 .IP \[bu] 2
-\f[B]string\f[R] the message
+\f[B][string]\f[R] the message, if absent, it will be read from the
+standard input (CTRL+D to end)
 .SS EXAMPLES
 .IP
 .nf
@@ -880,12 +885,13 @@ bold font
 .IP
 .nf
 \f[C]
-print_header string
+print_header [string]
 \f[R]
 .fi
 .SS DESCRIPTION
 .IP \[bu] 2
-\f[B]string\f[R] the string of header title
+\f[B][string]\f[R] the string of header title, if absent, it will be
+read from the standard input (CTRL+D to end)
 .SS EXAMPLES
 .IP
 .nf

@@ -610,11 +610,11 @@ print_info -- print the information message with font color gray
 
 ##### SYNOPSIS
 ```
-print_info string
+print_info [string]
 ```
 
 ##### DESCRIPTION
-- **string** the message
+- **[string]** the message, if absent, it will be read from the standard input (CTRL+D to end)
 
 ##### EXAMPLES
 ```
@@ -631,11 +631,11 @@ print_info -- print the information message with font color default
 
 ##### SYNOPSIS
 ```
-print_info string
+print_info [string]
 ```
 
 ##### DESCRIPTION
-- **string** the message
+- **[string]** message, if absent, it will be read from the standard input (CTRL+D to end)
 
 ##### EXAMPLES
 ```
@@ -652,11 +652,11 @@ print_warn -- print the warning message with prefix 'WARN:' and font color yello
 
 ##### SYNOPSIS
 ```
-print_warn string
+print_warn [string]
 ```
 
 ##### DESCRIPTION
-- **string** the message
+- **[string]** message, if absent, it will be read from the standard input (CTRL+D to end)
 
 ##### EXAMPLES
 ```
@@ -673,11 +673,11 @@ print_error -- print the error message with prefix 'ERROR:' and font color red
 
 ##### SYNOPSIS
 ```
-print_error string
+print_error [string]
 ```
 
 ##### DESCRIPTION
-- **string** the error message
+- **[string]** the error message, if absent, it will be read from the standard input (CTRL+D to end)
 
 ##### EXAMPLES
 ```
@@ -694,11 +694,11 @@ print_success -- print the success message with prefix 'OK:' and font color gree
 
 ##### SYNOPSIS
 ```
-print_success string
+print_success [string]
 ```
 
 ##### DESCRIPTION
-- **string** the message
+- **[string]** the message, if absent, it will be read from the standard input (CTRL+D to end)
 
 ##### EXAMPLES
 ```
@@ -739,11 +739,11 @@ print_header -- print the header value with prefix '
 
 ##### SYNOPSIS
 ```
-print_header string
+print_header [string]
 ```
 
 ##### DESCRIPTION
-- **string** the string of header title
+- **[string]** the string of header title, if absent, it will be read from the standard input (CTRL+D to end)
 
 ##### EXAMPLES
 ```
