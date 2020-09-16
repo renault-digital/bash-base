@@ -1,3 +1,10 @@
+## [1.4.3](https://github.com/renault-digital/bash-base/compare/v1.4.2...v1.4.3) (2020-09-16)
+
+
+### Bug Fixes
+
+* ignore the error of `shopt command not found` ([e790eb4](https://github.com/renault-digital/bash-base/commit/e790eb417b6de11b5358badd4178dce6a987dc18)), closes [#30](https://github.com/renault-digital/bash-base/issues/30)
+
 ## [1.4.2](https://github.com/renault-digital/bash-base/compare/v1.4.1...v1.4.2) (2020-09-15)
 
 ## [1.4.1](https://github.com/renault-digital/bash-base/compare/v1.4.0...v1.4.1) (2020-09-15)
