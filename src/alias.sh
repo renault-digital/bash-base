@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-shopt -s expand_aliases # This file is for compatibility with previous versions
+shopt -s expand_aliases 2>/dev/null # This file is for compatibility with previous versions
 
 source src/out.sh
 source src/tool.sh
