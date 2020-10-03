@@ -110,6 +110,7 @@ Describe args_parse
 
     It 'option invalid'
         set -- "-d"
+        USAGE="Usage:..."
 
         When run args_parse $# "$@" var1 var2
         The value "$#" should eq "1"
@@ -118,6 +119,7 @@ Describe args_parse
         The variable var2 should be undefined
         The status should be success
         The error should include "ERROR: invalid option: -d"
+        The output should eq "Usage:..."
     End
 End
 
