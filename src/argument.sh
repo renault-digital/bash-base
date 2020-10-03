@@ -33,6 +33,7 @@ function args_parse() {
 			;;
 		\?)
 			print_error "invalid option: -$OPTARG" >&2
+			showUsage=true
 			;;
 		esac
 	done
