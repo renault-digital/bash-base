@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-# import, install only if not existed
-source bash-base 2>/dev/null || npm i -g @renault-digital/bash-base && source bash-base
+# This script is mainly for integration test manually after modification
+npm run build
+source "$(dirname $0)/../bin/bash-base.sh"
 
 # customize the short description of default help usage
 SHORT_DESC='an example shell script to show how to use bash-base '
