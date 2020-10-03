@@ -6,7 +6,7 @@ source bash-base.v1.0.0 2>/dev/null || source <(curl -o- -L https://raw.githubus
 # customize the short description of default help usage
 SHORT_DESC='an example shell script to show how to use bash-base '
 
-print_header collect information
+print_header "collect information"
 args_parse $# "$@" firstName lastName age sex country
 
 args_valid_or_read firstName '^[A-Za-z ]{2,}$' "Your first name (only letters)"
@@ -20,7 +20,7 @@ args_valid_or_select country countryNames "Which country"
 
 confirm_to_continue firstName lastName age sex country
 
-print_header say hello
+print_header "say hello"
 cat <<-EOF
 	Hello $(string_upper_first "$firstName") $(string_upper "$lastName"),
 	nice to meet you.
