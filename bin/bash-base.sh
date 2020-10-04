@@ -5,9 +5,11 @@ shopt -s expand_aliases 2>/dev/null # This file is for compatibility with previo
 alias args_confirm='confirm_to_continue'
 alias args_print='print_args'
 
-THIS_SCRIPT_NAME="$(basename "$0")"        # the main script name
-SHORT_DESC='a bash script using bash-base' # redefine it to show your script short description in the 'NAME' field of generated -h response
-USAGE=''                                   # redefine it in your script only if the generated -h response is not good for you
+THIS_SCRIPT_NAME="$(basename "$0")" # the main script name
+
+SHORT_DESC="${THIS_SCRIPT_NAME%%.*}"
+SHORT_DESC="${SHORT_DESC/[\-_]/ }" # redefine it to show your script short description in the 'NAME' field of generated -h response
+USAGE=''                           # redefine it in your script only if the generated -h response is not good for you
 
 # @NAME
 #     args_parse -- parse the script argument values to positional variable names, process firstly the optional param help(-h) / quiet(-q) if existed
@@ -20,7 +22,7 @@ USAGE=''                                   # redefine it in your script only if 
 # @SEE_ALSO
 function args_parse() {
 	local nbArgValues nbPositionalVarNames option showUsage OPTARG OPTIND nbPositionalArgValues positionalArgValues positionalVarNames
-	local element validCommand description defaultUsage
+	local element validCommand description defaultUsage strPositionalVarNames strPositionalValuesExamples
 
 	nbArgValues=$1
 	shift 1
@@ -36,6 +38,7 @@ function args_parse() {
 			;;
 		\?)
 			print_error "invalid option: -$OPTARG" >&2
+			showUsage=true
 			;;
 		esac
 	done
@@ -44,11 +47,18 @@ function args_parse() {
 	nbPositionalArgValues=$((nbArgValues - OPTIND + 1))
 	positionalArgValues=("${@:1:nbPositionalArgValues}")
 	positionalVarNames=("${@:nbPositionalArgValues+1:nbPositionalVarNames}")
-	for i in $(seq 0 $((nbPositionalVarNames - 1))); do
-		eval "${positionalVarNames[i]}='${positionalArgValues[i]}'"
-	done
+	if ((nbPositionalVarNames > 0)); then
+		for i in $(seq 0 $((nbPositionalVarNames - 1))); do
+			eval "${positionalVarNames[i]}='${positionalArgValues[i]}'"
+		done
+	fi
 
 	# Generate default usage response for -h
+	if ((nbPositionalVarNames > 0)); then
+		strPositionalVarNames=" $(array_join ' ' positionalVarNames)"
+		strPositionalValuesExamples=" \"$(array_join 'Value" "' positionalVarNames)Value\""
+	fi
+
 	descriptions=''
 	for element in "${positionalVarNames[@]}"; do
 		validCommand="$(
@@ -91,7 +101,7 @@ function args_parse() {
 		    ${THIS_SCRIPT_NAME} -- ${SHORT_DESC}
 
 		${COLOR_BOLD_YELLOW}SYNOPSIS${COLOR_END}
-		    ./${THIS_SCRIPT_NAME} [-qh] $(array_join ' ' positionalVarNames)
+		    ./${THIS_SCRIPT_NAME} [-qh]${strPositionalVarNames}
 
 		${COLOR_BOLD_YELLOW}DESCRIPTION${COLOR_END}
 		    [-h]                help, print the usage
@@ -103,7 +113,7 @@ function args_parse() {
 		        ./${THIS_SCRIPT_NAME} -h
 
 		    run with all params, if run in quiet mode with -q, be sure all the params are valid:
-		        ./${THIS_SCRIPT_NAME} [-q] "$(array_join 'Value" "' positionalVarNames)Value"
+		        ./${THIS_SCRIPT_NAME} [-q]${strPositionalValuesExamples}
 
 		    run using wizard, input value for params step by step:
 		        ./${THIS_SCRIPT_NAME}

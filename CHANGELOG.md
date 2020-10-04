@@ -1,3 +1,10 @@
+## [1.4.4](https://github.com/renault-digital/bash-base/compare/v1.4.3...v1.4.4) (2020-10-04)
+
+
+### Bug Fixes
+
+* print help usage if parameter not valid ([c98a654](https://github.com/renault-digital/bash-base/commit/c98a654d4fd6eef1a082cd8d3ed5580fe7d5ccad))
+
 ## [1.4.3](https://github.com/renault-digital/bash-base/compare/v1.4.2...v1.4.3) (2020-09-16)
 
 
