@@ -1,3 +1,10 @@
+## [1.4.5](https://github.com/renault-digital/bash-base/compare/v1.4.4...v1.4.5) (2020-10-06)
+
+
+### Bug Fixes
+
+* can not extract argument valid rule if multiple rules existed ([a5fd06e](https://github.com/renault-digital/bash-base/commit/a5fd06e0058022ca592476bf01f8ecff6c9b7e02)), closes [#34](https://github.com/renault-digital/bash-base/issues/34)
+
 ## [1.4.4](https://github.com/renault-digital/bash-base/compare/v1.4.3...v1.4.4) (2020-10-04)
 
 
