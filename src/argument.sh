@@ -59,7 +59,7 @@ function args_parse() {
 	descriptions=''
 	for element in "${positionalVarNames[@]}"; do
 		validCommand="$(
-			grep -E "^\s*args_valid.*\s+${element}\s+" "$0" |
+			grep -E "^\s*args_valid.*\s+${element}\s+" "$0" | head -1 |
 				awk -F "'" -v OFS="'" '{
             for (i=2; i<=NF; i+=2) {
                 gsub(/ /, "_SPACE_", $i);
