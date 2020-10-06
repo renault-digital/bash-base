@@ -32,7 +32,7 @@ Describe args_parse
         The variable modeQuiet should eq "true"
     End
 
-    It 'default generated USAGE'
+    It 'default generated USAGE without positional argument'
         cat <<-EOF > my_script.sh
 					#!/usr/bin/env bash
 
@@ -75,7 +75,60 @@ Describe args_parse
         The status should be success
         The output should eq "$expected"
 
-#        rm -fr my_script.sh
+        rm -fr my_script.sh
+    End
+
+    It 'default generated USAGE with 1 positional argument and 2 valid rules for it'
+        cat <<-EOF > my_script.sh
+					#!/usr/bin/env bash
+
+          source src/array.sh
+          source src/tool.sh
+          source src/string.sh
+          source src/reflection.sh
+          source src/argument.sh
+
+          args_parse \$# "\$@" destGitRepoURL
+
+          if [[  -n "${currentGitRepoURL}"  ]]; then
+            args_valid_or_read destGitRepoURL '^(https|git).+\.git$' "git repository" "${currentGitRepoURL}"
+          else
+            args_valid_or_read destGitRepoURL '^(https|git).+\.git$' "git repository"
+          fi
+				EOF
+        chmod +x my_script.sh
+
+        declare_heredoc expected <<-EOF
+					${COLOR_BOLD_YELLOW}NAME${COLOR_END}
+					    my_script.sh -- my script
+
+					${COLOR_BOLD_YELLOW}SYNOPSIS${COLOR_END}
+					    ./my_script.sh [-qh] destGitRepoURL
+
+					${COLOR_BOLD_YELLOW}DESCRIPTION${COLOR_END}
+					    [-h]                help, print the usage
+					    [-q]                optional, Run quietly, no confirmation
+
+					    destGitRepoURL      git repository
+
+					${COLOR_BOLD_YELLOW}EXAMPLES${COLOR_END}
+					    help, print the usage:
+					        ./my_script.sh -h
+
+					    run with all params, if run in quiet mode with -q, be sure all the params are valid:
+					        ./my_script.sh [-q] "destGitRepoURLValue"
+
+					    run using wizard, input value for params step by step:
+					        ./my_script.sh
+
+					    or you can run with some params, and input value for other params using wizard.
+				EOF
+
+        When run script my_script.sh -h
+        The status should be success
+        The output should eq "$expected"
+
+        rm -fr my_script.sh
     End
 
     It 'print customized USAGE'
