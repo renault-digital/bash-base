@@ -34,7 +34,7 @@ else
 
 		if [[ "$2" == "verify" ]]; then
 			echo -e "# Verifying the installation (docker required):" >&2
-			docker run --rm -v "$(pwd)":/bash-base -w /bash-base shellspec/shellspec:master-kcov --shell bash spec/*.sh >&2
+			docker run --rm -v "$(pwd)":/bash-base -w /bash-base shellspec/shellspec:0.27-kcov --shell bash spec/*.sh >&2
 		fi
 
 		# transfer file content of bash-base.sh to 'source' command of client script by stdout
