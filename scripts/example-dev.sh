@@ -8,7 +8,7 @@ source "$(dirname "$0")/../bin/bash-base.sh"
 SHORT_DESC='an example shell script to show how to use bash-base '
 
 print_header "collect information"
-args_parse $# "$@" firstName lastName age sex country
+args_parse $# "$@" firstName lastName age sex country order
 
 args_valid_or_read firstName '^[A-Za-z ]{2,}$' "Your first name (only letters)"
 args_valid_or_read lastName '^[A-Za-z ]{2,}$' "Your last name (only letters)"
@@ -18,6 +18,7 @@ args_valid_or_select_pipe sex 'man|woman' "Your sex"
 response=$(curl -sS 'https://restcountries.eu/rest/v2/regionalbloc/eu' --compressed)
 string_pick_to_array '{"name":"' '","topLevelDomain' countryNames "$response"
 args_valid_or_select country countryNames "Which country"
+args_valid_or_select_args order "Which order" first "second one" "1 234"
 
 confirm_to_continue firstName lastName age sex country
 
