@@ -156,13 +156,13 @@ Describe args_parse
 
 					SHORT_DESC='this is a script for test generated help usage'
 
-					args_parse \$# "\$@" myVar1 myVar2 myVar3 myVar4 myVar5 myVar44 fromEnv varWithoutValidation order
+					args_parse \$# "\$@" myVar1 myVar2 myVar3 myVar4 myVar44 myVar5 fromEnv varWithoutValidation order
 					args_valid_or_read myVar1 '^[0-9a-z ]{3,}$' 'SIA (lowercase, 3 chars)'
 					args_valid_or_read myVar2 '^[0-9a-z ]{3,}$' 'SIA <lowercase, 3 chars>'
 					args_valid_or_read myVar3 '^[0-9a-z ]{3,}$' 'SIA [lowercase, 3 chars]'
 					args_valid_or_read myVar4 '^[0-9a-z ]{3,}$' 'SIA \${lowercase, 3 chars}'
-					args_valid_or_read myVar5 '^[0-9a-z ]{3,}$' 'SIA |lowercase, 3 chars'
 					args_valid_or_select myVar44 arrBranchesToSelectCleaned "The base of merge request (normally it's develop or integration)"
+					args_valid_or_read myVar5 '^[0-9a-z ]{3,}$' 'SIA |lowercase, 3 chars'
 					args_valid_or_select_pipe fromEnv 'int|qua|sta|rec|ope' "Which env of DCP Alpine" int
 					args_valid_or_select_args order "Which order" first "second one"
 				EOF
@@ -173,7 +173,7 @@ Describe args_parse
 					    my_script.sh -- this is a script for test generated help usage
 
 					${COLOR_BOLD_YELLOW}SYNOPSIS${COLOR_END}
-					    ./my_script.sh [-qh] myVar1 myVar2 myVar3 myVar4 myVar5 myVar44 fromEnv varWithoutValidation order
+					    ./my_script.sh [-qh] myVar1 myVar2 myVar3 myVar4 myVar44 myVar5 fromEnv varWithoutValidation order
 
 					${COLOR_BOLD_YELLOW}DESCRIPTION${COLOR_END}
 					    [-h]                help, print the usage
@@ -183,8 +183,8 @@ Describe args_parse
 					    myVar2              SIA <lowercase, 3 chars>
 					    myVar3              SIA [lowercase, 3 chars]
 					    myVar4              SIA \${lowercase, 3 chars}
-					    myVar5              SIA |lowercase, 3 chars
 					    myVar44             The base of merge request (normally its develop or integration), you can select one using wizard if you do not know which value is valid
+					    myVar5              SIA |lowercase, 3 chars
 					    fromEnv             Which env of DCP Alpine, possible values: int|qua|sta|rec|ope
 					    varWithoutValidation a valid value for varWithoutValidation
 					    order               Which order, you can select one using wizard if you do not know which value is valid
@@ -194,7 +194,7 @@ Describe args_parse
 					        ./my_script.sh -h
 
 					    run with all params, if run in quiet mode with -q, be sure all the params are valid:
-					        ./my_script.sh [-q] "myVar1Value" "myVar2Value" "myVar3Value" "myVar4Value" "myVar5Value" "myVar44Value" "fromEnvValue" "varWithoutValidationValue" "orderValue"
+					        ./my_script.sh [-q] "myVar1Value" "myVar2Value" "myVar3Value" "myVar4Value" "myVar44Value" "myVar5Value" "fromEnvValue" "varWithoutValidationValue" "orderValue"
 
 					    run using wizard, input value for params step by step:
 					        ./my_script.sh
