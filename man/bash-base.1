@@ -96,7 +96,42 @@ args_valid_or_select_pipe sel \[dq]a|ab|d\[dq] \[dq]which value\[dq]
 .fi
 .SS SEE_ALSO
 .PP
-args_valid_or_select, args_valid_or_read
+args_valid_or_select, args_valid_or_select_args, args_valid_or_read
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
+args_valid_or_select_args \[en] test whether the value contains by the
+array, if not contained, require to select a new one from array and
+assign it to the value variable name
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+args_valid_or_select_args valueVarName prompt arrayElement1 arrayElement2 ...
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B]valueVarName\f[R] the variable name of the value to valid and the
+new value assign to,
+.IP \[bu] 2
+\f[B]prompt\f[R] the prompt message to show when requiring to select a
+new one from array
+.IP \[bu] 2
+\f[B]arrayElement1\&...\f[R] the elements of array, quote the element
+which contains space
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+sel=\[dq]abc\[dq]
+args_valid_or_select_args sel \[dq]which value\[dq] \[dq]a\[dq] \[dq]ab\[dq] \[dq]d\[dq]
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+args_valid_or_select, args_valid_or_select_pipe, args_valid_or_read
 .PP
    *   *   *   *   *
 .SS NAME
@@ -135,7 +170,8 @@ args_valid_or_read destRootPackage \[aq]\[ha].+$\[aq] \[dq]Destination root pack
 .fi
 .SS SEE_ALSO
 .PP
-args_valid_or_select, args_valid_or_select_pipe
+args_valid_or_select, args_valid_or_select_args,
+args_valid_or_select_pipe
 .PP
    *   *   *   *   *
 .SS NAME
@@ -251,7 +287,37 @@ echo \[dq]ab\[dq] | array_contains arr
 .fi
 .SS SEE_ALSO
 .PP
-array_remove
+array_remove, array_in
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
+array_in \[en] exit success code 0 if first item is in the array of the
+rest arguments, fail if not.
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+array_in seekingElement arrayElement1 arrayElement2 arrayElement3 ...
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B]seekingElement\f[R] the element to search in array
+.IP \[bu] 2
+\f[B]arrayElement1\&...\f[R] the elements of array, quote the element
+which contains space
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+arr=(\[dq]a\[dq] \[dq]b\[dq] \[dq]c\[dq] \[dq]ab\[dq] \[dq]f\[dq] \[dq]g\[dq])
+array_in \[dq]a b\[dq] \[dq]a\[dq] \[dq]b\[dq] \[dq]c\[dq] \[dq]a b\[dq] \[dq]f\[dq] \[dq]g\[dq]
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+array_remove, array_contains
 .PP
    *   *   *   *   *
 .SS NAME

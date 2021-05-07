@@ -1,3 +1,11 @@
+# [1.5.0](https://github.com/renault-digital/bash-base/compare/v1.4.7...v1.5.0) (2021-05-07)
+
+
+### Features
+
+* add args_valid_or_select_args ([ce5cc4a](https://github.com/renault-digital/bash-base/commit/ce5cc4aca59dbe4d5edc53d18f29ceef88566bb6)), closes [#38](https://github.com/renault-digital/bash-base/issues/38)
+* add array_in ([8a98de2](https://github.com/renault-digital/bash-base/commit/8a98de2d770ed67c413826ec00110c6031f06e74))
+
 ## [1.4.7](https://github.com/renault-digital/bash-base/compare/v1.4.6...v1.4.7) (2021-05-07)
 
 ## [1.4.6](https://github.com/renault-digital/bash-base/compare/v1.4.5...v1.4.6) (2021-01-31)

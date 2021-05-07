@@ -5,11 +5,13 @@
 - args_parse
 - args_valid_or_select
 - args_valid_or_select_pipe
+- args_valid_or_select_args
 - args_valid_or_read
 - array_join
 - array_describe
 - array_from_describe
 - array_contains
+- array_in
 - array_sort
 - array_sort_distinct
 - array_length
@@ -129,7 +131,31 @@ args_valid_or_select_pipe sel "a|ab|d" "which value"
 ```
 
 ##### SEE_ALSO
-args_valid_or_select, args_valid_or_read
+args_valid_or_select, args_valid_or_select_args, args_valid_or_read
+
+---
+
+##### NAME
+args_valid_or_select_args -- test whether the value contains by the array, if not contained, require to select a new one from array and assign it to the value variable name
+
+##### SYNOPSIS
+```
+args_valid_or_select_args valueVarName prompt arrayElement1 arrayElement2 ...
+```
+
+##### DESCRIPTION
+- **valueVarName** the variable name of the value to valid and the new value assign to,
+- **prompt** the prompt message to show when requiring to select a new one from array
+- **arrayElement1...** the elements of array, quote the element which contains space
+
+##### EXAMPLES
+```
+sel="abc"
+args_valid_or_select_args sel "which value" "a" "ab" "d"
+```
+
+##### SEE_ALSO
+args_valid_or_select, args_valid_or_select_pipe, args_valid_or_read
 
 ---
 
@@ -155,7 +181,7 @@ args_valid_or_read destRootPackage '^.+$' "Destination root package" "${defaultD
 ```
 
 ##### SEE_ALSO
-args_valid_or_select, args_valid_or_select_pipe
+args_valid_or_select, args_valid_or_select_args, args_valid_or_select_pipe
 
 ---
 
@@ -247,7 +273,30 @@ echo "ab" | array_contains arr
 ```
 
 ##### SEE_ALSO
-array_remove
+array_remove, array_in
+
+---
+
+##### NAME
+array_in -- exit success code 0 if first item is in the array of the rest arguments, fail if not.
+
+##### SYNOPSIS
+```
+array_in seekingElement arrayElement1 arrayElement2 arrayElement3 ...
+```
+
+##### DESCRIPTION
+- **seekingElement** the element to search in array
+- **arrayElement1...** the elements of array, quote the element which contains space
+
+##### EXAMPLES
+```
+arr=("a" "b" "c" "ab" "f" "g")
+array_in "a b" "a" "b" "c" "a b" "f" "g"
+```
+
+##### SEE_ALSO
+array_remove, array_contains
 
 ---
 

@@ -78,19 +78,28 @@ function args_parse() {
 		if [[ -z ${validCommand} ]]; then
 			description="a valid value for ${element}"
 		else
-			description="$(
-				reflect_nth_arg 4 "${validCommand}" |
+			if [[ "${validCommand}" =~ 'args_valid_or_select_pipe' ]]; then
+				prompt="$(reflect_nth_arg 4 "${validCommand}")"
+				possibleValues=", possible values: $(reflect_nth_arg 3 "$validCommand")"
+			elif [[ "${validCommand}" =~ 'args_valid_or_select_args' ]]; then
+				prompt="$(reflect_nth_arg 3 "${validCommand}")"
+				possibleValues=", you can select one using wizard if you do not know which value is valid"
+			elif [[ "${validCommand}" =~ 'args_valid_or_select' ]]; then
+				prompt="$(reflect_nth_arg 4 "${validCommand}")"
+				possibleValues=", you can select one using wizard if you do not know which value is valid"
+			else
+				prompt="$(reflect_nth_arg 4 "${validCommand}")"
+			fi
+
+			prompt="$(
+				echo "${prompt}" |
 					string_replace "_SPACE_" " " |
 					string_replace "_DOLLAR_" "$" |
 					string_replace "_PARENTHESES_LEFT_" "(" |
 					string_replace "_PARENTHESES_RIGHT_" ")"
 			)"
 
-			if [[ "${validCommand}" =~ 'args_valid_or_select_pipe' ]]; then
-				description="${description}, possible values: $(reflect_nth_arg 3 "$validCommand")"
-			elif [[ "${validCommand}" =~ 'args_valid_or_select' ]]; then
-				description="${description}, you can select one using wizard if you do not know which value is valid"
-			fi
+			description="${prompt}${possibleValues}"
 		fi
 
 		descriptions+="$(printf "\n    %-20s%s" "${element} " "${description}")"
@@ -177,7 +186,7 @@ function args_valid_or_select() {
 #     sel="abc"
 #     args_valid_or_select_pipe sel "a|ab|d" "which value"
 # @SEE_ALSO
-#     args_valid_or_select, args_valid_or_read
+#     args_valid_or_select, args_valid_or_select_args, args_valid_or_read
 function args_valid_or_select_pipe() {
 	local valueVarName validValues prompt newArray
 	valueVarName="${1}"
@@ -186,6 +195,39 @@ function args_valid_or_select_pipe() {
 
 	string_split_to_array '|' newArray "$validValues"
 	args_valid_or_select "${valueVarName}" newArray "$prompt"
+}
+
+# @NAME
+#     args_valid_or_select_args -- test whether the value contains by the array, if not contained, require to select a new one from array and assign it to the value variable name
+# @SYNOPSIS
+#     args_valid_or_select_args valueVarName prompt arrayElement1 arrayElement2 ...
+# @DESCRIPTION
+#     **valueVarName** the variable name of the value to valid and the new value assign to,
+#     **prompt** the prompt message to show when requiring to select a new one from array
+#     **arrayElement1...** the elements of array, quote the element which contains space
+# @EXAMPLES
+#     sel="abc"
+#     args_valid_or_select_args sel "which value" "a" "ab" "d"
+# @SEE_ALSO
+#     args_valid_or_select, args_valid_or_select_pipe, args_valid_or_read
+function args_valid_or_select_args() {
+	local valueVarName value prompt PS3
+	valueVarName="${1}"
+	value=$(eval eval "echo '$'${valueVarName}")
+	prompt="${2}"
+	shift 2
+
+	while ! array_in "${value}" "$@"; do
+		echo -e "\n${prompt} ?"
+		[[ -n "${value}" ]] && print_error "the input '${value}' is not valid."
+
+		PS3="choose one by ${COLOR_BOLD_YELLOW}number${COLOR_END} [1|2|...] ? "
+		select value in "$@"; do
+			break
+		done
+	done
+	eval "${valueVarName}='${value}'"
+	printf "Selected value: ${COLOR_BLUE}'%s'${COLOR_END}\n" "$(eval echo '$'"${valueVarName}")"
 }
 
 # @NAME
@@ -202,7 +244,7 @@ function args_valid_or_select_pipe() {
 #     args_valid_or_read destProjectIRN '^[0-9]{5,5}$' "IRN (only the 5 digits)"
 #     args_valid_or_read destRootPackage '^.+$' "Destination root package" "${defaultDestRootPackage}"
 # @SEE_ALSO
-#     args_valid_or_select, args_valid_or_select_pipe
+#     args_valid_or_select, args_valid_or_select_args, args_valid_or_select_pipe
 function args_valid_or_read() {
 	local value regExp prompt proposedValue
 	value=$(eval eval "echo '$'$1")
@@ -303,20 +345,35 @@ function array_from_describe() {
 #     array_contains arr "ab"
 #     echo "ab" | array_contains arr
 # @SEE_ALSO
-#     array_remove
+#     array_remove, array_in
 function array_contains() {
 	local array="$1[@]"
 	local seeking="${2-$(cat)}"
 
-	local exitCode element
-	exitCode=1
-	for element in "${!array}"; do
-		if [[ ${element} == "${seeking}" ]]; then
-			exitCode=0
-			break
-		fi
+	array_in "${seeking}" "${!array}"
+}
+
+# @NAME
+#     array_in -- exit success code 0 if first item is in the array of the rest arguments, fail if not.
+# @SYNOPSIS
+#     array_in seekingElement arrayElement1 arrayElement2 arrayElement3 ...
+# @DESCRIPTION
+#     **seekingElement** the element to search in array
+#     **arrayElement1...** the elements of array, quote the element which contains space
+# @EXAMPLES
+#     arr=("a" "b" "c" "ab" "f" "g")
+#     array_in "a b" "a" "b" "c" "a b" "f" "g"
+# @SEE_ALSO
+#     array_remove, array_contains
+function array_in() {
+	local seeking="$1"
+	shift
+	local element
+
+	for element in "$@"; do
+		[[ ${element} == "${seeking}" ]] && return 0
 	done
-	return $exitCode
+	return 1
 }
 
 # @NAME
