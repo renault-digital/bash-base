@@ -86,6 +86,7 @@ function args_parse() {
 				possibleValues=", you can select one using wizard if you do not know which value is valid"
 			else
 				prompt="$(reflect_nth_arg 4 "${validCommand}")"
+				possibleValues=""
 			fi
 
 			prompt="$(
