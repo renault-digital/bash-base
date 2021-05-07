@@ -52,10 +52,13 @@ jobs:
       - name: failed if coverage not 100%
         run: |
           cat coverage/coverage.json
-          if [ $(jq '.percent_covered|tonumber' coverage/coverage.json) -lt 100 ]; then
-            echo "The coverage should be 100%."
-            exit 1
+          percent=$(jq '.percent_covered|tonumber|floor' coverage/coverage.json)
+          if (( $(echo "${percent} == 100" | bc -l) )); then
+            echo "The coverage is OK."
+            exit 0
           fi
+          echo "The coverage should be 100%."
+          exit 1
 
   semantic-release-preview:
     runs-on: ubuntu-latest
