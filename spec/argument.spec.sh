@@ -156,7 +156,7 @@ Describe args_parse
 
 					SHORT_DESC='this is a script for test generated help usage'
 
-					args_parse \$# "\$@" myVar1 myVar2 myVar3 myVar4 myVar5 myVar44 fromEnv varWithoutValidation
+					args_parse \$# "\$@" myVar1 myVar2 myVar3 myVar4 myVar5 myVar44 fromEnv varWithoutValidation order
 					args_valid_or_read myVar1 '^[0-9a-z ]{3,}$' 'SIA (lowercase, 3 chars)'
 					args_valid_or_read myVar2 '^[0-9a-z ]{3,}$' 'SIA <lowercase, 3 chars>'
 					args_valid_or_read myVar3 '^[0-9a-z ]{3,}$' 'SIA [lowercase, 3 chars]'
@@ -164,6 +164,7 @@ Describe args_parse
 					args_valid_or_read myVar5 '^[0-9a-z ]{3,}$' 'SIA |lowercase, 3 chars'
 					args_valid_or_select myVar44 arrBranchesToSelectCleaned "The base of merge request (normally it's develop or integration)"
 					args_valid_or_select_pipe fromEnv 'int|qua|sta|rec|ope' "Which env of DCP Alpine" int
+					args_valid_or_select_args order "Which order" first "second one"
 				EOF
         chmod +x my_script.sh
 
@@ -172,7 +173,7 @@ Describe args_parse
 					    my_script.sh -- this is a script for test generated help usage
 
 					${COLOR_BOLD_YELLOW}SYNOPSIS${COLOR_END}
-					    ./my_script.sh [-qh] myVar1 myVar2 myVar3 myVar4 myVar5 myVar44 fromEnv varWithoutValidation
+					    ./my_script.sh [-qh] myVar1 myVar2 myVar3 myVar4 myVar5 myVar44 fromEnv varWithoutValidation order
 
 					${COLOR_BOLD_YELLOW}DESCRIPTION${COLOR_END}
 					    [-h]                help, print the usage
@@ -186,13 +187,14 @@ Describe args_parse
 					    myVar44             The base of merge request (normally its develop or integration), you can select one using wizard if you do not know which value is valid
 					    fromEnv             Which env of DCP Alpine, possible values: int|qua|sta|rec|ope
 					    varWithoutValidation a valid value for varWithoutValidation
+					    order               Which order, you can select one using wizard if you do not know which value is valid
 
 					${COLOR_BOLD_YELLOW}EXAMPLES${COLOR_END}
 					    help, print the usage:
 					        ./my_script.sh -h
 
 					    run with all params, if run in quiet mode with -q, be sure all the params are valid:
-					        ./my_script.sh [-q] "myVar1Value" "myVar2Value" "myVar3Value" "myVar4Value" "myVar5Value" "myVar44Value" "fromEnvValue" "varWithoutValidationValue"
+					        ./my_script.sh [-q] "myVar1Value" "myVar2Value" "myVar3Value" "myVar4Value" "myVar5Value" "myVar44Value" "fromEnvValue" "varWithoutValidationValue" "orderValue"
 
 					    run using wizard, input value for params step by step:
 					        ./my_script.sh
@@ -273,6 +275,38 @@ Describe args_valid_or_select_pipe {
     It 'init value invalid and save result to variable'
         sel="abc"
         func() { actual=$(yes 1 | args_valid_or_select_pipe sel "a|ab|d" "which value" | grep "Selected"); }
+        When run func
+        The variable actual should eq "Selected value: ${COLOR_BLUE}'a'${COLOR_END}"
+        The error should include "choose one by"
+    End
+End
+
+
+Describe args_valid_or_select_args {
+    It 'init value valid'
+        sel="ab"
+        When call args_valid_or_select_args sel "which value" a ab d
+        The variable sel should eq "ab"
+        The output should start with "Selected value: ${COLOR_BLUE}'ab'"
+    End
+
+    It 'init value invalid and select the first one'
+        sel="abc"
+        When call eval 'yes 1 | args_valid_or_select_args sel "which value" a ab d | grep "Selected"'
+        The output should eq "Selected value: ${COLOR_BLUE}'a'${COLOR_END}"
+        The error should include "choose one by"
+    End
+
+    It 'init value invalid and select the second one'
+        sel="abc"
+        When call eval 'yes 2 | args_valid_or_select_args sel "which value" a ab d | grep "Selected"'
+        The output should eq "Selected value: ${COLOR_BLUE}'ab'${COLOR_END}"
+        The error should include "choose one by"
+    End
+
+    It 'init value invalid and save result to variable'
+        sel="abc"
+        func() { actual=$(yes 1 | args_valid_or_select_args sel "which value" a ab d | grep "Selected"); }
         When run func
         The variable actual should eq "Selected value: ${COLOR_BLUE}'a'${COLOR_END}"
         The error should include "choose one by"

@@ -90,7 +90,7 @@ function array_contains() {
 #     array_in seekingElement arrayElement1 arrayElement2 arrayElement3 ...
 # @DESCRIPTION
 #     **seekingElement** the element to search in array
-#     **arrayElement1...** the elements of array
+#     **arrayElement1...** the elements of array, quote the element which contains space
 # @EXAMPLES
 #     arr=("a" "b" "c" "ab" "f" "g")
 #     array_in "a b" "a" "b" "c" "a b" "f" "g"
