@@ -8,21 +8,50 @@ AfterRun preserve
 
 
 Describe array_contains
-    arr=("a" "b" "c" "ab" "f" "g")
+    arr=("a" "b" "c" "a b" "f" "g")
 
     It 'found'
-        When call array_contains arr "ab"
+        When call array_contains arr "a b"
         The status should be success
     End
 
     It 'found pipe'
-        When call eval 'echo "ab" | array_contains arr'
+        When call eval 'echo "a b" | array_contains arr'
         The status should be success
     End
 
     It 'not found'
         When call array_contains arr "abc"
         The status should be failure
+    End
+End
+
+
+Describe array_in
+    It 'found with quoted args'
+        When call array_in "a b" "a" "b" "c" "a b" "f" "g"
+        The status should be success
+    End
+
+    It 'not found'
+        When call array_in "a b" "a"
+        The status should be failure
+    End
+
+    It 'not found with empty array'
+        When call array_in "a b"
+        The status should be failure
+    End
+
+    It 'found in args'
+        When call array_in a_b a b c a_b f g
+        The status should be success
+    End
+
+    It 'found in string'
+        str="a b c a_b f g"
+        When call array_in "a_b" $str
+        The status should be success
     End
 End
 

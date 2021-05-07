@@ -76,20 +76,35 @@ function array_from_describe() {
 #     array_contains arr "ab"
 #     echo "ab" | array_contains arr
 # @SEE_ALSO
-#     array_remove
+#     array_remove, array_in
 function array_contains() {
 	local array="$1[@]"
 	local seeking="${2-$(cat)}"
 
-	local exitCode element
-	exitCode=1
-	for element in "${!array}"; do
-		if [[ ${element} == "${seeking}" ]]; then
-			exitCode=0
-			break
-		fi
+	array_in "${seeking}" "${!array}"
+}
+
+# @NAME
+#     array_in -- exit success code 0 if first item is in the array of the rest arguments, fail if not.
+# @SYNOPSIS
+#     array_in seekingElement arrayElement1 arrayElement2 arrayElement3 ...
+# @DESCRIPTION
+#     **seekingElement** the element to search in array
+#     **arrayElement1...** the elements of array
+# @EXAMPLES
+#     arr=("a" "b" "c" "ab" "f" "g")
+#     array_in "a b" "a" "b" "c" "a b" "f" "g"
+# @SEE_ALSO
+#     array_remove, array_contains
+function array_in() {
+	local seeking="$1"
+	shift
+	local element
+
+	for element in "$@"; do
+		[[ ${element} == "${seeking}" ]] && return 0
 	done
-	return $exitCode
+	return 1
 }
 
 # @NAME
