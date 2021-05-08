@@ -19,6 +19,24 @@ Describe 'declare_heredoc'
 End
 
 
+Describe 'wait_for'
+    It 'ok'
+        When call wait_for 'test 1 -eq 1' slowTask 2
+        The status should be success
+        The output should include "OK: slowTask is ok now"
+    End
+
+    It 'not ok'
+        rm -fr a.txt
+        func() {  actual=$( wait_for 'test -f a.txt' slowTask 2 & touch a.txt); }
+        When run func
+        The status should be success
+        The value "${actual}" should include "WARN: Waiting for slowTask to be ok"
+        The value "${actual}" should include "OK: slowTask is ok now"
+    End
+End
+
+
 Describe 'stop_if_failed'
     It 'no error'
         func() { eval "echo 'message normal'; stop_if_failed 'error occurred'"; }
@@ -60,14 +78,14 @@ Describe 'confirm_to_continue'
 
     It 'modeQuiet false and input y'
         modeQuiet="false"
-        func() { actual=$(yes | confirm_to_continue var1 var2 && echo 'Excuting following code'); }
+        func() { actual=$(echo y | confirm_to_continue var1 var2 && echo 'Excuting following code'); }
         When run func
         The value "$(echo ${actual} | sed -e 's/ //g' -e 's/\n//g')" should eq "var1:${COLOR_BLUE}value1${COLOR_END}var2:${COLOR_BLUE}value2${COLOR_END}Continue...Excutingfollowingcode"
     End
 
     It 'modeQuiet false and input n'
         modeQuiet="false"
-        func() { eval "yes 'n' | confirm_to_continue var1 var2 && echo 'Excuting following code'"; }
+        func() { eval "echo 'n' | confirm_to_continue var1 var2 && echo 'Excuting following code'"; }
         When run func
         The output should include "var1:                         ${COLOR_BLUE}value 1${COLOR_END}"
         The output should include "var2:                         ${COLOR_BLUE}value 2${COLOR_END}"

@@ -44,7 +44,14 @@ jobs:
 
       # Run tests
       - name: shellspec-kcov
-        run: docker run -i --rm -v "$(pwd)":/bash-base -w /bash-base shellspec/shellspec:0.27-kcov --kcov -f t spec/*.spec.sh
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bash kcov
+          command -v kcov
+          curl -fsSL https://git.io/shellspec | sh -s 0.27.2 --yes
+          export PATH="$HOME/.local/lib/shellspec:$PATH"
+          bash -c 'echo BASH_VERSION: $BASH_VERSION'
+          bash shellspec --kcov -f t spec/*.spec.sh
 
       - name: codecov.io
         run: bash <(curl -s https://codecov.io/bash)
