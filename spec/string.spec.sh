@@ -187,8 +187,8 @@ Describe 'string_replace_regex'
         '(ac|ae){1,}' 'b' 'acaed' "bd"
         '(ac|ae)+' 'b' 'acaed' "bd"
 
-        '\s+' '' 'a   b' "ab"
-        '^\s+' '' '   a   b' "a   b"
+        '[ ]+' '' 'a   b' "ab"
+        '^[ ]+' '' '   a   b' "a   b"
     End
 
     Example "replace $1 to $2 in $3"

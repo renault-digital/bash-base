@@ -34,7 +34,7 @@
     "lint:comment": "./scripts/lint-comment.sh",
     "lint": "npm run shellcheck && npm run lint:comment",
     "test": "./scripts/test.sh",
-    "test:focus": "npm test -- --focus #execute only fIt/fDescribe",
+    "test:focus": "npm test -- -f t --focus #execute only fIt/fDescribe",
     "test:coverage": "npm test -- --kcov -f t",
     "build": "./scripts/build.sh"
   },

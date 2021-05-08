@@ -158,17 +158,17 @@ Describe args_parse
 
 					args_parse \$# "\$@" myVar1 myVar2 myVar3 myVar4 myVar44 myVar5 fromEnv varWithoutValidation order
 					args_valid_or_read myVar1 '^[0-9a-z ]{3,}$' 'SIA (lowercase, 3 chars)'
-					args_valid_or_read myVar2 '^[0-9a-z ]{3,}$' 'SIA <lowercase, 3 chars>'
+					args_valid_or_read myVar2 '^[0-9a-z ]{3,}$' 'SIA lowercase, 3 chars'
 					args_valid_or_read myVar3 '^[0-9a-z ]{3,}$' 'SIA [lowercase, 3 chars]'
-					args_valid_or_read myVar4 '^[0-9a-z ]{3,}$' 'SIA \${lowercase, 3 chars}'
-					args_valid_or_select myVar44 arrBranchesToSelectCleaned "The base of merge request (normally it's develop or integration)"
-					args_valid_or_read myVar5 '^[0-9a-z ]{3,}$' 'SIA |lowercase, 3 chars'
-					args_valid_or_select_pipe fromEnv 'int|qua|sta|rec|ope' "Which env of DCP Alpine" int
+					args_valid_or_read myVar4 '^[0-9a-z ]{3,}$' 'SIA lowercase, 3 chars'
+					args_valid_or_select myVar44 arrBranchesToSelectCleaned "The base of merge request (normally it is develop or integration)"
+					args_valid_or_read myVar5 '^[0-9a-z ]{3,}$' 'SIA !lowercase, 3 chars'
+					args_valid_or_select_pipe fromEnv 'int/qua/sta/rec/ope' "Which env of DCP Alpine" int
 					args_valid_or_select_args order "Which order" first "second one"
 				EOF
         chmod +x my_script.sh
 
-        declare_heredoc expected <<-EOF
+        expected=$(cat <<-EOF
 					${COLOR_BOLD_YELLOW}NAME${COLOR_END}
 					    my_script.sh -- this is a script for test generated help usage
 
@@ -180,12 +180,12 @@ Describe args_parse
 					    [-q]                optional, Run quietly, no confirmation
 
 					    myVar1              SIA (lowercase, 3 chars)
-					    myVar2              SIA <lowercase, 3 chars>
+					    myVar2              SIA lowercase, 3 chars
 					    myVar3              SIA [lowercase, 3 chars]
-					    myVar4              SIA \${lowercase, 3 chars}
-					    myVar44             The base of merge request (normally its develop or integration), you can select one using wizard if you do not know which value is valid
-					    myVar5              SIA |lowercase, 3 chars
-					    fromEnv             Which env of DCP Alpine, possible values: int|qua|sta|rec|ope
+					    myVar4              SIA lowercase, 3 chars
+					    myVar44             The base of merge request (normally it is develop or integration), you can select one using wizard if you do not know which value is valid
+					    myVar5              SIA !lowercase, 3 chars
+					    fromEnv             Which env of DCP Alpine, possible values: int/qua/sta/rec/ope
 					    varWithoutValidation a valid value for varWithoutValidation
 					    order               Which order, you can select one using wizard if you do not know which value is valid
 
@@ -201,6 +201,7 @@ Describe args_parse
 
 					    or you can run with some params, and input value for other params using wizard.
 				EOF
+				)
 
         When run script my_script.sh -h
         The status should be success
@@ -236,14 +237,14 @@ Describe args_valid_or_select {
 
     It 'init value invalid and select the first one'
         sel="abc"
-        When call eval 'yes 1 | args_valid_or_select sel arr "which value" | grep "Selected"'
+        When call eval 'echo 1 | args_valid_or_select sel arr "which value" | grep "Selected"'
         The output should eq "Selected value: ${COLOR_BLUE}'a'${COLOR_END}"
         The error should include "choose one by"
     End
 
     It 'init value invalid and select the second one'
         sel="abc"
-        When call eval 'yes 2 | args_valid_or_select sel arr "which value" | grep "Selected"'
+        When call eval 'echo 2 | args_valid_or_select sel arr "which value" | grep "Selected"'
         The output should eq "Selected value: ${COLOR_BLUE}'ab'${COLOR_END}"
         The error should include "choose one by"
     End
@@ -260,21 +261,21 @@ Describe args_valid_or_select_pipe {
 
     It 'init value invalid and select the first one'
         sel="abc"
-        When call eval 'yes 1 | args_valid_or_select_pipe sel "a|ab|d" "which value" | grep "Selected"'
+        When call eval 'echo 1 | args_valid_or_select_pipe sel "a|ab|d" "which value" | grep "Selected"'
         The output should eq "Selected value: ${COLOR_BLUE}'a'${COLOR_END}"
         The error should include "choose one by"
     End
 
     It 'init value invalid and select the second one'
         sel="abc"
-        When call eval 'yes 2 | args_valid_or_select_pipe sel "a|ab|d" "which value" | grep "Selected"'
+        When call eval 'echo 2 | args_valid_or_select_pipe sel "a|ab|d" "which value" | grep "Selected"'
         The output should eq "Selected value: ${COLOR_BLUE}'ab'${COLOR_END}"
         The error should include "choose one by"
     End
 
     It 'init value invalid and save result to variable'
         sel="abc"
-        func() { actual=$(yes 1 | args_valid_or_select_pipe sel "a|ab|d" "which value" | grep "Selected"); }
+        func() { actual=$(echo 1 | args_valid_or_select_pipe sel "a|ab|d" "which value" | grep "Selected"); }
         When run func
         The variable actual should eq "Selected value: ${COLOR_BLUE}'a'${COLOR_END}"
         The error should include "choose one by"
@@ -292,21 +293,21 @@ Describe args_valid_or_select_args {
 
     It 'init value invalid and select the first one'
         sel="abc"
-        When call eval 'yes 1 | args_valid_or_select_args sel "which value" a ab d | grep "Selected"'
+        When call eval 'echo 1 | args_valid_or_select_args sel "which value" a ab d | grep "Selected"'
         The output should eq "Selected value: ${COLOR_BLUE}'a'${COLOR_END}"
         The error should include "choose one by"
     End
 
     It 'init value invalid and select the second one'
         sel="abc"
-        When call eval 'yes 2 | args_valid_or_select_args sel "which value" a ab d | grep "Selected"'
+        When call eval 'echo 2 | args_valid_or_select_args sel "which value" a ab d | grep "Selected"'
         The output should eq "Selected value: ${COLOR_BLUE}'ab'${COLOR_END}"
         The error should include "choose one by"
     End
 
     It 'init value invalid and save result to variable'
         sel="abc"
-        func() { actual=$(yes 1 | args_valid_or_select_args sel "which value" a ab d | grep "Selected"); }
+        func() { actual=$(echo 1 | args_valid_or_select_args sel "which value" a ab d | grep "Selected"); }
         When run func
         The variable actual should eq "Selected value: ${COLOR_BLUE}'a'${COLOR_END}"
         The error should include "choose one by"
@@ -316,52 +317,53 @@ End
 
 Describe args_valid_or_read
     It 'the value is unset'
-        When call eval "yes 70022 | args_valid_or_read irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' | grep 'Inputted'"
+        When call eval "echo 70022 | args_valid_or_read irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' | grep 'Inputted'"
         The output should eq "Inputted value: ${COLOR_BLUE}'70022'${COLOR_END}"
+        The error should eq ""
     End
 
     It 'the value is empty'
         irn=""
-        When call eval "yes 70022 | args_valid_or_read irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' | grep 'Inputted'"
+        When call eval "echo 70022 | args_valid_or_read irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' | grep 'Inputted'"
         The output should eq "Inputted value: ${COLOR_BLUE}'70022'${COLOR_END}"
     End
 
     It "the value is not valid"
         irn="225"
-        When call eval "yes 70022 | args_valid_or_read irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' | grep 'Inputted'"
+        When call eval "echo 70022 | args_valid_or_read irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' | grep 'Inputted'"
         The output should eq "Inputted value: ${COLOR_BLUE}'70022'${COLOR_END}"
     End
 
     It "the value is valid"
         irn="70033"
-        When call eval "yes 70022 | args_valid_or_read irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)'"
+        When call eval "echo 70022 | args_valid_or_read irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)'"
         The variable irn should eq "70033"
         The output should eq "Inputted value: ${COLOR_BLUE}'70033'${COLOR_END}"
     End
 
     It 'take proposedValue when the value is unset and modeQuiet is true'
         modeQuiet="true"
-        When call eval "yes 70022 | args_valid_or_read irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' 70088 | grep 'Inputted'"
+        When call eval "echo 70022 | args_valid_or_read irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' 70088 | grep 'Inputted'"
         The output should eq "Inputted value: ${COLOR_BLUE}'70088'${COLOR_END}"
     End
 
     It 'take proposedValue when the value is empty and modeQuiet is true'
         irn=""
         modeQuiet="true"
-        When call eval "yes 70022 | args_valid_or_read irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' 70088 | grep 'Inputted'"
+        When call eval "echo 70022 | args_valid_or_read irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' 70088 | grep 'Inputted'"
         The output should eq "Inputted value: ${COLOR_BLUE}'70088'${COLOR_END}"
     End
 
     It 'take proposedValue when user input nothing'
         modeQuiet="false"
-        When call eval "yes '' | args_valid_or_read irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' 70088 | grep 'Inputted'"
+        When call eval "echo '' | args_valid_or_read irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' 70088 | grep 'Inputted'"
         The output should eq "Inputted value: ${COLOR_BLUE}'70088'${COLOR_END}"
     End
 
     It 'not take proposedValue when value is valid'
         modeQuiet="false"
         irn="70033"
-        When call eval "yes '' | args_valid_or_read irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' 70088 | grep 'Inputted'"
+        When call eval "echo '' | args_valid_or_read irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' 70088 | grep 'Inputted'"
         The output should eq "Inputted value: ${COLOR_BLUE}'70033'${COLOR_END}"
     End
 End
