@@ -42,7 +42,7 @@ function confirm_to_continue() {
 
 		case "${response}" in
 		[yY][eE][sS] | [yY])
-			echo -e "Starting..."
+			echo -e "Continue..."
 			sleep 1s
 			;;
 		*)
@@ -51,6 +51,30 @@ function confirm_to_continue() {
 			;;
 		esac
 	fi
+}
+
+# @NAME
+#     wait_for -- wait the subject predicate to be true before continue
+# @SYNOPSIS
+#     wait_for predicate [subject] [interval]
+# @DESCRIPTION
+#     **predicate** a string of command, used to check is ok or not
+#     **[subject]** optional, the subject name
+#     **[interval]** optional, the interval of number of seconds between the checks, default to 3
+# @EXAMPLES
+#     wait_for 'test -f /tmp/output.txt' 'file existed' 3
+# @SEE_ALSO
+#     confirm_to_continue, stop_if_failed
+function wait_for() {
+	local predicate="${1}"
+	local subject="${2-it}"
+	local interval=${3-3}
+
+	while ! eval "${predicate}"; do
+		print_warn "Waiting for ${subject} to be ok"
+		sleep "${interval}"
+	done
+	print_success "${subject} is ok now."
 }
 
 # @NAME

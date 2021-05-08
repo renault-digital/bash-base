@@ -62,7 +62,7 @@ Describe 'confirm_to_continue'
         modeQuiet="false"
         func() { actual=$(yes | confirm_to_continue var1 var2 && echo 'Excuting following code'); }
         When run func
-        The value "$(echo ${actual} | sed -e 's/ //g' -e 's/\n//g')" should eq "var1:${COLOR_BLUE}value1${COLOR_END}var2:${COLOR_BLUE}value2${COLOR_END}Starting...Excutingfollowingcode"
+        The value "$(echo ${actual} | sed -e 's/ //g' -e 's/\n//g')" should eq "var1:${COLOR_BLUE}value1${COLOR_END}var2:${COLOR_BLUE}value2${COLOR_END}Continue...Excutingfollowingcode"
     End
 
     It 'modeQuiet false and input n'
