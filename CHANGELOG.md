@@ -1,3 +1,5 @@
+## [1.5.1](https://github.com/renault-digital/bash-base/compare/v1.5.0...v1.5.1) (2021-05-08)
+
 # [1.5.0](https://github.com/renault-digital/bash-base/compare/v1.4.7...v1.5.0) (2021-05-07)
 
 
