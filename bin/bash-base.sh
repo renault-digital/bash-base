@@ -89,6 +89,7 @@ function args_parse() {
 				possibleValues=", you can select one using wizard if you do not know which value is valid"
 			else
 				prompt="$(reflect_nth_arg 4 "${validCommand}")"
+				possibleValues=""
 			fi
 
 			prompt="$(
@@ -985,6 +986,86 @@ function print_header() {
 }
 
 # @NAME
+#     prc_filter_by_port -- list the process with port listened, not with sudo
+# @SYNOPSIS
+#     prc_filter_by_port [port]
+# @DESCRIPTION
+#     **[port]** optional, the port number, if absent, all process with port listened will be printed
+# @EXAMPLES
+#     prc_filter_by_port 9090
+# @SEE_ALSO
+#     prc_kill_by_port
+function prc_filter_by_port() {
+	if [ $# -eq 0 ]; then
+		lsof -iTCP -sTCP:LISTEN -n -P
+	elif [ $# -eq 1 ]; then
+		lsof -iTCP -sTCP:LISTEN -n -P | grep -i --color "$1"
+	fi
+}
+
+# @NAME
+#     prc_kill_by_port -- kill the process who listening on the specific port, not with sudo
+# @SYNOPSIS
+#     prc_kill_by_port port
+# @DESCRIPTION
+#     **port** the port number
+# @EXAMPLES
+#     prc_kill_by_port 9090
+# @SEE_ALSO
+#     prc_filter_by_port
+function prc_kill_by_port() {
+	if [ $# -eq 1 ]; then
+		lsof -iTCP:"$1" -sTCP:LISTEN -n -P
+		if [[ "$?" -eq 0 ]]; then
+			echo "Start to kill port listener..."
+			lsof -iTCP:"$1" -sTCP:LISTEN -n -P -t | xargs kill -9
+		else
+			echo "No port listener to kill."
+		fi
+	fi
+}
+
+# @NAME
+#     prc_filter_by_cmd -- print out the proccess with the filter of command and its arguments, not with sudo
+# @SYNOPSIS
+#     prc_filter_by_cmd [command]
+# @DESCRIPTION
+#     **[command]** optional, the token of command or arguments, if absent, all process will be printed
+# @EXAMPLES
+#     prc_filter_by_cmd node
+# @SEE_ALSO
+#     prc_kill_by_cmd
+function prc_filter_by_cmd() {
+	if [ $# -eq 0 ]; then
+		ps
+	elif [ $# -eq 1 ]; then
+		ps | awk '{ result=$0; $1=$2=$3=""; if ($4 != "awk" && $0 ~ /'"$1"'/) { print result } }'
+	fi
+}
+
+# @NAME
+#     prc_kill_by_cmd -- search the process by the command and arguments, and kill it, not with sudo
+# @SYNOPSIS
+#     prc_kill_by_cmd command
+# @DESCRIPTION
+#     **command** the token
+# @EXAMPLES
+#     prc_kill_by_cmd my-app
+# @SEE_ALSO
+#     prc_filter_by_cmd
+function prc_kill_by_cmd() {
+	if [ $# -eq 1 ]; then
+		ps | tail -n +2 | awk '{ result=$0; $1=$2=$3=""; if ($4 != "awk" && $0 ~ /'"$1"'/) { print result; rc = 1 } }; END { exit !rc }'
+		if [[ "$?" -eq 0 ]]; then
+			echo "Start to kill command..."
+			ps | tail -n +2 | awk '{ result=$1; $1=$2=$3=""; if ($4 != "awk" && $0 ~ /'"$1"'/) { print result } }' | sort -u | xargs kill -9
+		else
+			echo "No command to kill."
+		fi
+	fi
+}
+
+# @NAME
 #     reflect_nth_arg -- parse a string of arguments, then extract the nth argument
 # @SYNOPSIS
 #     reflect_nth_arg index arguments...
@@ -1489,7 +1570,7 @@ function confirm_to_continue() {
 
 		case "${response}" in
 		[yY][eE][sS] | [yY])
-			echo -e "Starting..."
+			echo -e "Continue..."
 			sleep 1s
 			;;
 		*)
@@ -1498,6 +1579,30 @@ function confirm_to_continue() {
 			;;
 		esac
 	fi
+}
+
+# @NAME
+#     wait_for -- wait the subject predicate to be true before continue
+# @SYNOPSIS
+#     wait_for predicate [subject] [interval]
+# @DESCRIPTION
+#     **predicate** a string of command, used to check is ok or not
+#     **[subject]** optional, the subject name
+#     **[interval]** optional, the interval of number of seconds between the checks, default to 3
+# @EXAMPLES
+#     wait_for 'test -f /tmp/output.txt' 'file existed' 3
+# @SEE_ALSO
+#     confirm_to_continue, stop_if_failed
+function wait_for() {
+	local predicate="${1}"
+	local subject="${2-it}"
+	local interval=${3-3}
+
+	while ! eval "${predicate}"; do
+		print_warn "Waiting for ${subject} to be ok"
+		sleep "${interval}"
+	done
+	print_success "${subject} is ok now."
 }
 
 # @NAME

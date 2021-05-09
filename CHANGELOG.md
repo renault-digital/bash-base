@@ -1,3 +1,15 @@
+# [1.6.0](https://github.com/renault-digital/bash-base/compare/v1.5.1...v1.6.0) (2021-05-09)
+
+
+### Bug Fixes
+
+* fix the generated help usage for args_valid_or_read ([e32f621](https://github.com/renault-digital/bash-base/commit/e32f6216680b40dea46816943454a5b7b2dbb43f))
+
+
+### Features
+
+* add wait_for and process functions ([f86f6a2](https://github.com/renault-digital/bash-base/commit/f86f6a24ac6ceef74f694d6932ba0adbb4a95d90)), closes [#42](https://github.com/renault-digital/bash-base/issues/42)
+
 ## [1.5.1](https://github.com/renault-digital/bash-base/compare/v1.5.0...v1.5.1) (2021-05-08)
 
 # [1.5.0](https://github.com/renault-digital/bash-base/compare/v1.4.7...v1.5.0) (2021-05-07)

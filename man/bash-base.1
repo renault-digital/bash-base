@@ -973,6 +973,112 @@ print_debug
    *   *   *   *   *
 .SS NAME
 .PP
+prc_filter_by_port \[en] list the process with port listened, not with
+sudo
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+prc_filter_by_port [port]
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B][port]\f[R] optional, the port number, if absent, all process with
+port listened will be printed
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+prc_filter_by_port 9090
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+prc_kill_by_port
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
+prc_kill_by_port \[en] kill the process who listening on the specific
+port, not with sudo
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+prc_kill_by_port port
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B]port\f[R] the port number
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+prc_kill_by_port 9090
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+prc_filter_by_port
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
+prc_filter_by_cmd \[en] print out the proccess with the filter of
+command and its arguments, not with sudo
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+prc_filter_by_cmd [command]
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B][command]\f[R] optional, the token of command or arguments, if
+absent, all process will be printed
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+prc_filter_by_cmd node
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+prc_kill_by_cmd
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
+prc_kill_by_cmd \[en] search the process by the command and arguments,
+and kill it, not with sudo
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+prc_kill_by_cmd command
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B]command\f[R] the token
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+prc_kill_by_cmd my-app
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+prc_filter_by_cmd
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
 reflect_nth_arg \[en] parse a string of arguments, then extract the nth
 argument
 .SS SYNOPSIS
@@ -1727,6 +1833,36 @@ confirm_to_continue a b
 .SS SEE_ALSO
 .PP
 print_args, stop_if_failed
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
+wait_for \[en] wait the subject predicate to be true before continue
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+wait_for predicate [subject] [interval]
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B]predicate\f[R] a string of command, used to check is ok or not
+.IP \[bu] 2
+\f[B][subject]\f[R] optional, the subject name
+.IP \[bu] 2
+\f[B][interval]\f[R] optional, the interval of number of seconds between
+the checks, default to 3
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+wait_for \[aq]test -f /tmp/output.txt\[aq] \[aq]file existed\[aq] 3
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+confirm_to_continue, stop_if_failed
 .PP
    *   *   *   *   *
 .SS NAME

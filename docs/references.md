@@ -34,6 +34,10 @@
 - print_success
 - print_args
 - print_header
+- prc_filter_by_port
+- prc_kill_by_port
+- prc_filter_by_cmd
+- prc_kill_by_cmd
 - reflect_nth_arg
 - reflect_get_function_definition
 - reflect_function_names_of_file
@@ -60,6 +64,7 @@
 - string_pick_to_array
 - stop_if_failed
 - confirm_to_continue
+- wait_for
 - declare_heredoc
 
 ### Usage:
@@ -805,6 +810,90 @@ print_error, print_success, print_warn, print_info, print_args, print_debug
 ---
 
 ##### NAME
+prc_filter_by_port -- list the process with port listened, not with sudo
+
+##### SYNOPSIS
+```
+prc_filter_by_port [port]
+```
+
+##### DESCRIPTION
+- **[port]** optional, the port number, if absent, all process with port listened will be printed
+
+##### EXAMPLES
+```
+prc_filter_by_port 9090
+```
+
+##### SEE_ALSO
+prc_kill_by_port
+
+---
+
+##### NAME
+prc_kill_by_port -- kill the process who listening on the specific port, not with sudo
+
+##### SYNOPSIS
+```
+prc_kill_by_port port
+```
+
+##### DESCRIPTION
+- **port** the port number
+
+##### EXAMPLES
+```
+prc_kill_by_port 9090
+```
+
+##### SEE_ALSO
+prc_filter_by_port
+
+---
+
+##### NAME
+prc_filter_by_cmd -- print out the proccess with the filter of command and its arguments, not with sudo
+
+##### SYNOPSIS
+```
+prc_filter_by_cmd [command]
+```
+
+##### DESCRIPTION
+- **[command]** optional, the token of command or arguments, if absent, all process will be printed
+
+##### EXAMPLES
+```
+prc_filter_by_cmd node
+```
+
+##### SEE_ALSO
+prc_kill_by_cmd
+
+---
+
+##### NAME
+prc_kill_by_cmd -- search the process by the command and arguments, and kill it, not with sudo
+
+##### SYNOPSIS
+```
+prc_kill_by_cmd command
+```
+
+##### DESCRIPTION
+- **command** the token
+
+##### EXAMPLES
+```
+prc_kill_by_cmd my-app
+```
+
+##### SEE_ALSO
+prc_filter_by_cmd
+
+---
+
+##### NAME
 reflect_nth_arg -- parse a string of arguments, then extract the nth argument
 
 ##### SYNOPSIS
@@ -1398,6 +1487,29 @@ confirm_to_continue a b
 
 ##### SEE_ALSO
 print_args, stop_if_failed
+
+---
+
+##### NAME
+wait_for -- wait the subject predicate to be true before continue
+
+##### SYNOPSIS
+```
+wait_for predicate [subject] [interval]
+```
+
+##### DESCRIPTION
+- **predicate** a string of command, used to check is ok or not
+- **[subject]** optional, the subject name
+- **[interval]** optional, the interval of number of seconds between the checks, default to 3
+
+##### EXAMPLES
+```
+wait_for 'test -f /tmp/output.txt' 'file existed' 3
+```
+
+##### SEE_ALSO
+confirm_to_continue, stop_if_failed
 
 ---
 
