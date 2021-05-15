@@ -53,7 +53,7 @@ The directory installed is `~/.bash-base`.
 - the man page of version v1.0.2:  `man bash-base.v1.0.2`, 
 - you can import this version in one line in your script:
 ```
-source bash-base.v1.0.2 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- v1.0.2"
+source bash-base.v1.0.2 2>/dev/null || curl -o- -L https://git.io/bash-base/install | bash -s -- v1.0.2"
 ```
 
 
@@ -61,11 +61,11 @@ source bash-base.v1.0.2 2>/dev/null || curl -o- -L https://raw.githubusercontent
 - the man page is: `man bash-base`,
 - and import like this:
 ```
-source bash-base 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash
+source bash-base 2>/dev/null || curl -o- -L https://git.io/bash-base/install | bash
 ```
 or
 ```
-source bash-base 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- latest
+source bash-base 2>/dev/null || curl -o- -L https://git.io/bash-base/install | bash -s -- latest
 ```
 
 ###### Notes:
@@ -75,16 +75,16 @@ if you don't like this behavior, you need to specify a fixed version to use in y
 
 ##### If you want to check all functions of bash-base is compatible with your environment when install, using param `verify` :
 ```
-source bash-base 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- latest verify
+source bash-base 2>/dev/null || curl -o- -L https://git.io/bash-base/install | bash -s -- latest verify
 ```
 or
 ```
-source bash-base 2>/dev/null || curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- v1.0.2 verify
+source bash-base 2>/dev/null || curl -o- -L https://git.io/bash-base/install | bash -s -- v1.0.2 verify
 ```
 
 ##### To uninstall all versions of bash-base from your system:
 ```
-curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- uninstall
+curl -o- -L https://git.io/bash-base/install | bash -s -- uninstall
 ```
 
 
@@ -94,11 +94,11 @@ Simply write in console or script:
 
 If to import latest version:
 ```
-source <(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/master/bin/bash-base.sh)
+source <(curl -fsSL https://git.io/bash-base)
 ```
 or
 ```
-eval "$(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/master/bin/bash-base.sh)"
+eval "$(curl -fsSL https://git.io/bash-base)"
 ```
 
 If to import specific version:

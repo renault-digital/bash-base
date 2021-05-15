@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Import specific version of bash-base directly from github during every execution
-source <(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/master/bin/bash-base.sh)
+source <(curl -fsSL https://git.io/bash-base)
 
 # customize the short description of default help usage
 SHORT_DESC='an example shell script to show how to use bash-base '

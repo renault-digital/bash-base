@@ -44,7 +44,7 @@ else
 		ln -fs "${installDir}"/man/bash-base.1 ${manDir}/bash-base."${version}".1
 		cat >&2 <<-EOF
 			# the man page of this version: 'man bash-base.${version}', and you can import this version in one line in your script:
-			# source bash-base.${version} 2>/dev/null || source <(curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash -s -- ${version})
+			# source bash-base.${version} 2>/dev/null || source <(curl -o- -L https://git.io/bash-base/install | bash -s -- ${version})
 
 		EOF
 
@@ -53,7 +53,7 @@ else
 			ln -fs "${installDir}"/man/bash-base.1 ${manDir}/bash-base.1
 			cat >&2 <<-EOF
 				# if you want always to use the latest version, the man page is: 'man bash-base', and import like this:
-				# source bash-base 2>/dev/null || source <(curl -o- -L https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh | bash)
+				# source bash-base 2>/dev/null || source <(curl -o- -L https://git.io/bash-base/install | bash)
 				# this way, your script will access github to check whether a newer version published during every time it launched.
 				# if you don't like this behavior, you can specify a fixed version to use in your script.
 
