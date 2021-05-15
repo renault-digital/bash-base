@@ -26,8 +26,15 @@ End
 
 
 Describe 'prc_kill_by_port'
-    It '-'
+    It 'signal term'
         func() {  actual=$( nc -l 9999 & prc_kill_by_port 9999 ); }
+        When run func
+        The status should be success
+        The value "${actual}" should include ":9999"
+    End
+
+    It 'signal kill'
+        func() {  actual=$( nc -l 9999 & prc_kill_by_port 9999 9); }
         When run func
         The status should be success
         The value "${actual}" should include ":9999"
@@ -58,8 +65,15 @@ End
 
 
 Describe 'prc_kill_by_cmd'
-    It '-'
+    It 'signal term'
         func() {  actual=$( sleep 10 & prc_kill_by_cmd sleep); }
+        When run func
+        The status should be success
+        The value "${actual}" should include "sleep"
+    End
+
+    It 'signal kill'
+        func() {  actual=$( sleep 10 & prc_kill_by_cmd sleep 9); }
         When run func
         The status should be success
         The value "${actual}" should include "sleep"
