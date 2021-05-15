@@ -1006,12 +1006,15 @@ port, not with sudo
 .IP
 .nf
 \f[C]
-prc_kill_by_port port
+prc_kill_by_port port [signal]
 \f[R]
 .fi
 .SS DESCRIPTION
 .IP \[bu] 2
 \f[B]port\f[R] the port number
+.IP \[bu] 2
+\f[B][signal]\f[R] optional, can be kill signal name or number, default
+to 15-TERM
 .SS EXAMPLES
 .IP
 .nf
@@ -1059,12 +1062,15 @@ and kill it, not with sudo
 .IP
 .nf
 \f[C]
-prc_kill_by_cmd command
+prc_kill_by_cmd command [signal]
 \f[R]
 .fi
 .SS DESCRIPTION
 .IP \[bu] 2
 \f[B]command\f[R] the token
+.IP \[bu] 2
+\f[B][signal]\f[R] optional, can be kill signal name or number, default
+to 15-TERM
 .SS EXAMPLES
 .IP
 .nf

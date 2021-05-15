@@ -835,11 +835,12 @@ prc_kill_by_port -- kill the process who listening on the specific port, not wit
 
 ##### SYNOPSIS
 ```
-prc_kill_by_port port
+prc_kill_by_port port [signal]
 ```
 
 ##### DESCRIPTION
 - **port** the port number
+- **[signal]** optional, can be kill signal name or number, default to 15-TERM
 
 ##### EXAMPLES
 ```
@@ -877,11 +878,12 @@ prc_kill_by_cmd -- search the process by the command and arguments, and kill it,
 
 ##### SYNOPSIS
 ```
-prc_kill_by_cmd command
+prc_kill_by_cmd command [signal]
 ```
 
 ##### DESCRIPTION
 - **command** the token
+- **[signal]** optional, can be kill signal name or number, default to 15-TERM
 
 ##### EXAMPLES
 ```

@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/renault-digital/bash-base/compare/v1.6.0...v1.7.0) (2021-05-15)
+
+
+### Features
+
+* add param to specific the kill signal ([28c4fd4](https://github.com/renault-digital/bash-base/commit/28c4fd4d7516891682f323a97488ab3e63b5c712))
+
 # [1.6.0](https://github.com/renault-digital/bash-base/compare/v1.5.1...v1.6.0) (2021-05-09)
 
 
