@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Import specific version of bash-base using
-source bash-base.v1.0.0 2>/dev/null || source <(curl -o- -L https://git.io/bash-base/install | bash -s -- v1.0.0)
+source bash-base.v1.0.0 2>/dev/null || source <(curl -o- -L https://git.io/bashbase-i | bash -s -- v1.0.0)
 
 # customize the short description of default help usage
 SHORT_DESC='an example shell script to show how to use bash-base '

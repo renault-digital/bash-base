@@ -4,7 +4,7 @@ source src/document.sh
 source src/tool.sh
 source src/reflection.sh
 
-shellScriptFile="bin/bash-base.sh"
+shellScriptFile="bin/bash-base"
 referencesMarkdownFile="docs/references.md"
 referencesManPageFile="man/bash-base.1"
 
