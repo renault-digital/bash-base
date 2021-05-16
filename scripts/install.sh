@@ -20,7 +20,7 @@ else
 
 	installDir=${installDir}/${version}
 
-	if [[ ! -f ${installDir}/bin/bash-base.sh ]]; then
+	if [[ ! -f ${installDir}/bin/bash-base ]]; then
 		echo "# version to install: ${version}" >&2
 
 		mkdir -p "${installDir}"
@@ -37,23 +37,23 @@ else
 			docker run --rm -v "$(pwd)":/bash-base -w /bash-base shellspec/shellspec:0.27-kcov --shell bash spec/*.sh >&2
 		fi
 
-		# transfer file content of bash-base.sh to 'source' command of client script by stdout
-		cat "${installDir}"/bin/bash-base.sh
+		# transfer file content of bash-base to 'source' command of client script by stdout
+		cat "${installDir}"/bin/bash-base
 
-		ln -fs "${installDir}"/bin/bash-base.sh ${binDir}/bash-base."${version}"
+		ln -fs "${installDir}"/bin/bash-base ${binDir}/bash-base."${version}"
 		ln -fs "${installDir}"/man/bash-base.1 ${manDir}/bash-base."${version}".1
 		cat >&2 <<-EOF
 			# the man page of this version: 'man bash-base.${version}', and you can import this version in one line in your script:
-			# source bash-base.${version} 2>/dev/null || source <(curl -o- -L https://git.io/bash-base/install | bash -s -- ${version})
+			# source bash-base.${version} 2>/dev/null || source <(curl -o- -L https://git.io/bashbase-i | bash -s -- ${version})
 
 		EOF
 
 		if [[ -n "${latest}" ]]; then
-			ln -fs "${installDir}"/bin/bash-base.sh ${binDir}/bash-base
+			ln -fs "${installDir}"/bin/bash-base ${binDir}/bash-base
 			ln -fs "${installDir}"/man/bash-base.1 ${manDir}/bash-base.1
 			cat >&2 <<-EOF
 				# if you want always to use the latest version, the man page is: 'man bash-base', and import like this:
-				# source bash-base 2>/dev/null || source <(curl -o- -L https://git.io/bash-base/install | bash)
+				# source bash-base 2>/dev/null || source <(curl -o- -L https://git.io/bashbase-i | bash)
 				# this way, your script will access github to check whether a newer version published during every time it launched.
 				# if you don't like this behavior, you can specify a fixed version to use in your script.
 

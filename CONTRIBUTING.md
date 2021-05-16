@@ -50,7 +50,7 @@ A pull request should remain focused in scope and avoid containing unrelated com
     - Analyser the commit message to decide the new version
     - Generate release note
     - Generate&Update CHANGELOG.md
-    - Generate&Update bin/bash-base.sh from src/*.sh
+    - Generate&Update bin/bash-base from src/*.sh
     - Build docker image
     - Lint man-styled script comment
     - Generate docs/references.md and man/bash-base.1

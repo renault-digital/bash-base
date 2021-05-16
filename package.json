@@ -18,8 +18,8 @@
     "man/",
     "spec/"
   ],
-  "main": "bin/bash-base.sh",
-  "bin": "bin/bash-base.sh",
+  "main": "bin/bash-base",
+  "bin": "bin/bash-base",
   "man": "man/bash-base.1",
   "directories": {
     "doc": "docs",

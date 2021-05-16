@@ -2,7 +2,7 @@
 
 # This script is mainly for integration test manually after modification
 npm run build
-source "$(dirname "$0")/../bin/bash-base.sh"
+source "$(dirname "$0")/../bin/bash-base"
 
 # customize the short description of default help usage
 SHORT_DESC='an example shell script to show how to use bash-base '

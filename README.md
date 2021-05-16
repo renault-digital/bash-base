@@ -18,12 +18,17 @@ No more spending time searching the special ways of bash for basic operations li
 
 Bash-base does this for you, you can just call the function here which is well tested and stable, and only focus you on the high level logic. Writing your script with less time, but more readability.
 
-Available on [github](https://github.com/renault-digital/bash-base), [npm](https://www.npmjs.com/package/@renault-digital/bash-base) and [dockerhub](https://hub.docker.com/r/renaultdigital/bash-base), see [usage](docs/USAGE.md).
+Available on [GitHub](https://github.com/renault-digital/bash-base), [NPM](https://www.npmjs.com/package/@renault-digital/bash-base) and [Docker Hub](https://hub.docker.com/r/renaultdigital/bash-base).
+
+
+## Test coverage report
+[![test coverage](https://codecov.io/gh/renault-digital/bash-base/graphs/tree.svg)](https://codecov.io/gh/renault-digital/bash-base)
+
 
 ## Quick start
 
 Creat a sample script `example_docker.sh` with the following content:
-```shell
+```bash
 #!/usr/bin/env bash
 
 source <(docker run renaultdigital/bash-base)
@@ -43,7 +48,7 @@ print_success "Hello $sex $(string_upper_first "$firstName"), you are in $countr
 ```
 
 Assign the `execute` right to it:
-```
+```bash
 chmod +x example_docker.sh
 ```
 
@@ -54,29 +59,184 @@ Run it:
 ![run.gif](docs/run.gif)
 
 
-## [Test coverage report](https://codecov.io/gh/renault-digital/bash-base)
-![test coverage](https://codecov.io/gh/renault-digital/bash-base/graphs/tree.svg)
-![test coverage](https://camo.githubusercontent.com/7070235e235fd6c26427496dd2958704df132b2229631b8bc8bb5af13d0e5ec2/68747470733a2f2f636f6465636f762e696f2f67682f72656e61756c742d6469676974616c2f626173682d626173652f6772617068732f747265652e737667)
+## Installation
 
-----
+#### 1. Import from [docker hub](https://hub.docker.com/r/renaultdigital/bash-base)
 
-## Table of Contents <!-- omit in toc -->
+```bash
+# One line to import & download if not yet:
+source <(docker run --rm renaultdigital/bash-base)
+```
+<details>
+<summary>Others</summary>
 
-- [Goal](#goal)
-- [Quick start](#quick-start)
-- [Test coverage report](#test-coverage-report)
-- [Installation](#installation)
-    - [Web installer (for developers)](#web-installer-for-developers)
-    - [Package manager](#package-manager)
-    - [Manual installation](#manual-installation)
-    - [Distribution archive (runtime only)](#distribution-archive-runtime-only)
+```bash
+# To specify a version
+source <(docker run --rm renaultdigital/bash-base:1.0.2)
+# Update or uninstall
+docker rmi -f renaultdigital/bash-base
+```
+</details>
 
 
-- [Examples](example)
-- [Functions reference](docs/references.md)
-- [Specfile (test file)](spec)
-- [Latest Update](CHANGELOG.md)
-- [How to contribute](CONTRIBUTING.md)
+#### 2. Install from [NPM](https://www.npmjs.com/package/@renault-digital/bash-base)
+
+```bash
+# Install the latest
+npm i -g @renault-digital/bash-base
+```
+<details>
+<summary>Others</summary>
+
+```bash
+# To specify a version
+npm i @renault-digital/bash-base@1.6.0
+# One line to import & install if not yet:
+source bash-base 2>/dev/null || npm i -g @renault-digital/bash-base && source bash-base
+# Verify the installation
+man bash-base
+# Uninstall
+npm uninstall -g @renault-digital/bash-base
+```
+</details>
+
+
+#### 3. Install with [basher](https://github.com/basherpm/basher)
+
+```bash
+# Install from master branch
+basher install renault-digital/bash-base
+```
+<details>
+<summary>Others</summary>
+
+- The officially supported version is bash-base **v2.0.0** and later.
+```bash
+# To specify a version
+basher install renault-digital/bash-base@v1.0.2
+# Verify the installation
+man bash-base
+# Uninstall
+basher uninstall renault-digital/bash-base
+```
+</details>
+
+
+#### 4. Web installer
+
+```bash
+# Install the latest
+curl -fsSL https://git.io/bashbase-i | bash
+```
+<details>
+<summary>Others</summary>
+
+- The directory installed is `~/.bash-base`.
+- `https://git.io/bashbase-i` is redirected to [install.sh](https://github.com/renault-digital/bash-base/raw/master/scripts/install.sh)
+- this way, your script will access github to check whether a newer version published each time it launched.
+  For CI, it is recommended to use a specific version to avoid unexpected failures.
+```bash
+# or with wget
+wget -O- https://git.io/bashbase-i | bash
+# Verify the installation
+man bash-base
+# Uninstall all versions
+curl -fsSL https://git.io/bashbase-i | bash -s uninstall
+```
+
+To specify a version:
+```bash
+curl -fsSL https://git.io/bashbase-i | bash -s v1.0.2
+# Verify the installation
+man bash-base.v1.0.2
+```
+
+Check if all functions of bash-base is compatible with current environment when install:
+```bash
+curl -fsSL https://git.io/bashbase-i | bash -s latest verify
+curl -fsSL https://git.io/bashbase-i | bash -s v1.0.2 verify
+```
+
+One line to import & install if not yet:
+```bash
+source bash-base 2>/dev/null || curl -fsSL https://git.io/bashbase-i | bash
+source bash-base 2>/dev/null || curl -fsSL https://git.io/bashbase-i | bash -s latest verify
+
+source bash-base.v1.0.2 2>/dev/null || curl -fsSL https://git.io/bashbase-i | bash -s v1.0.2
+source bash-base.v1.0.2 2>/dev/null || curl -fsSL https://git.io/bashbase-i | bash -s v1.0.2 verify
+```
+
+</details>
+
+
+#### 5. Import from GitHub, no install
+
+```bash
+# Import latest version:
+source <(curl -fsSL https://git.io/bashbase)
+```
+<details>
+<summary>Others</summary>
+
+- This way, your script need to access GitHub each time it launched.
+```bash
+# or with eval
+eval "$(curl -fsSL https://git.io/bashbase)"
+# To specify a version
+source <(curl -fsSL https://raw.githubusercontent.com/renault-digital/bash-base/v1.0.2/bin/bash-base)
+# Verify the import
+string_trim ' hello '
+```
+</details>
+
+
+#### 6. Download archive
+
+See [GitHub releases](https://github.com/renault-digital/bash-base/releases) or [NPM tarball URLs](https://registry.npmjs.org/@renault-digital/bash-base)
+  
+
+## How to config
+
+#### 1. LOG_LEVEL
+```
+LOG_LEVEL=$LOG_LEVEL_INFO
+```
+override this default value in your script if you want to change the log level, the possible values are:
+
+- LOG_LEVEL_ERROR=4
+- LOG_LEVEL_WARN=3
+- LOG_LEVEL_INFO=2
+- LOG_LEVEL_DEBUG=1
+
+
+#### 2. SHORT_DESC
+```
+SHORT_DESC='a bash script using bash-base'
+```
+redefine it to show your script short description in the 'NAME' field of generated -h response
+
+
+#### 3. USAGE
+```
+USAGE=''
+```
+redefine it in your script only if the generated -h response is not good for you
+
+
+## Other Examples
+See [example](example) folder
+
+## Useful functions list
+See [reference](docs/references.md)
+
+## Specfile (test file)
+See [spec](spec) folder
+
+## Latest Update
+See [change log](CHANGELOG.md)
+
+## Contributing
+See [How to contribute](CONTRIBUTING.md)
 
 ## License
 [MIT](https://opensource.org/licenses/MIT).
