@@ -18,6 +18,8 @@ No more spending time searching the special ways of bash for basic operations li
 
 Bash-base does this for you, you can just call the function here which is well tested and stable, and only focus you on the high level logic. Writing your script with less time, but more readability.
 
+Available on [github](https://github.com/renault-digital/bash-base), [npm](https://www.npmjs.com/package/@renault-digital/bash-base) and [dockerhub](https://hub.docker.com/r/renaultdigital/bash-base), see [usage](docs/USAGE.md).
+
 ## Quick start
 
 Creat a sample script `example_docker.sh` with the following content:
@@ -51,22 +53,30 @@ Print the generated help usage with the option `-h`:
 Run it:
 ![run.gif](docs/run.gif)
 
-Available on [github](https://github.com/renault-digital/bash-base), [npm](https://www.npmjs.com/package/@renault-digital/bash-base) and [dockerhub](https://hub.docker.com/r/renaultdigital/bash-base), see [other ways of usage](docs/USAGE.md).
 
-## Example
-See [example](example) folder
+## [Test coverage report](https://codecov.io/gh/renault-digital/bash-base)
+![test coverage](https://codecov.io/gh/renault-digital/bash-base/graphs/tree.svg)
+![test coverage](https://camo.githubusercontent.com/7070235e235fd6c26427496dd2958704df132b2229631b8bc8bb5af13d0e5ec2/68747470733a2f2f636f6465636f762e696f2f67682f72656e61756c742d6469676974616c2f626173682d626173652f6772617068732f747265652e737667)
 
-## Reference
-See [reference](docs/references.md)
+----
 
-## Specification
-See [spec](spec) folder
+## Table of Contents <!-- omit in toc -->
 
-## Latest Update
-See [CHANGELOG.md](CHANGELOG.md)
+- [Goal](#goal)
+- [Quick start](#quick-start)
+- [Test coverage report](#test-coverage-report)
+- [Installation](#installation)
+    - [Web installer (for developers)](#web-installer-for-developers)
+    - [Package manager](#package-manager)
+    - [Manual installation](#manual-installation)
+    - [Distribution archive (runtime only)](#distribution-archive-runtime-only)
 
-## Contributing
-See [How to contribute](CONTRIBUTING.md)
+
+- [Examples](example)
+- [Functions reference](docs/references.md)
+- [Specfile (test file)](spec)
+- [Latest Update](CHANGELOG.md)
+- [How to contribute](CONTRIBUTING.md)
 
 ## License
 [MIT](https://opensource.org/licenses/MIT).
