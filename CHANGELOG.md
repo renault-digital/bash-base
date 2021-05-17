@@ -1,3 +1,15 @@
+# [2.0.0](https://github.com/renault-digital/bash-base/compare/v1.7.0...v2.0.0) (2021-05-17)
+
+
+### Documentation
+
+* add basher install ([f4772f3](https://github.com/renault-digital/bash-base/commit/f4772f3f476d93207550c4f6ff5cacbeffa202c8))
+
+
+### BREAKING CHANGES
+
+* rename bin/bash-base.sh to bin/bash-base for basher
+
 # [1.7.0](https://github.com/renault-digital/bash-base/compare/v1.6.0...v1.7.0) (2021-05-15)
 
 

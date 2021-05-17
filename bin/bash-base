@@ -999,7 +999,7 @@ function prc_filter_by_port() {
 	if [ $# -eq 0 ]; then
 		lsof -iTCP -sTCP:LISTEN -n -P
 	elif [ $# -eq 1 ]; then
-		lsof -iTCP -sTCP:LISTEN -n -P | grep -i --color "$1"
+		lsof -iTCP -sTCP:LISTEN -n -P | grep -i --color ":$1"
 	fi
 }
 
@@ -1020,7 +1020,7 @@ function prc_kill_by_port() {
 
 	lsof -iTCP:"${port}" -sTCP:LISTEN -n -P
 	if [[ "$?" -eq 0 ]]; then
-		echo "Start to kill port listener..."
+		echo "Start to kill port listener by signal ${signal}..."
 		lsof -iTCP:"${port}" -sTCP:LISTEN -n -P -t | xargs kill -"${signal}"
 	else
 		echo "No port listener to kill."
@@ -1062,7 +1062,7 @@ function prc_kill_by_cmd() {
 
 	ps | tail -n +2 | awk '{ result=$0; $1=$2=$3=""; if ($4 != "awk" && $0 ~ /'"${cmd}"'/) { print result; rc = 1 } }; END { exit !rc }'
 	if [[ "$?" -eq 0 ]]; then
-		echo "Start to kill command..."
+		echo "Start to kill command by signal ${signal}..."
 		ps | tail -n +2 | awk '{ result=$1; $1=$2=$3=""; if ($4 != "awk" && $0 ~ /'"${cmd}"'/) { print result } }' | sort -u | xargs kill -"${signal}"
 	else
 		echo "No command to kill."
