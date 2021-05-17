@@ -32,19 +32,14 @@ Creat a sample script `example_docker.sh` with the following content:
 #!/usr/bin/env bash
 
 source <(docker run renaultdigital/bash-base)
-
 SHORT_DESC='an example shell script to show how to use bash-base '
 
-args_parse $# "$@" firstName age sex country
+args_parse $# "$@" firstName sex
 args_valid_or_read firstName '^[A-Za-z ]{2,}$' "Your first name (only letters)"
-args_valid_or_read age '^[0-9]{1,2}$' "Your age (maxim 2 digits))"
 args_valid_or_select_pipe sex 'Mr.|Mrs' "Your sex"
 
-response=$(curl -sS 'https://restcountries.eu/rest/v2/regionalbloc/eu' --compressed)
-string_pick_to_array '{"name":"' '","topLevelDomain' countryNames "$response"
-args_valid_or_select country countryNames "Which country"
-
-print_success "Hello $sex $(string_upper_first "$firstName"), you are in $country, and your age is $age, nice to meet you."
+confirm_to_continue firstName sex
+print_success "Hello $sex $(string_upper_first "$firstName"), nice to meet you."
 ```
 
 Assign the `execute` right to it:
@@ -52,11 +47,8 @@ Assign the `execute` right to it:
 chmod +x example_docker.sh
 ```
 
-Print the generated help usage with the option `-h`:
-![help.gif](docs/help.gif)
-
 Run it:
-![run.gif](docs/run.gif)
+![example-docker.gif](docs/example-docker.gif)
 
 
 ## Installation
