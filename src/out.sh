@@ -101,7 +101,7 @@ function print_args() {
 		local varName varValue varValueOutput
 		for varName in "$@"; do
 			varValue=$(eval echo '$'"${varName}")
-			varValueOutput=$([[ -z "${varValue}" ]] && print_error "<NULL>" || echo "${COLOR_BLUE}${varValue}${COLOR_END}")
+			varValueOutput=$([[ -z "${varValue}" ]] && echo "<EMPTY>" || echo "${COLOR_BLUE}${varValue}${COLOR_END}")
 			printf "%-30.30s%s\n" "${varName}:" "${varValueOutput}"
 		done
 	fi
