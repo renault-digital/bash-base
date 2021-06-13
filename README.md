@@ -221,11 +221,11 @@ USAGE=''
 redefine it in your script only if the generated response for <mark>**-h**</mark> argument is not good for you.
 
 
-## Other Examples
-See [example](example) folder
-
-## Useful functions list
+## All Functions
 See [reference](docs/references.md)
+
+## Usage Examples
+See [example](example) folder, including the use case of <mark>**[Makefile](example/Makefile)**</mark>
 
 ## Specfile (test file)
 See [spec](spec) folder
