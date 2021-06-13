@@ -2,10 +2,10 @@
 
 source src/constant.sh
 
-LOG_LEVEL=$LOG_LEVEL_INFO # override this default value in your script if you want to change the log level.
+LOG_LEVEL=${LOG_LEVEL:-$LOG_LEVEL_INFO} # the default value INFO will be used if no config existed
 
 # @NAME
-#     print_info -- print the information message with font color gray
+#     print_info -- if LOG_LEVEL<=$LOG_LEVEL_DEBUG, print the information message with font color gray
 # @SYNOPSIS
 #     print_info [string]
 # @DESCRIPTION
@@ -21,7 +21,7 @@ function print_debug() {
 }
 
 # @NAME
-#     print_info -- print the information message with font color default
+#     print_info -- if LOG_LEVEL<=$LOG_LEVEL_INFO, print the information message with font color default
 # @SYNOPSIS
 #     print_info [string]
 # @DESCRIPTION
@@ -37,7 +37,7 @@ function print_info() {
 }
 
 # @NAME
-#     print_warn -- print the warning message with prefix 'WARN:' and font color yellow
+#     print_warn -- if LOG_LEVEL<=$LOG_LEVEL_WARN, print the warning message with prefix 'WARN:' and font color yellow
 # @SYNOPSIS
 #     print_warn [string]
 # @DESCRIPTION
@@ -53,7 +53,7 @@ function print_warn() {
 }
 
 # @NAME
-#     print_error -- print the error message with prefix 'ERROR:' and font color red
+#     print_error -- if LOG_LEVEL<=$LOG_LEVEL_ERROR, print the error message with prefix 'ERROR:' and font color red
 # @SYNOPSIS
 #     print_error [string]
 # @DESCRIPTION
@@ -69,7 +69,7 @@ function print_error() {
 }
 
 # @NAME
-#     print_success -- print the success message with prefix 'OK:' and font color green
+#     print_success -- if LOG_LEVEL<=$LOG_LEVEL_WARN, print the success message with prefix 'OK:' and font color green
 # @SYNOPSIS
 #     print_success [string]
 # @DESCRIPTION
@@ -85,7 +85,7 @@ function print_success() {
 }
 
 # @NAME
-#     print_args -- show the name and value of variables
+#     print_args -- if LOG_LEVEL<=$LOG_LEVEL_WARN, show the name and value of variables
 # @SYNOPSIS
 #     print_args variableName...
 # @DESCRIPTION
@@ -108,7 +108,7 @@ function print_args() {
 }
 
 # @NAME
-#     print_header -- print the header value with prefix '\n###' and bold font
+#     print_header -- if LOG_LEVEL<=$LOG_LEVEL_ERROR, print the header value with prefix '\n###' and bold font
 # @SYNOPSIS
 #     print_header [string]
 # @DESCRIPTION
