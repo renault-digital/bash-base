@@ -778,7 +778,8 @@ doc_lint_script_comment
    *   *   *   *   *
 .SS NAME
 .PP
-print_info \[en] print the information message with font color gray
+print_info \[en] if LOG_LEVEL<=$LOG_LEVEL_DEBUG, print the information
+message with font color gray
 .SS SYNOPSIS
 .IP
 .nf
@@ -805,7 +806,8 @@ print_info
    *   *   *   *   *
 .SS NAME
 .PP
-print_info \[en] print the information message with font color default
+print_info \[en] if LOG_LEVEL<=$LOG_LEVEL_INFO, print the information
+message with font color default
 .SS SYNOPSIS
 .IP
 .nf
@@ -832,8 +834,8 @@ print_debug
    *   *   *   *   *
 .SS NAME
 .PP
-print_warn \[en] print the warning message with prefix `WARN:' and font
-color yellow
+print_warn \[en] if LOG_LEVEL<=$LOG_LEVEL_WARN, print the warning
+message with prefix `WARN:' and font color yellow
 .SS SYNOPSIS
 .IP
 .nf
@@ -860,8 +862,8 @@ print_debug
    *   *   *   *   *
 .SS NAME
 .PP
-print_error \[en] print the error message with prefix `ERROR:' and font
-color red
+print_error \[en] if LOG_LEVEL<=$LOG_LEVEL_ERROR, print the error
+message with prefix `ERROR:' and font color red
 .SS SYNOPSIS
 .IP
 .nf
@@ -888,8 +890,8 @@ print_debug
    *   *   *   *   *
 .SS NAME
 .PP
-print_success \[en] print the success message with prefix `OK:' and font
-color green
+print_success \[en] if LOG_LEVEL<=$LOG_LEVEL_WARN, print the success
+message with prefix `OK:' and font color green
 .SS SYNOPSIS
 .IP
 .nf
@@ -916,7 +918,8 @@ print_debug
    *   *   *   *   *
 .SS NAME
 .PP
-print_args \[en] show the name and value of variables
+print_args \[en] if LOG_LEVEL<=$LOG_LEVEL_WARN, show the name and value
+of variables
 .SS SYNOPSIS
 .IP
 .nf
@@ -945,8 +948,8 @@ print_debug
    *   *   *   *   *
 .SS NAME
 .PP
-print_header \[en] print the header value with prefix \[cq] ###\[cq] and
-bold font
+print_header \[en] if LOG_LEVEL<=$LOG_LEVEL_ERROR, print the header
+value with prefix \[cq] ###\[cq] and bold font
 .SS SYNOPSIS
 .IP
 .nf

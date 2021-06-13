@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/renault-digital/bash-base/compare/v2.0.2...v2.1.0) (2021-06-13)
+
+
+### Features
+
+* use default value INFO only if absent for LOG_LEVEL ([9eb6ae1](https://github.com/renault-digital/bash-base/commit/9eb6ae1a35c3bf37d109e9bf581da4d28d34c7d3))
+
 ## [2.0.2](https://github.com/renault-digital/bash-base/compare/v2.0.1...v2.0.2) (2021-06-13)
 
 ## [2.0.1](https://github.com/renault-digital/bash-base/compare/v2.0.0...v2.0.1) (2021-05-17)

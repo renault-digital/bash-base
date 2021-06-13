@@ -660,7 +660,7 @@ doc_lint_script_comment
 ---
 
 ##### NAME
-print_info -- print the information message with font color gray
+print_info -- if LOG_LEVEL<=$LOG_LEVEL_DEBUG, print the information message with font color gray
 
 ##### SYNOPSIS
 ```
@@ -681,7 +681,7 @@ print_header, print_error, print_success, print_warn, print_args, print_info
 ---
 
 ##### NAME
-print_info -- print the information message with font color default
+print_info -- if LOG_LEVEL<=$LOG_LEVEL_INFO, print the information message with font color default
 
 ##### SYNOPSIS
 ```
@@ -702,7 +702,7 @@ print_header, print_error, print_success, print_warn, print_args, print_debug
 ---
 
 ##### NAME
-print_warn -- print the warning message with prefix 'WARN:' and font color yellow
+print_warn -- if LOG_LEVEL<=$LOG_LEVEL_WARN, print the warning message with prefix 'WARN:' and font color yellow
 
 ##### SYNOPSIS
 ```
@@ -723,7 +723,7 @@ print_header, print_error, print_success, print_info, print_args, print_debug
 ---
 
 ##### NAME
-print_error -- print the error message with prefix 'ERROR:' and font color red
+print_error -- if LOG_LEVEL<=$LOG_LEVEL_ERROR, print the error message with prefix 'ERROR:' and font color red
 
 ##### SYNOPSIS
 ```
@@ -744,7 +744,7 @@ print_header, print_success, print_warn, print_info, print_args, print_debug
 ---
 
 ##### NAME
-print_success -- print the success message with prefix 'OK:' and font color green
+print_success -- if LOG_LEVEL<=$LOG_LEVEL_WARN, print the success message with prefix 'OK:' and font color green
 
 ##### SYNOPSIS
 ```
@@ -765,7 +765,7 @@ print_header, print_error, print_warn, print_info, print_args, print_debug
 ---
 
 ##### NAME
-print_args -- show the name and value of variables
+print_args -- if LOG_LEVEL<=$LOG_LEVEL_WARN, show the name and value of variables
 
 ##### SYNOPSIS
 ```
@@ -788,7 +788,7 @@ print_header, print_error, print_success, print_warn, print_info, print_debug
 ---
 
 ##### NAME
-print_header -- print the header value with prefix '
+print_header -- if LOG_LEVEL<=$LOG_LEVEL_ERROR, print the header value with prefix '
 ###' and bold font
 
 ##### SYNOPSIS
