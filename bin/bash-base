@@ -152,7 +152,7 @@ function args_parse() {
 #     varEmpty=""
 #     args_valid_or_select varEmpty arr "Which app"
 # @SEE_ALSO
-#     args_valid_or_select_pipe, args_valid_or_read
+#     args_valid_or_select_pipe, args_valid_or_read, args_valid_or_default
 function args_valid_or_select() {
 	local valueVarName validValuesVarName prompt value validValues PS3
 	valueVarName="${1}"
@@ -187,7 +187,7 @@ function args_valid_or_select() {
 #     sel="abc"
 #     args_valid_or_select_pipe sel "a|ab|d" "which value"
 # @SEE_ALSO
-#     args_valid_or_select, args_valid_or_select_args, args_valid_or_read
+#     args_valid_or_select, args_valid_or_select_args, args_valid_or_read, args_valid_or_default
 function args_valid_or_select_pipe() {
 	local valueVarName validValues prompt newArray
 	valueVarName="${1}"
@@ -210,7 +210,7 @@ function args_valid_or_select_pipe() {
 #     sel="abc"
 #     args_valid_or_select_args sel "which value" "a" "ab" "d"
 # @SEE_ALSO
-#     args_valid_or_select, args_valid_or_select_pipe, args_valid_or_read
+#     args_valid_or_select, args_valid_or_select_pipe, args_valid_or_read, args_valid_or_default
 function args_valid_or_select_args() {
 	local valueVarName value prompt PS3
 	valueVarName="${1}"
@@ -245,7 +245,7 @@ function args_valid_or_select_args() {
 #     args_valid_or_read destProjectIRN '^[0-9]{5,5}$' "IRN (only the 5 digits)"
 #     args_valid_or_read destRootPackage '^.+$' "Destination root package" "${defaultDestRootPackage}"
 # @SEE_ALSO
-#     args_valid_or_select, args_valid_or_select_args, args_valid_or_select_pipe
+#     args_valid_or_select, args_valid_or_select_args, args_valid_or_select_pipe, args_valid_or_default
 function args_valid_or_read() {
 	local value regExp prompt proposedValue
 	value=$(eval eval "echo '$'$1")
@@ -266,6 +266,39 @@ function args_valid_or_read() {
 			value="${proposedValue}"
 		fi
 	done
+	eval "${1}='${value}'"
+	printf "Inputted value: ${COLOR_BLUE}'%s'${COLOR_END}\n" "$(eval echo '$'"${1}")"
+}
+
+# @NAME
+#     args_valid_or_default -- designed for optional params, test whether the value matched the valid regular expression, if not matched, fallback to empty or default value
+# @SYNOPSIS
+#     args_valid_or_default valueVarName strRegExp prompt [defaultValue]
+# @DESCRIPTION
+#     **valueVarName** the variable name of the value to valid and the new value assign to,
+#     **strRegExp** a string of regular expression to be used for validation
+#     **prompt** the description of the argument in generated help usage
+#     **[defaultValue]** optional, the default value to fallback on
+# @EXAMPLES
+#     args_valid_or_default destProjectSIA '^[0-9a-z]{3,3}$' "SIA (lowercase, 3 chars)"
+#     args_valid_or_default destProjectIRN '^[0-9]{5,5}$' "IRN (only the 5 digits)"
+#     args_valid_or_default destRootPackage '^.+$' "Destination root package" "${defaultDestRootPackage}"
+# @SEE_ALSO
+#     args_valid_or_select, args_valid_or_select_args, args_valid_or_select_pipe, args_valid_or_read
+function args_valid_or_default() {
+	local value regExp prompt defaultValue
+	value=$(eval eval "echo '$'$1")
+	regExp=${2}
+	prompt="${3}"
+	defaultValue="${4}"
+
+	if [[ -z "${value}" || ! ${value} =~ ${regExp} ]]; then
+		prompt="for param ${1}:"
+		[[ -n "${value}" ]] && prompt+=" the input '${value}' is not valid" || prompt+=" no input"
+		[[ -n "${defaultValue}" ]] && prompt+=", fallback to default value '${defaultValue}'" || prompt+=", fallback to empty"
+		print_warn "${prompt}"
+		value="${defaultValue}"
+	fi
 	eval "${1}='${value}'"
 	printf "Inputted value: ${COLOR_BLUE}'%s'${COLOR_END}\n" "$(eval echo '$'"${1}")"
 }

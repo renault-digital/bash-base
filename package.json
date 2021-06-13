@@ -1,6 +1,6 @@
 {
   "name": "@renault-digital/bash-base",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "A common lib for creating bash script easily.",
   "private": false,
   "publishConfig": {

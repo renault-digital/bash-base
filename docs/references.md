@@ -7,6 +7,7 @@
 - args_valid_or_select_pipe
 - args_valid_or_select_args
 - args_valid_or_read
+- args_valid_or_default
 - array_join
 - array_describe
 - array_from_describe
@@ -112,7 +113,7 @@ args_valid_or_select varEmpty arr "Which app"
 ```
 
 ##### SEE_ALSO
-args_valid_or_select_pipe, args_valid_or_read
+args_valid_or_select_pipe, args_valid_or_read, args_valid_or_default
 
 ---
 
@@ -136,7 +137,7 @@ args_valid_or_select_pipe sel "a|ab|d" "which value"
 ```
 
 ##### SEE_ALSO
-args_valid_or_select, args_valid_or_select_args, args_valid_or_read
+args_valid_or_select, args_valid_or_select_args, args_valid_or_read, args_valid_or_default
 
 ---
 
@@ -160,7 +161,7 @@ args_valid_or_select_args sel "which value" "a" "ab" "d"
 ```
 
 ##### SEE_ALSO
-args_valid_or_select, args_valid_or_select_pipe, args_valid_or_read
+args_valid_or_select, args_valid_or_select_pipe, args_valid_or_read, args_valid_or_default
 
 ---
 
@@ -186,7 +187,33 @@ args_valid_or_read destRootPackage '^.+$' "Destination root package" "${defaultD
 ```
 
 ##### SEE_ALSO
-args_valid_or_select, args_valid_or_select_args, args_valid_or_select_pipe
+args_valid_or_select, args_valid_or_select_args, args_valid_or_select_pipe, args_valid_or_default
+
+---
+
+##### NAME
+args_valid_or_default -- designed for optional params, test whether the value matched the valid regular expression, if not matched, fallback to empty or default value
+
+##### SYNOPSIS
+```
+args_valid_or_default valueVarName strRegExp prompt [defaultValue]
+```
+
+##### DESCRIPTION
+- **valueVarName** the variable name of the value to valid and the new value assign to,
+- **strRegExp** a string of regular expression to be used for validation
+- **prompt** the description of the argument in generated help usage
+- **[defaultValue]** optional, the default value to fallback on
+
+##### EXAMPLES
+```
+args_valid_or_default destProjectSIA '^[0-9a-z]{3,3}$' "SIA (lowercase, 3 chars)"
+args_valid_or_default destProjectIRN '^[0-9]{5,5}$' "IRN (only the 5 digits)"
+args_valid_or_default destRootPackage '^.+$' "Destination root package" "${defaultDestRootPackage}"
+```
+
+##### SEE_ALSO
+args_valid_or_select, args_valid_or_select_args, args_valid_or_select_pipe, args_valid_or_read
 
 ---
 

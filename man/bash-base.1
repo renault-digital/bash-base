@@ -62,7 +62,7 @@ args_valid_or_select varEmpty arr \[dq]Which app\[dq]
 .fi
 .SS SEE_ALSO
 .PP
-args_valid_or_select_pipe, args_valid_or_read
+args_valid_or_select_pipe, args_valid_or_read, args_valid_or_default
 .PP
    *   *   *   *   *
 .SS NAME
@@ -96,7 +96,8 @@ args_valid_or_select_pipe sel \[dq]a|ab|d\[dq] \[dq]which value\[dq]
 .fi
 .SS SEE_ALSO
 .PP
-args_valid_or_select, args_valid_or_select_args, args_valid_or_read
+args_valid_or_select, args_valid_or_select_args, args_valid_or_read,
+args_valid_or_default
 .PP
    *   *   *   *   *
 .SS NAME
@@ -131,7 +132,8 @@ args_valid_or_select_args sel \[dq]which value\[dq] \[dq]a\[dq] \[dq]ab\[dq] \[d
 .fi
 .SS SEE_ALSO
 .PP
-args_valid_or_select, args_valid_or_select_pipe, args_valid_or_read
+args_valid_or_select, args_valid_or_select_pipe, args_valid_or_read,
+args_valid_or_default
 .PP
    *   *   *   *   *
 .SS NAME
@@ -171,7 +173,45 @@ args_valid_or_read destRootPackage \[aq]\[ha].+$\[aq] \[dq]Destination root pack
 .SS SEE_ALSO
 .PP
 args_valid_or_select, args_valid_or_select_args,
-args_valid_or_select_pipe
+args_valid_or_select_pipe, args_valid_or_default
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
+args_valid_or_default \[en] designed for optional params, test whether
+the value matched the valid regular expression, if not matched, fallback
+to empty or default value
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+args_valid_or_default valueVarName strRegExp prompt [defaultValue]
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B]valueVarName\f[R] the variable name of the value to valid and the
+new value assign to,
+.IP \[bu] 2
+\f[B]strRegExp\f[R] a string of regular expression to be used for
+validation
+.IP \[bu] 2
+\f[B]prompt\f[R] the description of the argument in generated help usage
+.IP \[bu] 2
+\f[B][defaultValue]\f[R] optional, the default value to fallback on
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+args_valid_or_default destProjectSIA \[aq]\[ha][0-9a-z]{3,3}$\[aq] \[dq]SIA (lowercase, 3 chars)\[dq]
+args_valid_or_default destProjectIRN \[aq]\[ha][0-9]{5,5}$\[aq] \[dq]IRN (only the 5 digits)\[dq]
+args_valid_or_default destRootPackage \[aq]\[ha].+$\[aq] \[dq]Destination root package\[dq] \[dq]${defaultDestRootPackage}\[dq]
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+args_valid_or_select, args_valid_or_select_args,
+args_valid_or_select_pipe, args_valid_or_read
 .PP
    *   *   *   *   *
 .SS NAME
