@@ -367,3 +367,48 @@ Describe args_valid_or_read
         The output should eq "Inputted value: ${COLOR_BLUE}'70033'${COLOR_END}"
     End
 End
+
+
+Describe args_valid_or_default
+    It 'the value is unset'
+        When call eval "args_valid_or_default irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' | grep 'Inputted'"
+        The output should eq "Inputted value: ${COLOR_BLUE}''${COLOR_END}"
+        The error should eq ""
+    End
+
+    It 'the value is empty'
+        irn=""
+        When call eval "args_valid_or_default irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' | grep 'Inputted'"
+        The output should eq "Inputted value: ${COLOR_BLUE}''${COLOR_END}"
+    End
+
+    It "the value is not valid"
+        irn="225"
+        When call eval "args_valid_or_default irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' | grep 'Inputted'"
+        The output should eq "Inputted value: ${COLOR_BLUE}''${COLOR_END}"
+    End
+
+    It "the value is valid"
+        irn="70033"
+        When call eval "args_valid_or_default irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)'"
+        The variable irn should eq "70033"
+        The output should eq "Inputted value: ${COLOR_BLUE}'70033'${COLOR_END}"
+    End
+
+    It 'take proposedValue when the value is unset'
+        When call eval "args_valid_or_default irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' 70088 | grep 'Inputted'"
+        The output should eq "Inputted value: ${COLOR_BLUE}'70088'${COLOR_END}"
+    End
+
+    It 'take proposedValue when the value is empty'
+        irn=""
+        When call eval "args_valid_or_default irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' 70088 | grep 'Inputted'"
+        The output should eq "Inputted value: ${COLOR_BLUE}'70088'${COLOR_END}"
+    End
+
+    It 'not take proposedValue when value is valid'
+        irn="70033"
+        When call eval "args_valid_or_default irn '^[0-9]{5,5}$' 'IRN (only the 5 digits)' 70088 | grep 'Inputted'"
+        The output should eq "Inputted value: ${COLOR_BLUE}'70033'${COLOR_END}"
+    End
+End
