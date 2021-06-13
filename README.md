@@ -190,29 +190,35 @@ See [GitHub releases](https://github.com/renault-digital/bash-base/releases) or 
 ## How to config
 
 #### 1. LOG_LEVEL
-```
-LOG_LEVEL=$LOG_LEVEL_INFO
-```
-override this default value in your script if you want to change the log level, the possible values are:
 
-- LOG_LEVEL_ERROR=4
-- LOG_LEVEL_WARN=3
-- LOG_LEVEL_INFO=2
-- LOG_LEVEL_DEBUG=1
+The possible values are:
+- **$LOG_LEVEL_ERROR or 4**: enable the output of `print_error`/`print_header`
+- **$LOG_LEVEL_WARN or 3**: enable the output of `print_warn`/`print_args`/`print_success` and those by level **ERROR**
+- **$LOG_LEVEL_INFO or 2**: enable `print_info` and those by level **ERROR**, **WARN**
+- **$LOG_LEVEL_DEBUG or 1**: enable `print_debug` and those by level **ERROR**, **WARN**, **INFO**
 
+```
+LOG_LEVEL=${LOG_LEVEL:-$LOG_LEVEL_INFO}
+```
+The default value `$LOG_LEVEL_INFO` will be used if no config existed. you can override this default value in `shell script`, `OS environment` or `ci/cd pipeline variables`:
+```
+export LOG_LEVEL=$LOG_LEVEL_DEBUG 
+or
+export LOG_LEVEL=1
+```
 
 #### 2. SHORT_DESC
 ```
 SHORT_DESC='a bash script using bash-base'
 ```
-redefine it to show your script short description in the 'NAME' field of generated -h response
+redefine it to show your script short description in the 'NAME' field of generated response for <mark>**-h**</mark> argument.
 
 
 #### 3. USAGE
 ```
 USAGE=''
 ```
-redefine it in your script only if the generated -h response is not good for you
+redefine it in your script only if the generated response for <mark>**-h**</mark> argument is not good for you.
 
 
 ## Other Examples
