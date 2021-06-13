@@ -51,7 +51,7 @@ Describe args_parse
 					    my_script.sh -- my script
 
 					${COLOR_BOLD_YELLOW}SYNOPSIS${COLOR_END}
-					    ./my_script.sh [-qh]
+					    [optionalVariable=value ...] ./my_script.sh [-qh]
 
 					${COLOR_BOLD_YELLOW}DESCRIPTION${COLOR_END}
 					    [-h]                help, print the usage
@@ -67,6 +67,9 @@ Describe args_parse
 
 					    run using wizard, input value for params step by step:
 					        ./my_script.sh
+
+					    run with optional variables, example:
+					        myOpt1=myValue1 myOpt2=myValue2 ./my_script.sh
 
 					    or you can run with some params, and input value for other params using wizard.
 				EOF
@@ -103,7 +106,7 @@ Describe args_parse
 					    my_script.sh -- my script
 
 					${COLOR_BOLD_YELLOW}SYNOPSIS${COLOR_END}
-					    ./my_script.sh [-qh] destGitRepoURL
+					    [optionalVariable=value ...] ./my_script.sh [-qh] destGitRepoURL
 
 					${COLOR_BOLD_YELLOW}DESCRIPTION${COLOR_END}
 					    [-h]                help, print the usage
@@ -120,6 +123,9 @@ Describe args_parse
 
 					    run using wizard, input value for params step by step:
 					        ./my_script.sh
+
+					    run with optional variables, example:
+					        myOpt1=myValue1 myOpt2=myValue2 ./my_script.sh
 
 					    or you can run with some params, and input value for other params using wizard.
 				EOF
@@ -156,15 +162,17 @@ Describe args_parse
 
 					SHORT_DESC='this is a script for test generated help usage'
 
-					args_parse \$# "\$@" myVar1 myVar2 myVar3 myVar4 myVar44 myVar5 fromEnv varWithoutValidation order
+					args_parse \$# "\$@" myVar1 myVar2 myVar3 myVar4 myVar44 myVar5 fromEnv varWithoutValidation order myOptionalVar myOptionalVar2
 					args_valid_or_read myVar1 '^[0-9a-z ]{3,}$' 'SIA (lowercase, 3 chars)'
 					args_valid_or_read myVar2 '^[0-9a-z ]{3,}$' 'SIA lowercase, 3 chars'
 					args_valid_or_read myVar3 '^[0-9a-z ]{3,}$' 'SIA [lowercase, 3 chars]'
 					args_valid_or_read myVar4 '^[0-9a-z ]{3,}$' 'SIA lowercase, 3 chars'
 					args_valid_or_select myVar44 arrBranchesToSelectCleaned "The base of merge request (normally it is develop or integration)"
-					args_valid_or_read myVar5 '^[0-9a-z ]{3,}$' 'SIA !lowercase, 3 chars'
+					args_valid_or_read myVar5 '^[0-9a-z ]{3,}$' 'SIA !lowercase, 3 chars' default
 					args_valid_or_select_pipe fromEnv 'int/qua/sta/rec/ope' "Which env of DCP Alpine" int
 					args_valid_or_select_args order "Which order" first "second one"
+					args_valid_or_default myOptionalVar '^[0-9a-z ]{3,}$' 'SIA !lowercase, 3 chars' default
+					args_valid_or_default myOptionalVar2 '^[0-9a-z ]{3,}$' 'SIA !lowercase, 3 chars'
 				EOF
         chmod +x my_script.sh
 
@@ -173,7 +181,7 @@ Describe args_parse
 					    my_script.sh -- this is a script for test generated help usage
 
 					${COLOR_BOLD_YELLOW}SYNOPSIS${COLOR_END}
-					    ./my_script.sh [-qh] myVar1 myVar2 myVar3 myVar4 myVar44 myVar5 fromEnv varWithoutValidation order
+					    [optionalVariable=value ...] ./my_script.sh [-qh] myVar1 myVar2 myVar3 myVar4 myVar44 myVar5 fromEnv varWithoutValidation order
 
 					${COLOR_BOLD_YELLOW}DESCRIPTION${COLOR_END}
 					    [-h]                help, print the usage
@@ -184,10 +192,12 @@ Describe args_parse
 					    myVar3              SIA [lowercase, 3 chars]
 					    myVar4              SIA lowercase, 3 chars
 					    myVar44             The base of merge request (normally it is develop or integration), you can select one using wizard if you do not know which value is valid
-					    myVar5              SIA !lowercase, 3 chars
+					    myVar5              SIA !lowercase, 3 chars, proposed value: default
 					    fromEnv             Which env of DCP Alpine, possible values: int/qua/sta/rec/ope
 					    varWithoutValidation a valid value for varWithoutValidation
 					    order               Which order, you can select one using wizard if you do not know which value is valid
+					    myOptionalVar       optional, SIA !lowercase, 3 chars. should be set like myOptionalVar=value before my_script.sh or export to OS environment. if absent, fallback to: default
+					    myOptionalVar2      optional, SIA !lowercase, 3 chars. should be set like myOptionalVar2=value before my_script.sh or export to OS environment, empty if absent
 
 					${COLOR_BOLD_YELLOW}EXAMPLES${COLOR_END}
 					    help, print the usage:
@@ -198,6 +208,9 @@ Describe args_parse
 
 					    run using wizard, input value for params step by step:
 					        ./my_script.sh
+
+					    run with optional variables, example:
+					        myOpt1=myValue1 myOpt2=myValue2 ./my_script.sh
 
 					    or you can run with some params, and input value for other params using wizard.
 				EOF

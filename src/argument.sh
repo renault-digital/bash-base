@@ -51,11 +51,7 @@ function args_parse() {
 	fi
 
 	# Generate default usage response for -h
-	if ((nbPositionalVarNames > 0)); then
-		strPositionalVarNames=" $(array_join ' ' positionalVarNames)"
-		strPositionalValuesExamples=" \"$(array_join 'Value" "' positionalVarNames)Value\""
-	fi
-
+	onlyPositionalVarNames=()
 	descriptions=''
 	for element in "${positionalVarNames[@]}"; do
 		validCommand="$(
@@ -73,19 +69,35 @@ function args_parse() {
 		)"
 
 		if [[ -z ${validCommand} ]]; then
+			onlyPositionalVarNames+=("${element}")
 			description="a valid value for ${element}"
 		else
 			if [[ "${validCommand}" =~ 'args_valid_or_select_pipe' ]]; then
+				onlyPositionalVarNames+=("${element}")
 				prompt="$(reflect_nth_arg 4 "${validCommand}")"
 				possibleValues=", possible values: $(reflect_nth_arg 3 "$validCommand")"
 			elif [[ "${validCommand}" =~ 'args_valid_or_select_args' ]]; then
+				onlyPositionalVarNames+=("${element}")
 				prompt="$(reflect_nth_arg 3 "${validCommand}")"
 				possibleValues=", you can select one using wizard if you do not know which value is valid"
 			elif [[ "${validCommand}" =~ 'args_valid_or_select' ]]; then
+				onlyPositionalVarNames+=("${element}")
 				prompt="$(reflect_nth_arg 4 "${validCommand}")"
 				possibleValues=", you can select one using wizard if you do not know which value is valid"
-			else
+			elif [[ "${validCommand}" =~ args_valid_or_read ]]; then
+				onlyPositionalVarNames+=("${element}")
 				prompt="$(reflect_nth_arg 4 "${validCommand}")"
+				if [[ -n $(reflect_nth_arg 5 "${validCommand}") ]]; then
+					prompt="${prompt}, proposed value: $(reflect_nth_arg 5 "${validCommand}")"
+				fi
+				possibleValues=""
+			elif [[ "${validCommand}" =~ args_valid_or_default ]]; then
+				prompt="optional, $(reflect_nth_arg 4 "${validCommand}"). should be set like '${element}=value' before ${THIS_SCRIPT_NAME} or export to OS environment"
+				if [[ -n $(reflect_nth_arg 5 "${validCommand}") ]]; then
+					prompt="${prompt}. if absent, fallback to: $(reflect_nth_arg 5 "${validCommand}")"
+				else
+					prompt="${prompt}, empty if absent"
+				fi
 				possibleValues=""
 			fi
 
@@ -103,12 +115,17 @@ function args_parse() {
 		descriptions+="$(printf "\n    %-20s%s" "${element} " "${description}")"
 	done
 
+	if [ ${#onlyPositionalVarNames[@]} -gt 0 ]; then
+		strPositionalVarNames=" $(array_join ' ' onlyPositionalVarNames)"
+		strPositionalValuesExamples=" \"$(array_join 'Value" "' onlyPositionalVarNames)Value\""
+	fi
+
 	declare_heredoc defaultUsage <<-EOF
 		${COLOR_BOLD_YELLOW}NAME${COLOR_END}
 		    ${THIS_SCRIPT_NAME} -- ${SHORT_DESC}
 
 		${COLOR_BOLD_YELLOW}SYNOPSIS${COLOR_END}
-		    ./${THIS_SCRIPT_NAME} [-qh]${strPositionalVarNames}
+		    [optionalVariable=value ...] ./${THIS_SCRIPT_NAME} [-qh]${strPositionalVarNames}
 
 		${COLOR_BOLD_YELLOW}DESCRIPTION${COLOR_END}
 		    [-h]                help, print the usage
@@ -124,6 +141,9 @@ function args_parse() {
 
 		    run using wizard, input value for params step by step:
 		        ./${THIS_SCRIPT_NAME}
+
+		    run with optional variables, example:
+		        myOpt1=myValue1 myOpt2=myValue2 ./${THIS_SCRIPT_NAME}
 
 		    or you can run with some params, and input value for other params using wizard.
 	EOF
@@ -268,10 +288,13 @@ function args_valid_or_read() {
 }
 
 # @NAME
-#     args_valid_or_default -- designed for optional params, test whether the value matched the valid regular expression, if not matched, fallback to empty or default value
+#     args_valid_or_default -- description of the optional params, value will fallback to empty or default if it no match the regular expression.
 # @SYNOPSIS
 #     args_valid_or_default valueVarName strRegExp prompt [defaultValue]
 # @DESCRIPTION
+#     the optional params should be set in OS environment like 'export optional_variable=value && ./my_script.sh',
+#     or be placed before the $0 like 'optionalVariable1=value1 optionalVariable2=value2 ./my_script.sh'.
+#
 #     **valueVarName** the variable name of the value to valid and the new value assign to,
 #     **strRegExp** a string of regular expression to be used for validation
 #     **prompt** the description of the argument in generated help usage
