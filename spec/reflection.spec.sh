@@ -120,7 +120,7 @@ Describe 'reflect_function_names_of_file'
         When call reflect_function_names_of_file "${shellScriptFile}"
         The status should eq "0"
         The output should include "reflect_nth_arg"
-        The lines of output should eq 64
+        The lines of output should eq 65
 
         rm -fr "${shellScriptFile}"
     End
