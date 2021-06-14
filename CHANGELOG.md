@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/renault-digital/bash-base/compare/v2.2.0...v2.3.0) (2021-06-14)
+
+
+### Features
+
+* parse args_valid_or_default for the optional params ([c723203](https://github.com/renault-digital/bash-base/commit/c7232032ba96d918b48a76e94bf1477e4c810b35))
+
 # [2.2.0](https://github.com/renault-digital/bash-base/compare/v2.1.0...v2.2.0) (2021-06-13)
 
 

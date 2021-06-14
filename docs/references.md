@@ -192,7 +192,7 @@ args_valid_or_select, args_valid_or_select_args, args_valid_or_select_pipe, args
 ---
 
 ##### NAME
-args_valid_or_default -- designed for optional params, test whether the value matched the valid regular expression, if not matched, fallback to empty or default value
+args_valid_or_default -- description of the optional params, value will fallback to empty or default if it no match the regular expression.
 
 ##### SYNOPSIS
 ```
@@ -200,6 +200,9 @@ args_valid_or_default valueVarName strRegExp prompt [defaultValue]
 ```
 
 ##### DESCRIPTION
+the optional params should be set in OS environment like 'export optional_variable=value && ./my_script.sh',
+or be placed before the $0 like 'optionalVariable1=value1 optionalVariable2=value2 ./my_script.sh'.
+
 - **valueVarName** the variable name of the value to valid and the new value assign to,
 - **strRegExp** a string of regular expression to be used for validation
 - **prompt** the description of the argument in generated help usage
