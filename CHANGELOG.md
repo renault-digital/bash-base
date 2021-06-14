@@ -1,3 +1,10 @@
+## [2.3.1](https://github.com/renault-digital/bash-base/compare/v2.3.0...v2.3.1) (2021-06-14)
+
+
+### Bug Fixes
+
+* get the inputted value for optional params ([62ba109](https://github.com/renault-digital/bash-base/commit/62ba1097aef765e1616f4489c97207c85007f172))
+
 # [2.3.0](https://github.com/renault-digital/bash-base/compare/v2.2.0...v2.3.0) (2021-06-14)
 
 
