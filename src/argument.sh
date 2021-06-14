@@ -44,76 +44,78 @@ function args_parse() {
 	nbPositionalArgValues=$((nbArgValues - OPTIND + 1))
 	positionalArgValues=("${@:1:nbPositionalArgValues}")
 	positionalVarNames=("${@:nbPositionalArgValues+1:nbPositionalVarNames}")
-	if ((nbPositionalVarNames > 0)); then
-		for i in $(seq 0 $((nbPositionalVarNames - 1))); do
-			eval "${positionalVarNames[i]}='${positionalArgValues[i]}'"
-		done
-	fi
 
-	# Generate default usage response for -h
 	onlyPositionalVarNames=()
 	descriptions=''
-	for element in "${positionalVarNames[@]}"; do
-		validCommand="$(
-			grep -E "^\s*args_valid.*\s+${element}\s+" "$0" | head -1 |
-				awk -F "'" -v OFS="'" '{
-            for (i=2; i<=NF; i+=2) {
-                gsub(/ /, "_SPACE_", $i);
-                gsub(/\$/, "_DOLLAR_", $i);
-                gsub(/\(/, "_PARENTHESES_LEFT_", $i);
-                gsub(/\)/, "_PARENTHESES_RIGHT_", $i);
-            }
-            print
-        }' |
-				sed -e "s/\'//g"
-		)"
+	if ((nbPositionalVarNames > 0)); then
+		for i in $(seq 0 $((nbPositionalVarNames - 1))); do
+			element=${positionalVarNames[i]}
 
-		if [[ -z ${validCommand} ]]; then
-			onlyPositionalVarNames+=("${element}")
-			description="a valid value for ${element}"
-		else
-			if [[ "${validCommand}" =~ 'args_valid_or_select_pipe' ]]; then
-				onlyPositionalVarNames+=("${element}")
-				prompt="$(reflect_nth_arg 4 "${validCommand}")"
-				possibleValues=", possible values: $(reflect_nth_arg 3 "$validCommand")"
-			elif [[ "${validCommand}" =~ 'args_valid_or_select_args' ]]; then
-				onlyPositionalVarNames+=("${element}")
-				prompt="$(reflect_nth_arg 3 "${validCommand}")"
-				possibleValues=", you can select one using wizard if you do not know which value is valid"
-			elif [[ "${validCommand}" =~ 'args_valid_or_select' ]]; then
-				onlyPositionalVarNames+=("${element}")
-				prompt="$(reflect_nth_arg 4 "${validCommand}")"
-				possibleValues=", you can select one using wizard if you do not know which value is valid"
-			elif [[ "${validCommand}" =~ args_valid_or_read ]]; then
-				onlyPositionalVarNames+=("${element}")
-				prompt="$(reflect_nth_arg 4 "${validCommand}")"
-				if [[ -n $(reflect_nth_arg 5 "${validCommand}") ]]; then
-					prompt="${prompt}, proposed value: $(reflect_nth_arg 5 "${validCommand}")"
-				fi
-				possibleValues=""
-			elif [[ "${validCommand}" =~ args_valid_or_default ]]; then
-				prompt="optional, $(reflect_nth_arg 4 "${validCommand}"). should be set like '${element}=value' before ${THIS_SCRIPT_NAME} or export to OS environment"
-				if [[ -n $(reflect_nth_arg 5 "${validCommand}") ]]; then
-					prompt="${prompt}. if absent, fallback to: $(reflect_nth_arg 5 "${validCommand}")"
-				else
-					prompt="${prompt}, empty if absent"
-				fi
-				possibleValues=""
-			fi
-
-			prompt="$(
-				echo "${prompt}" |
-					string_replace "_SPACE_" " " |
-					string_replace "_DOLLAR_" "$" |
-					string_replace "_PARENTHESES_LEFT_" "(" |
-					string_replace "_PARENTHESES_RIGHT_" ")"
+			validCommand="$(
+				grep -E "^\s*args_valid.*\s+${element}\s+" "$0" | head -1 |
+					awk -F "'" -v OFS="'" '{
+                for (i=2; i<=NF; i+=2) {
+                    gsub(/ /, "_SPACE_", $i);
+                    gsub(/\$/, "_DOLLAR_", $i);
+                    gsub(/\(/, "_PARENTHESES_LEFT_", $i);
+                    gsub(/\)/, "_PARENTHESES_RIGHT_", $i);
+                }
+                print
+            }' |
+					sed -e "s/\'//g"
 			)"
 
-			description="${prompt}${possibleValues}"
-		fi
+			if [[ -z ${validCommand} ]]; then
+				eval "${positionalVarNames[i]}='${positionalArgValues[i]}'"
+				onlyPositionalVarNames+=("${element}")
+				description="a valid value for ${element}"
+			else
+				if [[ "${validCommand}" =~ 'args_valid_or_select_pipe' ]]; then
+					eval "${positionalVarNames[i]}='${positionalArgValues[i]}'"
+					onlyPositionalVarNames+=("${element}")
+					prompt="$(reflect_nth_arg 4 "${validCommand}")"
+					possibleValues=", possible values: $(reflect_nth_arg 3 "$validCommand")"
+				elif [[ "${validCommand}" =~ 'args_valid_or_select_args' ]]; then
+					eval "${positionalVarNames[i]}='${positionalArgValues[i]}'"
+					onlyPositionalVarNames+=("${element}")
+					prompt="$(reflect_nth_arg 3 "${validCommand}")"
+					possibleValues=", you can select one using wizard if you do not know which value is valid"
+				elif [[ "${validCommand}" =~ 'args_valid_or_select' ]]; then
+					eval "${positionalVarNames[i]}='${positionalArgValues[i]}'"
+					onlyPositionalVarNames+=("${element}")
+					prompt="$(reflect_nth_arg 4 "${validCommand}")"
+					possibleValues=", you can select one using wizard if you do not know which value is valid"
+				elif [[ "${validCommand}" =~ args_valid_or_read ]]; then
+					eval "${positionalVarNames[i]}='${positionalArgValues[i]}'"
+					onlyPositionalVarNames+=("${element}")
+					prompt="$(reflect_nth_arg 4 "${validCommand}")"
+					if [[ -n $(reflect_nth_arg 5 "${validCommand}") ]]; then
+						prompt="${prompt}, proposed value: $(reflect_nth_arg 5 "${validCommand}")"
+					fi
+					possibleValues=""
+				elif [[ "${validCommand}" =~ args_valid_or_default ]]; then
+					prompt="optional, $(reflect_nth_arg 4 "${validCommand}"). should be set like '${element}=value' before ${THIS_SCRIPT_NAME} or export to OS environment"
+					if [[ -n $(reflect_nth_arg 5 "${validCommand}") ]]; then
+						prompt="${prompt}. if absent, fallback to: $(reflect_nth_arg 5 "${validCommand}")"
+					else
+						prompt="${prompt}, empty if absent"
+					fi
+					possibleValues=""
+				fi
 
-		descriptions+="$(printf "\n    %-20s%s" "${element} " "${description}")"
-	done
+				prompt="$(
+					echo "${prompt}" |
+						string_replace "_SPACE_" " " |
+						string_replace "_DOLLAR_" "$" |
+						string_replace "_PARENTHESES_LEFT_" "(" |
+						string_replace "_PARENTHESES_RIGHT_" ")"
+				)"
+
+				description="${prompt}${possibleValues}"
+			fi
+			descriptions+="$(printf "\n    %-20s%s" "${element} " "${description}")"
+		done
+	fi
 
 	if [ ${#onlyPositionalVarNames[@]} -gt 0 ]; then
 		strPositionalVarNames=" $(array_join ' ' onlyPositionalVarNames)"
