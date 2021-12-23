@@ -1,6 +1,7 @@
 # Shorten URL
 
 https://github.com/renault-digital/bash-base/raw/master/scripts/install.sh => url=https://raw.githubusercontent.com/renault-digital/bash-base/master/scripts/install.sh
+
 https://github.com/renault-digital/bash-base/raw/master/bin/bash-base => url=https://raw.githubusercontent.com/renault-digital/bash-base/master/bin/bash-base
 
 ```shell
