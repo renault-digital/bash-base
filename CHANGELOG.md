@@ -1,3 +1,10 @@
+## [2.3.2](https://github.com/renault-digital/bash-base/compare/v2.3.1...v2.3.2) (2021-12-23)
+
+
+### Bug Fixes
+
+* shellcheck lint ([d708b3b](https://github.com/renault-digital/bash-base/commit/d708b3b42be1fad5bc5296a74efac742007151d9))
+
 ## [2.3.1](https://github.com/renault-digital/bash-base/compare/v2.3.0...v2.3.1) (2021-06-14)
 
 
