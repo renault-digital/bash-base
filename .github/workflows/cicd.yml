@@ -47,7 +47,7 @@ jobs:
       - name: shellspec-kcov
         run: |
           sudo apt-get update
-          sudo apt-get install -y bash kcov
+          sudo apt-get install -y bash kcov netcat-openbsd lsof
           command -v kcov
           curl -fsSL https://git.io/shellspec | sh -s 0.27.2 --yes
           export PATH="$HOME/.local/lib/shellspec:$PATH"
