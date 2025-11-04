@@ -26,6 +26,12 @@ Describe 'wait_for'
         The output should include "OK: slowTask is ok now"
     End
 
+    It 'ok with default value'
+        When call wait_for 'test 1 -eq 1'
+        The status should be success
+        The output should include "OK: test 1 -eq 1 is ok now"
+    End
+
     It 'not ok'
         rm -fr a.txt
         func() {  actual=$( wait_for 'test -f a.txt' slowTask 2 & touch a.txt); }
