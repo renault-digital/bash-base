@@ -20,8 +20,12 @@ module.exports = {
       "assets": ['CHANGELOG.md', 'package.json', 'package-lock.json', 'npm-shrinkwrap.json', 'src', 'docs', 'man', 'bin'],
     }],
     "@semantic-release/github",
-    ["semantic-release-docker", {
-      "name": "renaultdigital/bash-base"
+    ["@semantic-release/exec", {
+      "publishCmd": [
+        "docker tag renaultdigital/bash-base renaultdigital/bash-base:${nextRelease.version}",
+        "docker push renaultdigital/bash-base:${nextRelease.version}",
+        "docker push renaultdigital/bash-base"
+      ].join(" && ")
     }]
   ]
 }

@@ -36,7 +36,8 @@
     "test": "./scripts/test.sh",
     "test:focus": "npm test -- -f t --focus #execute only fIt/fDescribe",
     "test:coverage": "npm test -- --kcov -f t",
-    "build": "./scripts/build.sh"
+    "build": "./scripts/build.sh",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -56,20 +57,16 @@
   },
   "homepage": "https://github.com/renault-digital/bash-base#readme",
   "devDependencies": {
-    "@commitlint/cli": "^9.1.2",
-    "@commitlint/config-conventional": "^9.1.2",
-    "@semantic-release/changelog": "^5.0.1",
-    "@semantic-release/exec": "^5.0.0",
-    "@semantic-release/git": "^9.0.0",
-    "commitizen": "^4.1.2",
-    "cz-conventional-changelog": "^3.2.0",
-    "husky": "^4.2.5",
-    "semantic-release-docker": "^2.2.0",
-    "merge": ">=2.1.1"
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/exec": "^7.1.0",
+    "@semantic-release/git": "^10.0.1",
+    "commitizen": "^4.3.1",
+    "cz-conventional-changelog": "^3.3.0",
+    "husky": "^9.1.7",
+    "merge": ">=2.1.1",
+    "semantic-release": "^25.0.1"
   },
-  "dependencies": {},
-  "resolutions": {
-    "lodash": "4.17.19",
-    "dot-prop": "5.2.0"
-  }
+  "resolutions": {}
 }
