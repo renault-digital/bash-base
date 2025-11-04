@@ -9,20 +9,20 @@ on:
 
 jobs:
   lint-commit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: lint commit message of this pull request
         uses: wagoid/commitlint-github-action@v2
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v1
@@ -36,11 +36,11 @@ jobs:
         run: npm run lint
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       # Fetch the latest commit
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       # Run tests
       - name: shellspec-kcov
@@ -68,12 +68,12 @@ jobs:
           exit 1
 
   semantic-release-preview:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     # Waits for test jobs to complete
     needs: [lint-commit,lint,test]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v1
@@ -94,12 +94,12 @@ jobs:
   semantic-release:
     # Only release on push to master
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     # Waits for test jobs to complete
     needs: [semantic-release-preview]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
 
