@@ -1,3 +1,10 @@
+## [2.4.1](https://github.com/renault-digital/bash-base/compare/v2.4.0...v2.4.1) (2025-11-05)
+
+
+### Bug Fixes
+
+* remove not exsited reference ([e134d94](https://github.com/renault-digital/bash-base/commit/e134d949757cb04f9290fab7cc05242588de3da7))
+
 # [2.4.0](https://github.com/renault-digital/bash-base/compare/v2.3.2...v2.4.0) (2025-11-05)
 
 

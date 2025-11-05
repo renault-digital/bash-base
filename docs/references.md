@@ -1541,7 +1541,7 @@ wait_for 'test -f /tmp/output.txt' 'file existed' 3
 ```
 
 ##### SEE_ALSO
-confirm_to_continue, stop_if_failed, is_http_ok
+confirm_to_continue, stop_if_failed
 
 ---
 
