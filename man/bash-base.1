@@ -1901,7 +1901,7 @@ wait_for predicate [subject] [interval]
 .IP \[bu] 2
 \f[B]predicate\f[R] a string of command, used to check is ok or not
 .IP \[bu] 2
-\f[B][subject]\f[R] optional, the subject name
+\f[B][subject]\f[R] optional, the subject name, default to predicate
 .IP \[bu] 2
 \f[B][interval]\f[R] optional, the interval of number of seconds between
 the checks, default to 3
@@ -1914,7 +1914,7 @@ wait_for \[aq]test -f /tmp/output.txt\[aq] \[aq]file existed\[aq] 3
 .fi
 .SS SEE_ALSO
 .PP
-confirm_to_continue, stop_if_failed
+confirm_to_continue, stop_if_failed, is_http_ok
 .PP
    *   *   *   *   *
 .SS NAME

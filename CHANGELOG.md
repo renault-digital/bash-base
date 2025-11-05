@@ -1,3 +1,11 @@
+# [2.4.0](https://github.com/renault-digital/bash-base/compare/v2.3.2...v2.4.0) (2025-11-05)
+
+
+### Features
+
+* update dev dependencies ([da41ccf](https://github.com/renault-digital/bash-base/commit/da41ccf30e29422bba199318c7d463e813ecca1c))
+* **wait_for:** subject default to predicate if not specified ([1515929](https://github.com/renault-digital/bash-base/commit/15159299db3dbfd1e7b95edd38913a0690099595))
+
 ## [2.3.2](https://github.com/renault-digital/bash-base/compare/v2.3.1...v2.3.2) (2021-12-23)
 
 

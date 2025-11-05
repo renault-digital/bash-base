@@ -1532,7 +1532,7 @@ wait_for predicate [subject] [interval]
 
 ##### DESCRIPTION
 - **predicate** a string of command, used to check is ok or not
-- **[subject]** optional, the subject name
+- **[subject]** optional, the subject name, default to predicate
 - **[interval]** optional, the interval of number of seconds between the checks, default to 3
 
 ##### EXAMPLES
@@ -1541,7 +1541,7 @@ wait_for 'test -f /tmp/output.txt' 'file existed' 3
 ```
 
 ##### SEE_ALSO
-confirm_to_continue, stop_if_failed
+confirm_to_continue, stop_if_failed, is_http_ok
 
 ---
 
