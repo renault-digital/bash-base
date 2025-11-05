@@ -12,7 +12,6 @@ module.exports = {
     }],
     "@semantic-release/release-notes-generator",
     "@semantic-release/changelog",
-    "@semantic-release/npm",
     ["@semantic-release/exec", {
       "prepareCmd": "npm run build && docker build -t renaultdigital/bash-base ."
     }],

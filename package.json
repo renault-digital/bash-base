@@ -27,7 +27,6 @@
     "test": "spec"
   },
   "scripts": {
-    "preinstall": "npx npm-force-resolutions || true",
     "shellcheck": "docker run --rm -v \"$(pwd)\":/bash-base -w /bash-base koalaman/shellcheck:latest src/*.sh scripts/*.sh example/*.sh",
     "shfmt": "docker run --rm -v \"$(pwd)\":/bash-base -w /bash-base mvdan/shfmt -l -w src/*.sh scripts/*.sh example/*.sh",
     "lint:commit": " commitlint --from=$(git rev-list --max-parents=0 HEAD)",
@@ -66,7 +65,6 @@
     "cz-conventional-changelog": "^3.3.0",
     "husky": "^9.1.7",
     "merge": ">=2.1.1",
-    "semantic-release": "^25.0.1"
-  },
-  "resolutions": {}
+    "semantic-release": "^24.2.9"
+  }
 }

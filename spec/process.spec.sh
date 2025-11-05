@@ -8,7 +8,10 @@ AfterRun preserve
 
 Describe 'prc_filter_by_port'
     It 'with port number'
-        nc -l 9999 &
+        nc -lk 127.0.0.1 9999 &
+        sleep 1
+        echo "=== Debug: check listener ==="
+        lsof -iTCP:9999 -sTCP:LISTEN -n -P
         When call prc_filter_by_port 9999
         The status should be success
         The output should include ":9999"
