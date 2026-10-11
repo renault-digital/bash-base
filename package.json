@@ -12,6 +12,7 @@
     "CONTRIBUTING.md",
     "package-lock.json",
     "scripts/test.sh",
+    "scripts/test-shell-compat.sh",
     "src/",
     "bin/",
     "docs/",

@@ -4,3 +4,6 @@
 ## kcov (coverage) options
 --kcov-options "--include-path=src"
 
+## ShellSpec 0.28.1 options
+--pattern '*.spec.sh'
+--fail-no-examples

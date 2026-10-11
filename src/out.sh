@@ -14,9 +14,9 @@ LOG_LEVEL=${LOG_LEVEL:-$LOG_LEVEL_INFO} # the default value INFO will be used if
 #     print_info "my message"
 # @SEE_ALSO
 #     print_header, print_error, print_success, print_warn, print_args, print_info
-function print_debug() {
+print_debug() {
 	if [[ $LOG_LEVEL -le $LOG_LEVEL_DEBUG ]]; then
-		echo -e "${COLOR_GRAY}DEBUG: ${1-$(cat)}${COLOR_END}"
+		printf '%b\n' "${COLOR_GRAY}DEBUG: ${1-$(cat)}${COLOR_END}"
 	fi
 }
 
@@ -30,9 +30,9 @@ function print_debug() {
 #     print_info "my message"
 # @SEE_ALSO
 #     print_header, print_error, print_success, print_warn, print_args, print_debug
-function print_info() {
+print_info() {
 	if [[ $LOG_LEVEL -le $LOG_LEVEL_INFO ]]; then
-		echo -e "${COLOR_END}INFO: ${1-$(cat)}"
+		printf '%b\n' "${COLOR_END}INFO: ${1-$(cat)}"
 	fi
 }
 
@@ -46,9 +46,9 @@ function print_info() {
 #     print_warn "my message"
 # @SEE_ALSO
 #     print_header, print_error, print_success, print_info, print_args, print_debug
-function print_warn() {
+print_warn() {
 	if [[ $LOG_LEVEL -le $LOG_LEVEL_WARN ]]; then
-		echo -e "${COLOR_BOLD_YELLOW}WARN: ${1-$(cat)} ${COLOR_END}"
+		printf '%b\n' "${COLOR_BOLD_YELLOW}WARN: ${1-$(cat)} ${COLOR_END}"
 	fi
 }
 
@@ -62,9 +62,9 @@ function print_warn() {
 #     print_error "my error message"
 # @SEE_ALSO
 #     print_header, print_success, print_warn, print_info, print_args, print_debug
-function print_error() {
+print_error() {
 	if [[ $LOG_LEVEL -le $LOG_LEVEL_ERROR ]]; then
-		echo -e "${COLOR_BOLD_RED}ERROR: ${1-$(cat)} ${COLOR_END}"
+		printf '%b\n' "${COLOR_BOLD_RED}ERROR: ${1-$(cat)} ${COLOR_END}"
 	fi
 }
 
@@ -78,9 +78,9 @@ function print_error() {
 #     print_success "my message"
 # @SEE_ALSO
 #     print_header, print_error, print_warn, print_info, print_args, print_debug
-function print_success() {
+print_success() {
 	if [[ $LOG_LEVEL -le $LOG_LEVEL_WARN ]]; then
-		echo -e "${COLOR_BOLD_GREEN}OK: ${1-$(cat)} ${COLOR_END}"
+		printf '%b\n' "${COLOR_BOLD_GREEN}OK: ${1-$(cat)} ${COLOR_END}"
 	fi
 }
 
@@ -96,12 +96,23 @@ function print_success() {
 #     print_args var1 var2
 # @SEE_ALSO
 #     print_header, print_error, print_success, print_warn, print_info, print_debug
-function print_args() {
+print_args() {
 	if [[ $LOG_LEVEL -le $LOG_LEVEL_WARN ]]; then
 		local varName varValue varValueOutput
 		for varName in "$@"; do
-			varValue=$(eval echo '$'"${varName}")
-			varValueOutput=$([[ -z "${varValue}" ]] && echo "<EMPTY>" || echo "${COLOR_BLUE}${varValue}${COLOR_END}")
+			eval 'varValue="${'"$varName"'-}"'
+			if [[ -n "${BASH_VERSION:-}" ]]; then
+				# Historical Bash print_args used `eval echo $name`, which
+				# normalized whitespace and echo options in displayed values.
+				# Echo expanded DATA, never eval it as new shell source.
+				# shellcheck disable=SC2086,SC2116
+				varValue="$(echo $varValue)"
+			fi
+			if [[ -z "$varValue" ]]; then
+				varValueOutput="<EMPTY>"
+			else
+				varValueOutput="${COLOR_BLUE}${varValue}${COLOR_END}"
+			fi
 			printf "%-30.30s%s\n" "${varName}:" "${varValueOutput}"
 		done
 	fi
@@ -117,8 +128,8 @@ function print_args() {
 #     print_header "My header1"
 # @SEE_ALSO
 #     print_error, print_success, print_warn, print_info, print_args, print_debug
-function print_header() {
+print_header() {
 	if [[ $LOG_LEVEL -le $LOG_LEVEL_ERROR ]]; then
-		echo -e "${COLOR_BOLD_MAGENTA}\n### ${1-$(cat)} ${COLOR_END}"
+		printf '%b\n' "${COLOR_BOLD_MAGENTA}\n### ${1-$(cat)} ${COLOR_END}"
 	fi
 }

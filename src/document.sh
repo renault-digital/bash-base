@@ -18,9 +18,10 @@ source src/array.sh
 #     doc_lint_script_comment "${shellScriptFile}"
 # @SEE_ALSO
 #     doc_comment_to_markdown
-function doc_lint_script_comment() {
+doc_lint_script_comment() {
 	local shellScriptFile="$1"
-	local element strAllFunctionsAndTheirTags arrAllFunctionsAndTheirTags manTags strFunctionAndItsTags arrFunctionAndItsTags intersection counter
+	local element strAllFunctionsAndTheirTags arrAllFunctionsAndTheirTags manTags strFunctionAndItsTags arrFunctionAndItsTags intersection
+	local counter=0 lastFunction=""
 
 	# format the comment
 	sed -E -i'.bk' \
@@ -28,22 +29,27 @@ function doc_lint_script_comment() {
 		-e "s/^#/#     /g" \
 		-e "s/^#[[:space:]]+$/#/g" \
 		-e "s/^#[[:space:]]*!/#!/g" \
-		-e "s/^#[[:space:]]*(@|-|#+)/# \1/g" \
+		-e "s/^#[[:space:]]*(@|-|#+)/# \\1/g" \
 		"${shellScriptFile}"
 	rm -fr "${shellScriptFile}.bk"
 
-	# valid comment tags by man page convention
-	strAllFunctionsAndTheirTags=$(grep -e '^# @' -e '^function ' "${shellScriptFile}" | string_replace_regex '\(\)|#' '' | string_trim)
+	# Accept both historical `function name()` declarations and the shared
+	# Bash/zsh `name()` form.
+	strAllFunctionsAndTheirTags=$(grep -E -e '^# @' -e '^[[:space:]]*(function[[:space:]]+)?[0-9A-Za-z_-]+[[:space:]]*\(\)[[:space:]]*\{' "${shellScriptFile}" | string_replace_regex '\(\)|#' '' | string_trim)
 	string_split_to_array "{" arrAllFunctionsAndTheirTags "${strAllFunctionsAndTheirTags}"
-	local manTags=('@NAME' '@SYNOPSIS' '@DESCRIPTION' '@EXAMPLES' '@SEE_ALSO')
+	manTags=('@NAME' '@SYNOPSIS' '@DESCRIPTION' '@EXAMPLES' '@SEE_ALSO')
 	for strFunctionAndItsTags in "${arrAllFunctionsAndTheirTags[@]}"; do
 		string_split_to_array $'\n' arrFunctionAndItsTags "${strFunctionAndItsTags}"
 		array_intersection manTags arrFunctionAndItsTags intersection false
 		array_equals manTags intersection false
 		if [[ $? -ne 0 ]]; then
-			((counter++))
-			declare -p manTags intersection
-			print_error "the comments is not the same as template for ${arrFunctionAndItsTags[-1]}"
+			counter=$((counter + 1))
+			typeset -p manTags intersection
+			lastFunction=""
+			for element in "${arrFunctionAndItsTags[@]}"; do
+				lastFunction="$element"
+			done
+			print_error "the comments is not the same as template for ${lastFunction}"
 		fi
 	done
 
@@ -64,7 +70,7 @@ function doc_lint_script_comment() {
 #     doc_comment_to_markdown src/reflection.sh docs/references.md
 # @SEE_ALSO
 #     doc_lint_script_comment
-function doc_comment_to_markdown() {
+doc_comment_to_markdown() {
 	local fromShellFile="$1"
 	local toMarkdownFile="$2"
 
@@ -83,6 +89,6 @@ function doc_comment_to_markdown() {
 			string_replace_regex '^(\*\*)' "- \1"
 	)"
 
-	echo -e "@NAME\n${md//${NEW_LINE_SED}/\\n}" | #NEW_LINE_SED is not compatible by pandoc
+	printf '%b\n' "@NAME\n${md//${NEW_LINE_SED}/\\n}" | # NEW_LINE_SED is not compatible by pandoc
 		string_replace_regex '@([A-Z]+)' "##### \1" >"${toMarkdownFile}"
 }

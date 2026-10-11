@@ -43,35 +43,183 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Run tests
-      - name: shellspec-kcov
+      # Run the actual Bash/zsh gate, then the existing Bash ShellSpec/kcov suite.
+      - name: Bash/zsh compatibility and Bash ShellSpec coverage
         run: |
           sudo apt-get update
-          sudo apt-get install -y bash kcov netcat-openbsd lsof
+          sudo apt-get install -y bash zsh kcov netcat-openbsd lsof
           command -v kcov
-          curl -fsSL https://git.io/shellspec | sh -s 0.27.2 --yes
-          export PATH="$HOME/.local/lib/shellspec:$PATH"
+          curl -fsSL https://git.io/shellspec | sh -s 0.28.1 --yes
+          export PATH="$HOME/.local/bin:$PATH"
           bash -c 'echo BASH_VERSION: $BASH_VERSION'
-          bash shellspec --kcov -f t spec/*.spec.sh
+          zsh --version
+          bash scripts/test.sh --kcov -f t
 
       - name: codecov.io
         run: bash <(curl -s https://codecov.io/bash)
 
-      - name: failed if coverage not 100%
+      - name: Show uncovered source lines
+        if: always()
         run: |
-          cat coverage/coverage.json
-          percent=$(jq '.percent_covered|tonumber|floor' coverage/coverage.json)
-          if (( $(echo "${percent} == 100" | bc -l) )); then
-            echo "The coverage is OK."
-            exit 0
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          
+          report = Path("coverage/cobertura.xml")
+          if not report.is_file():
+              raise SystemExit(f"Missing coverage report: {report}")
+          
+          root = ET.parse(report).getroot()
+          classes = root.findall(".//class")
+          
+          print(f"Report: {report}")
+          print(f"Classes found: {len(classes)}")
+          print("Recorded filenames:")
+          for cls in classes:
+              print(" ", cls.get("filename", "<missing>"))
+          
+          targets = {
+              "alias.sh", "argument.sh", "array.sh",
+              "constant.sh", "document.sh", "out.sh",
+              "process.sh", "reflection.sh",
+              "string.sh", "tool.sh",
+          }
+          
+          found = 0
+          missing_total = 0
+          
+          for cls in classes:
+              filename = cls.get("filename", "")
+              if Path(filename).name not in targets:
+                  continue
+          
+              found += 1
+              lines = cls.findall("./lines/line")
+          
+              missing = sorted({
+                  int(line.get("number"))
+                  for line in lines
+                  if int(line.get("hits", "0")) == 0
+              })
+          
+              missing_total += len(missing)
+              print(f"{filename}: {len(missing)} uncovered lines")
+              print(f"  {missing}")
+          
+          print(f"Matched source entries: {found}")
+          print(f"Total uncovered entries: {missing_total}")
+          
+          if not classes or not found:
+              raise SystemExit(
+                  "Coverage XML structure or source paths need inspection"
+              )
+          PY
+
+      # ShellSpec 0.28.1 supports --covdir. Collect zsh coverage separately
+      # without touching the Bash coverage/ report used by the 100% gate.
+      # Diagnostic only: do not merge unverified zsh coverage into that gate.
+      - name: Probe zsh coverage
+        continue-on-error: false
+        run: |
+          test -f coverage/coverage.json
+          set +e
+          bash "$HOME/.local/lib/shellspec/shellspec" \
+            --shell zsh --kcov --covdir coverage-zsh \
+            --pattern '*.spec.sh' --fail-no-examples -f t \
+            spec/string.spec.sh spec/reflection.spec.sh
+          status=$?
+          set -e
+
+          echo "zsh ShellSpec/coverage exit status: $status"
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          reports = sorted(Path('coverage-zsh').rglob('cobertura.xml'))
+          print(f'zsh Cobertura reports: {len(reports)}')
+          for report in reports:
+              print(f'Report: {report}')
+              for cls in ET.parse(report).getroot().iter('class'):
+                  filename = cls.get('filename', '')
+                  if Path(filename).name not in {'string.sh', 'reflection.sh'}:
+                      continue
+                  lines = list(cls.iter('line'))
+                  covered = sum(int(line.get('hits', '0')) > 0 for line in lines)
+                  print(f'  {filename}: {covered}/{len(lines)} reported lines covered')
+          PY
+          exit "$status"
+
+      # Preserve the raw reports for review when the 100% gate fails.
+      - name: Upload coverage diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-diagnostics
+          path: |
+            coverage/
+            coverage-zsh/
+          if-no-files-found: warn
+          retention-days: 7
+
+
+  # Authoritative 100% line-coverage gate. GitHub's macos-15 ARM64 runner has
+  # /bin/bash 3.2 and /bin/zsh; Homebrew supplies Bash 5+ and kcov.
+  # Collect four reports from a single checkout, then validate the strict union.
+  coverage-macos:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install coverage tools (ShellSpec pinned to 0.28.1)
+        shell: bash
+        run: |
+          set -euo pipefail
+          brew install bash kcov
+          curl -fsSL https://git.io/shellspec | sh -s 0.28.1 --yes
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          /bin/bash -c 'printf "BASH32=%s\n" "$BASH_VERSION"'
+          "$(brew --prefix)/bin/bash" -c 'printf "BASH5=%s\n" "$BASH_VERSION"'
+          /bin/zsh --version
+          "$HOME/.local/bin/shellspec" --version
+          kcov --version
+          command -v nc
+          command -v lsof
+
+      - name: Run strict Bash 3.2 / Bash 5+ / zsh / TTY coverage gate
+        id: strict_coverage
+        shell: bash
+        run: |
+          set -uo pipefail
+          # Capture the original script exit status even when tee succeeds.
+          set +e
+          bash scripts/verify-final-coverage-v3.sh "$PWD" 2>&1 |
+            tee "$RUNNER_TEMP/bash-base-coverage-gate.log"
+          gate_status=${PIPESTATUS[0]}
+          set -e
+          coverage_root_line="$(grep -m 1 '^COVERAGE_ROOT='             "$RUNNER_TEMP/bash-base-coverage-gate.log" || true)"
+          report_dir="${coverage_root_line#COVERAGE_ROOT=}"
+          if [[ -n "$report_dir" ]]; then
+            printf 'coverage_root=%s\n' "$report_dir" >> "$GITHUB_OUTPUT"
           fi
-          echo "The coverage should be 100%."
-          exit 1
+          exit "$gate_status"
+
+      - name: Upload strict coverage evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: strict-macos-coverage
+          path: |
+            ${{ runner.temp }}/bash-base-coverage-gate.log
+            ${{ steps.strict_coverage.outputs.coverage_root }}
+          if-no-files-found: warn
+          retention-days: 7
 
   semantic-release-preview:
     runs-on: ubuntu-22.04
     # Waits for test jobs to complete
-    needs: [lint-commit,lint,test]
+    needs: [lint-commit,lint,test,coverage-macos]
     steps:
       - name: Checkout
         uses: actions/checkout@v4

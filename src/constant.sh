@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-NEW_LINE_SED="\\$(echo -e '\r\n')" # Constant: the return and new line character, used with sed
+NEW_LINE_SED="\\$(printf '\r\n')" # Constant: the return and new line character, used with sed
 export NEW_LINE_SED
 
 COLOR_BOLD_MAGENTA=$'\e[1;35m' # Constant: color for printing Header
