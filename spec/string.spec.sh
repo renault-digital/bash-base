@@ -11,7 +11,7 @@ Describe 'string_split_to_array'
     It 'with variable'
         str="a b c"
         When call string_split_to_array ' ' actual "$str"
-        The variable actual should satisfy array_describe_equals actual "([0]='a' [1]='b' [2]='c')"
+        The variable actual should satisfy array_values_equal actual 'a' 'b' 'c'
     End
 
     It 'with pipe and print to stdout'
@@ -23,7 +23,7 @@ Describe 'string_split_to_array'
     It 'with token string including space'
         str="amy delimiterbmy delimiterc"
         When call string_split_to_array 'my delimiter' actual "$str"
-        The variable actual should satisfy array_describe_equals actual "([0]='a' [1]='b' [2]='c')"
+        The variable actual should satisfy array_values_equal actual 'a' 'b' 'c'
     End
 
     It 'with stdin'
@@ -33,7 +33,7 @@ Describe 'string_split_to_array'
 					* origin/feature/52-new-feature
 				EOF
         When call string_split_to_array $'\n' actual "${lines}"
-        The variable actual should satisfy array_describe_equals actual "([0]='  origin/develop' [1]='  origin/integration' [2]='* origin/feature/52-new-feature')"
+        The variable actual should satisfy array_values_equal actual '  origin/develop' '  origin/integration' '* origin/feature/52-new-feature'
     End
 
     It 'with file'
@@ -43,7 +43,7 @@ Describe 'string_split_to_array'
 					 3. C
 				EOF
         When call eval "string_split_to_array $'\n' actual < temp_file.txt"
-        The variable actual should satisfy array_describe_equals actual "([0]=' 1. A D' [1]=' 2. B' [2]=' 3. C')"
+        The variable actual should satisfy array_values_equal actual ' 1. A D' ' 2. B' ' 3. C'
 
         rm -fr temp_file.txt
     End
@@ -54,12 +54,12 @@ Describe 'string_pick_to_array'
     It 'with variable'
         str="[{age:12},{age:15},{age:16}]"
         When call string_pick_to_array '{age:' '}' actual "$str"
-        The variable actual should satisfy array_describe_equals actual "([0]='12' [1]='15' [2]='16')"
+        The variable actual should satisfy array_values_equal actual '12' '15' '16'
     End
 
     It 'with pipe and print to stdout'
         str="[{age:12},{age:15},{age:16}]"
-        When call eval "echo $str | string_pick_to_array '{age:' '}'"
+        When call eval 'printf "%s\n" "$str" | string_pick_to_array "{age:" "}"'
         The output should eq $'12\n15\n16'
     End
 
@@ -78,7 +78,7 @@ Describe 'string_pick_to_array'
 					]
 				EOF
         When call string_pick_to_array 'age:' $'\n' actual "${lines}"
-        The variable actual should satisfy array_describe_equals actual "([0]='12' [1]='15' [2]='16')"
+        The variable actual should satisfy array_values_equal actual '12' '15' '16'
     End
 
     It 'with file'
@@ -96,7 +96,7 @@ Describe 'string_pick_to_array'
 					]
 				EOF
         When call eval "string_pick_to_array 'age:' $'\n' actual < temp_file.txt"
-        The variable actual should satisfy array_describe_equals actual "([0]='12' [1]='15' [2]='16')"
+        The variable actual should satisfy array_values_equal actual '12' '15' '16'
 
         rm -fr temp_file.txt
     End
@@ -435,9 +435,8 @@ Describe 'string_before_first'
 					EFGH
 					IJKL
 				EOF
-        func() { actual=$(string_before_first 'FGH' < temp_file.txt); }
-        When run func
-        The variable actual should eq $'ABCD\nE'
+        When call eval 'string_before_first "FGH" < temp_file.txt'
+        The output should eq $'ABCD\nE'
         rm -fr temp_file.txt
     End
 End
@@ -465,9 +464,8 @@ Describe 'string_after_first'
 					EFGH
 					IJKL
 				EOF
-        func() { actual=$(string_after_first "FGH" < temp_file.txt); }
-        When run func
-        The variable actual should eq $'\nIJKL'
+        When call eval 'string_after_first "FGH" < temp_file.txt'
+        The output should eq $'\nIJKL'
         rm -fr temp_file.txt
     End
 End
@@ -548,9 +546,8 @@ Describe 'string_index_first'
 					EFGH
 					IJKL
 				EOF
-        func() { actual=$(string_index_first "FGH" < temp_file.txt); }
-        When run func
-        The variable actual should eq "6"
+        When call eval 'string_index_first "FGH" < temp_file.txt'
+        The output should eq "6"
         rm -fr temp_file.txt
     End
 End

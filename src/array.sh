@@ -12,25 +12,28 @@
 #     array_join '|' myArry ==> " a | b c "
 # @SEE_ALSO
 #     string_split_to_array, array_describe, array_from_describe
-function array_join() {
+array_join() {
 	local delimiter="$1"
-	local array="$2[@]"
+	local array="$2[@]" # Same local names as the pre-PR Bash implementation.
+	local element result="" delimiterLength
 
-	local element result delimiterLength
-	for element in "${!array}"; do
+	# Expand the named array directly into function positional parameters. This
+	# avoids introducing new local variables that shadow caller array names.
+	eval 'set -- "${'"$2"'[@]}"'
+	for element in "$@"; do
 		result="${result}${element}${delimiter}"
 	done
 
 	delimiterLength=$(string_length "${delimiter}")
 	if string_is_empty "${result}"; then
-		echo ''
+		printf '\n'
 	else
 		string_sub 0 $((0 - delimiterLength)) "${result}"
 	fi
 }
 
 # @NAME
-#     array_describe -- convert the array to its string representation
+#     array_describe -- convert the array to its shell-native string representation
 # @SYNOPSIS
 #     array_describe arrayVarName
 # @DESCRIPTION
@@ -40,8 +43,20 @@ function array_join() {
 #     array_describe myArray ==> ([0]='a' [1]='b')
 # @SEE_ALSO
 #     string_split_to_array, array_join, array_from_describe
-function array_describe() {
-	declare -p "$1" | string_after_first "=" | tr '"' "'"
+array_describe() {
+	local _bash_base_declaration _bash_base_values
+
+	_bash_base_declaration="$(typeset -p "$1")" || return 1
+	_bash_base_values="${_bash_base_declaration#*=}"
+
+	# macOS Bash 3.2 wraps array assignments in one outer single-quoted
+	# word. Newer Bash prints the compound assignment directly. Decode
+	# the outer shell quoting before preserving the existing output format.
+	if [[ -n "${BASH_VERSION:-}" && "$_bash_base_values" == \'*\' ]]; then
+		eval "_bash_base_values=$_bash_base_values" || return 1
+	fi
+
+	printf '%s\n' "$_bash_base_values" | tr '"' "'"
 }
 
 # @NAME
@@ -56,7 +71,7 @@ function array_describe() {
 #     array_from_describe myNewArray < fileNameContentString
 # @SEE_ALSO
 #     string_split_to_array, array_join, array_describe
-function array_from_describe() {
+array_from_describe() {
 	local newArrayVarName="$1"
 	local string="${2-$(cat)}"
 
@@ -77,11 +92,14 @@ function array_from_describe() {
 #     echo "ab" | array_contains arr
 # @SEE_ALSO
 #     array_remove, array_in
-function array_contains() {
+array_contains() {
 	local array="$1[@]"
 	local seeking="${2-$(cat)}"
 
-	array_in "${seeking}" "${!array}"
+	# Use the same locals as before; adding a `values` or `arrayVarName`
+	# local here would hide callers' arrays with those legitimate names.
+	eval 'set -- "${'"$1"'[@]}"'
+	array_in "${seeking}" "$@"
 }
 
 # @NAME
@@ -96,7 +114,7 @@ function array_contains() {
 #     array_in "a b" "a" "b" "c" "a b" "f" "g"
 # @SEE_ALSO
 #     array_remove, array_contains
-function array_in() {
+array_in() {
 	local seeking="$1"
 	shift
 	local element
@@ -118,16 +136,14 @@ function array_in() {
 #     array_sort myArray ==> ([0]='aa' [1]='aa' [2]='bb')
 # @SEE_ALSO
 #     array_sort_distinct
-function array_sort() {
+array_sort() {
 	local arrayVarName="$1"
 	local strSorted arrSorted
 
 	strSorted="$(array_join $'\n' "${arrayVarName}" | sort)"
 	string_split_to_array $'\n' arrSorted "${strSorted}"
 
-	local string="\${arrSorted[@]}"
-	local command="${arrayVarName}=(\"${string}\")"
-	eval "${command}"
+	eval "${arrayVarName}=( \"\${arrSorted[@]}\" )"
 }
 
 # @NAME
@@ -141,16 +157,14 @@ function array_sort() {
 #     array_sort_distinct myArray ==> ([0]='aa' [1]='bb')
 # @SEE_ALSO
 #     array_sort
-function array_sort_distinct() {
+array_sort_distinct() {
 	local arrayVarName="$1"
 	local strSorted arrSorted
 
 	strSorted="$(array_join $'\n' "${arrayVarName}" | sort -u)"
 	string_split_to_array $'\n' arrSorted "${strSorted}"
 
-	local string="\${arrSorted[@]}"
-	local command="${arrayVarName}=(\"${string}\")"
-	eval "${command}"
+	eval "${arrayVarName}=( \"\${arrSorted[@]}\" )"
 }
 
 # @NAME
@@ -163,38 +177,30 @@ function array_sort_distinct() {
 #     myArray=('aa' 'bb' 'aa')
 #     array_length myArray ==> 3
 # @SEE_ALSO
-function array_length() {
+array_length() {
 	local arrayVarName="$1"
-	local string command tmp
+	local -a tmp
 
-	eval "string='$'{${arrayVarName}[@]}"
-	command="tmp=(\"${string}\")"
-	eval "${command}"
-
-	echo "${#tmp[@]}"
+	eval "tmp=( \"\${${arrayVarName}[@]}\" )"
+	printf '%s\n' "${#tmp[@]}"
 }
 
 # @NAME
-#     array_reset_index -- reset the indexes of array to the sequence 0,1,2..., save the result to original variable name
+#     array_reset_index -- reset indexes to the shell-native contiguous sequence, save the result to original variable name
 # @SYNOPSIS
 #     array_reset_index arrayVarName
 # @DESCRIPTION
 #     **arrayVarName** the variable name of the array to be processed
 # @EXAMPLES
-#     myArray=([2]='a' [5]='c' [11]='dd')
+#     Bash example: myArray=([2]='a' [5]='c' [11]='dd')
 #     array_reset_index myArray ==> ([0]='a' [1]='c' [2]='dd')
 # @SEE_ALSO
-function array_reset_index() {
+array_reset_index() {
 	local arrayVarName="$1"
-	local string command tmp
+	local -a tmp
 
-	eval "string='$'{${arrayVarName}[@]}"
-	command="tmp=(\"${string}\")"
-	eval "${command}"
-
-	string="\${tmp[@]}"
-	command="${arrayVarName}=(\"${string}\")"
-	eval "${command}"
+	eval "tmp=( \"\${${arrayVarName}[@]}\" )"
+	eval "${arrayVarName}=( \"\${tmp[@]}\" )"
 }
 
 # @NAME
@@ -212,7 +218,7 @@ function array_reset_index() {
 #     array_equals myArray1 myArray2 false && echo Y || echo N ==> N
 #     array_equals myArray1 myArray2 true && echo Y || echo N ==> Y
 # @SEE_ALSO
-function array_equals() {
+array_equals() {
 	local arrayVarName1="$1"
 	local arrayVarName2="$2"
 	local ignoreOrder=${3:-true}
@@ -235,7 +241,7 @@ function array_equals() {
 		array_reset_index tmp2
 	fi
 
-	[ "$(array_describe tmp1)" == "$(array_describe tmp2)" ]
+	[[ "$(array_describe tmp1)" == "$(array_describe tmp2)" ]]
 }
 
 # @NAME
@@ -254,25 +260,23 @@ function array_equals() {
 #     array_intersection myArray1 myArray2 newArray false
 # @SEE_ALSO
 #     array_subtract, array_union
-function array_intersection() {
+array_intersection() {
 	local array1="$1[@]"
 	local arrayVarName2="$2"
 	local newArrayVarName="$3"
 	local ignoreOrderAndDuplicated=${4:-true}
-
 	local tmp element2 string command
+
+	eval 'set -- "${'"$1"'[@]}"'
 	tmp=()
-	for element2 in "${!array1}"; do
+	for element2 in "$@"; do
 		array_contains "$arrayVarName2" "$element2" && array_append tmp "$element2"
 	done
 
 	if [ "${ignoreOrderAndDuplicated}" = true ]; then
 		array_sort_distinct tmp
 	fi
-
-	string="\${tmp[@]}"
-	command="${newArrayVarName}=(\"${string}\")"
-	eval "${command}"
+	eval "${newArrayVarName}=( \"\${tmp[@]}\" )"
 }
 
 # @NAME
@@ -291,25 +295,23 @@ function array_intersection() {
 #     array_subtract myArray1 myArray2 newArray false
 # @SEE_ALSO
 #     array_intersection, array_union
-function array_subtract() {
+array_subtract() {
 	local array1="$1[@]"
 	local arrayVarName2="$2"
 	local newArrayVarName="$3"
 	local ignoreOrderAndDuplicated=${4:-true}
-
 	local tmp element2 string command
+
+	eval 'set -- "${'"$1"'[@]}"'
 	tmp=()
-	for element2 in "${!array1}"; do
+	for element2 in "$@"; do
 		array_contains "$arrayVarName2" "$element2" || array_append tmp "$element2"
 	done
 
 	if [ "${ignoreOrderAndDuplicated}" = true ]; then
 		array_sort_distinct tmp
 	fi
-
-	string="\${tmp[@]}"
-	command="${newArrayVarName}=(\"${string}\")"
-	eval "${command}"
+	eval "${newArrayVarName}=( \"\${tmp[@]}\" )"
 }
 
 # @NAME
@@ -328,28 +330,25 @@ function array_subtract() {
 #     array_union myArray1 myArray2 newArray false
 # @SEE_ALSO
 #     array_intersection, array_union
-function array_union() {
+array_union() {
 	local array1="$1[@]"
 	local array2="$2[@]"
 	local newArrayVarName="$3"
 	local ignoreOrderAndDuplicated=${4:-true}
-
 	local tmp element2 string command
+
+	# Union consumes both arrays as a single ordered sequence. Both are
+	# expanded before positional arguments are replaced.
+	eval 'set -- "${'"$1"'[@]}" "${'"$2"'[@]}"'
 	tmp=()
-	for element2 in "${!array1}"; do
-		array_append tmp "$element2"
-	done
-	for element2 in "${!array2}"; do
+	for element2 in "$@"; do
 		array_append tmp "$element2"
 	done
 
 	if [ "${ignoreOrderAndDuplicated}" = true ]; then
 		array_sort_distinct tmp
 	fi
-
-	string="\${tmp[@]}"
-	command="${newArrayVarName}=(\"${string}\")"
-	eval "${command}"
+	eval "${newArrayVarName}=( \"\${tmp[@]}\" )"
 }
 
 # @NAME
@@ -364,14 +363,15 @@ function array_union() {
 #     array_append myArray "ele ment1" "ele ment2"
 # @SEE_ALSO
 #     array_remove
-function array_append() {
+array_append() {
 	local arrayVarName="$1"
 	shift
 
-	local elementToAppend command
+	local elementToAppend
 	for elementToAppend in "$@"; do
-		command="$arrayVarName+=(\"${elementToAppend}\")"
-		eval "${command}"
+		# Keep the value out of the eval program text; expand it only after eval
+		# has selected the destination array name.
+		eval "${arrayVarName}+=( \"\$elementToAppend\" )"
 	done
 }
 
@@ -387,24 +387,19 @@ function array_append() {
 #     array_remove arr "ab"
 # @SEE_ALSO
 #     array_contains, array_append
-function array_remove() {
+array_remove() {
 	local arrayVarName="$1"
 	local element="$2"
-
 	local string command tmp index
-	eval "string='$'{${arrayVarName}[@]}"
-	command="tmp=(\"${string}\")"
-	eval "${command}"
 
-	for index in "${!tmp[@]}"; do
-		if [[ "${tmp[$index]}" == "${element}" ]]; then
-			unset tmp["${index}"]
+	eval 'set -- "${'"$arrayVarName"'[@]}"'
+	tmp=()
+	for index in "$@"; do
+		if [[ "$index" != "$element" ]]; then
+			tmp+=("$index")
 		fi
 	done
-
-	string="\${tmp[@]}"
-	command="${arrayVarName}=(\"${string}\")"
-	eval "${command}"
+	eval "${arrayVarName}=( \"\${tmp[@]}\" )"
 }
 
 # @NAME
@@ -418,7 +413,7 @@ function array_remove() {
 #     arr=(" a " " b c ")
 #     array_clone arr newArray
 # @SEE_ALSO
-function array_clone() {
+array_clone() {
 	local arrayVarName="$1"
 	local arrayVarName2="$2"
 
@@ -437,23 +432,27 @@ function array_clone() {
 #     arr=(" a " " b c ")
 #     array_map arr "string_trim | wc -m | string_trim" newArray
 # @SEE_ALSO
-function array_map() {
+array_map() {
 	local array="$1[@]"
 	local pipedOperators="$2"
-	local newArrayVarName="$3"
-
+	local newArrayVarName="${3-}"
 	local tmp element mapped_value string command
+
+	eval 'set -- "${'"$1"'[@]}"'
 	tmp=()
-	for element in "${!array}"; do
-		escaped="${element//\'/\'"\'"\'}" # escape the single quote
-		mapped_value="$(eval "echo '${escaped}' | ${pipedOperators}")"
+	for element in "$@"; do
+		if [[ -n "${BASH_VERSION:-}" ]]; then
+			# Retain the original Bash echo semantics for values such as -n,
+			# but never evaluate an input element as shell source.
+			mapped_value="$(echo "$element" | eval "$pipedOperators")"
+		else
+			mapped_value="$(printf '%s\n' "$element" | eval "$pipedOperators")"
+		fi
 		tmp+=("${mapped_value}")
 	done
 
 	if [[ -n "${newArrayVarName}" ]]; then
-		string="\${tmp[@]}"
-		command="${newArrayVarName}=(\"${string}\")"
-		eval "${command}"
+		eval "${newArrayVarName}=( \"\${tmp[@]}\" )"
 	else
 		array_join $'\n' tmp
 	fi
@@ -471,23 +470,22 @@ function array_map() {
 #     arr=("NAME A" "NAME B" "OTHER")
 #     array_filter arr 'NAME' newArray
 # @SEE_ALSO
-function array_filter() {
+array_filter() {
 	local array="$1[@]"
 	local regExp="$2"
-	local newArrayVarName="$3"
-
+	local newArrayVarName="${3-}"
 	local tmp element string command
+
+	eval 'set -- "${'"$1"'[@]}"'
 	tmp=()
-	for element in "${!array}"; do
-		if [[ ${element} =~ ${regExp} ]]; then
+	for element in "$@"; do
+		if [[ $element =~ $regExp ]]; then
 			array_append tmp "${element}"
 		fi
 	done
 
 	if [[ -n "${newArrayVarName}" ]]; then
-		string="\${tmp[@]}"
-		command="${newArrayVarName}=(\"${string}\")"
-		eval "${command}"
+		eval "${newArrayVarName}=( \"\${tmp[@]}\" )"
 	else
 		array_join $'\n' tmp
 	fi

@@ -21,6 +21,21 @@ Bash-base does this for you, you can just call the function here which is well t
 Available on [GitHub](https://github.com/renault-digital/bash-base), [NPM](https://www.npmjs.com/package/@renault-digital/bash-base) and [Docker Hub](https://hub.docker.com/r/renaultdigital/bash-base).
 
 
+## Bash and zsh compatibility
+
+The reusable functions in `src/` can be sourced by both **Bash** and **zsh**.
+This matters on macOS, where zsh is the default interactive shell: `source
+bash-base` is interpreted by the current shell, so the library itself must not
+rely on hidden Bash-only syntax.
+
+Existing Bash scripts and the Bash ShellSpec regression suite remain supported.
+A separate dual-shell compatibility gate runs the same core behavior under Bash
+and zsh.
+
+See [Bash and zsh compatibility](docs/bash-zsh-compatibility.md) for the exact
+contract, array portability boundary and test model.
+
+
 ## Test coverage report
 [![test coverage](https://codecov.io/gh/renault-digital/bash-base/graphs/tree.svg)](https://codecov.io/gh/renault-digital/bash-base)
 
@@ -228,7 +243,7 @@ See [reference](docs/references.md)
 See [example](example) folder, including the use case of <mark>**[Makefile](example/Makefile)**</mark>
 
 ## Specfile (test file)
-See [spec](spec) folder
+See [spec](spec) folder. Run `npm test` to execute the Bash/zsh compatibility gate followed by the existing Bash ShellSpec regression suite.
 
 ## Latest Update
 See [change log](CHANGELOG.md)

@@ -16,3 +16,20 @@ array_describe_equals() {
 
 
 
+
+# Compare ordered array values across Bash and zsh without assuming native
+# indexed-array numbering or typeset/declare output formatting.
+array_values_equal() {
+    local array_name="$1"
+    shift
+    local -a __bb_test_values
+    local element
+
+    eval "__bb_test_values=( \"\${${array_name}[@]}\" )" || return 1
+    [[ ${#__bb_test_values[@]} -eq $# ]] || return 1
+    for element in "${__bb_test_values[@]}"; do
+        [[ "$element" == "$1" ]] || return 1
+        shift
+    done
+    return 0
+}

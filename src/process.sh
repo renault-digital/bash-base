@@ -10,7 +10,7 @@
 #     prc_filter_by_port 9090
 # @SEE_ALSO
 #     prc_kill_by_port
-function prc_filter_by_port() {
+prc_filter_by_port() {
 	if [ $# -eq 0 ]; then
 		lsof -iTCP -sTCP:LISTEN -n -P
 	elif [ $# -eq 1 ]; then
@@ -29,7 +29,7 @@ function prc_filter_by_port() {
 #     prc_kill_by_port 9090
 # @SEE_ALSO
 #     prc_filter_by_port
-function prc_kill_by_port() {
+prc_kill_by_port() {
 	local port="$1"
 	local signal="${2-15}"
 
@@ -52,7 +52,7 @@ function prc_kill_by_port() {
 #     prc_filter_by_cmd node
 # @SEE_ALSO
 #     prc_kill_by_cmd
-function prc_filter_by_cmd() {
+prc_filter_by_cmd() {
 	if [ $# -eq 0 ]; then
 		ps
 	elif [ $# -eq 1 ]; then
@@ -71,7 +71,7 @@ function prc_filter_by_cmd() {
 #     prc_kill_by_cmd my-app
 # @SEE_ALSO
 #     prc_filter_by_cmd
-function prc_kill_by_cmd() {
+prc_kill_by_cmd() {
 	local cmd="$1"
 	local signal="${2-15}"
 

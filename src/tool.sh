@@ -15,7 +15,7 @@ source src/out.sh
 #     stop_if_failed "ERROR: can't delete the directory '${destProjectPath}' !"
 # @SEE_ALSO
 #     confirm_to_continue
-function stop_if_failed() {
+stop_if_failed() {
 	if [[ $? -ne 0 ]]; then
 		print_error "$*"
 		exit 1
@@ -34,19 +34,25 @@ function stop_if_failed() {
 #     confirm_to_continue a b
 # @SEE_ALSO
 #     print_args, stop_if_failed
-function confirm_to_continue() {
+confirm_to_continue() {
 	local response
 	print_args "$@"
-	if ! [ "${modeQuiet}" == true ]; then
-		read -r -p "Continue ? [y/N] " response
 
-		case "${response}" in
-		[yY][eE][sS] | [yY])
-			echo -e "Continue..."
-			sleep 1s
+	if [[ "${modeQuiet:-false}" != true ]]; then
+		# Bash `read -p` and zsh `read "name?prompt"` are shell-specific.
+		# Match Bash read -p behavior by showing the prompt only for a TTY.
+		if [[ -t 0 ]]; then
+			printf '%s' 'Continue ? [y/N] ' >&2
+		fi
+		read -r response || response=""
+
+		case "$response" in
+		[yY] | [yY][eE][sS])
+			printf '%s\n' 'Continue...'
+			sleep 1
 			;;
 		*)
-			echo -e "Exiting..."
+			printf '%s\n' 'Exiting...'
 			exit 1
 			;;
 		esac
@@ -65,7 +71,7 @@ function confirm_to_continue() {
 #     wait_for 'test -f /tmp/output.txt' 'file existed' 3
 # @SEE_ALSO
 #     confirm_to_continue, stop_if_failed
-function wait_for() {
+wait_for() {
 	local predicate="${1}"
 	local subject="${2-${predicate}}"
 	local interval=${3-3}
@@ -91,6 +97,16 @@ function wait_for() {
 #     record2
 #     EOF
 # @SEE_ALSO
-function declare_heredoc() {
-	eval "$1='$(cat)'"
+declare_heredoc() {
+	local _bash_base_heredoc_target="${1-}"
+	local _bash_base_heredoc_content
+
+	# Only identifier names may appear as the left-hand side of an eval.
+	case "$_bash_base_heredoc_target" in
+	'' | [!a-zA-Z_]* | *[!a-zA-Z0-9_]*) return 2 ;;
+	esac
+
+	_bash_base_heredoc_content="$(cat)"
+	# Expand the content as a variable value, never parse it as shell code.
+	eval "${_bash_base_heredoc_target}=\"\$_bash_base_heredoc_content\""
 }

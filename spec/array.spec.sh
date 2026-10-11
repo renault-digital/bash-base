@@ -278,13 +278,19 @@ Describe 'array_from_describe'
     strDescribe="([1]=' as' [5]='fd ')"
     It 'with value'
         When call array_from_describe actual "${strDescribe}"
-        The value "$(declare -p actual)" should eq "declare -a actual=([1]=\" as\" [5]=\"fd \")"
+        The status should be success
+        The value "${#actual[@]}" should eq "2"
+        The value "${actual[1]}" should eq " as"
+        The value "${actual[5]}" should eq "fd "
     End
 
     It 'with file'
         echo "${strDescribe}" > temp_file.txt
         When call eval "array_from_describe actual < temp_file.txt"
-        The value "$(declare -p actual)" should eq "declare -a actual=([1]=\" as\" [5]=\"fd \")"
+        The status should be success
+        The value "${#actual[@]}" should eq "2"
+        The value "${actual[1]}" should eq " as"
+        The value "${actual[5]}" should eq "fd "
         rm -fr temp_file.txt
     End
 End

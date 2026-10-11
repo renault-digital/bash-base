@@ -13,7 +13,7 @@ source src/tool.sh
 #     string_trim < logfile
 #     echo " add " | string_trim
 # @SEE_ALSO
-function string_trim() {
+string_trim() {
 	local string="${1-$(cat)}"
 	echo "${string}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' #trim ' '
 }
@@ -29,7 +29,7 @@ function string_trim() {
 #     string_repeat 'abc' 5
 #     echo 5 | string_repeat 'abc'
 # @SEE_ALSO
-function string_repeat() {
+string_repeat() {
 	local string="$1"
 	local nbTimes=${2-$(cat)}
 	printf "${string}%.0s" $(seq 1 "$nbTimes")
@@ -46,7 +46,7 @@ function string_repeat() {
 #     string_length < logfile
 #     echo " add " | string_length
 # @SEE_ALSO
-function string_length() {
+string_length() {
 	local string index
 	string="${1-$(cat)}"
 
@@ -66,7 +66,7 @@ function string_length() {
 #     echo " add " | string_is_empty
 # @SEE_ALSO
 #     string_length
-function string_is_empty() {
+string_is_empty() {
 	local string="${1-$(cat)}"
 
 	[[ $(string_length "$string") -eq 0 ]]
@@ -82,7 +82,7 @@ function string_is_empty() {
 #     string_revert 'aBc'
 #     echo 'aBc' | string_revert
 # @SEE_ALSO
-function string_revert() {
+string_revert() {
 	local string="${1-$(cat)}"
 	echo "${string}" | rev
 }
@@ -98,9 +98,16 @@ function string_revert() {
 #     echo 'abc' | string_upper
 # @SEE_ALSO
 #     string_upper_first, string_lower
-function string_upper() {
+string_upper() {
 	local string=${1-$(cat)}
-	echo "${string^^}"
+	if [[ -n "${BASH_VERSION:-}" ]] && ((BASH_VERSINFO[0] >= 4)); then
+		# Bash's case expansion is locale-aware (unlike many tr versions).
+		# Keep the Bash 4+/5+ echo behavior verbatim. Construct the expression
+		# at runtime so Bash 3.2 can source this file without evaluating it.
+		eval 'echo "${string'"^^"'}"'
+		return
+	fi
+	printf '%s\n' "$string" | tr '[:lower:]' '[:upper:]'
 }
 
 # @NAME
@@ -114,9 +121,13 @@ function string_upper() {
 #     echo 'aBc' | string_lower
 # @SEE_ALSO
 #     string_upper, string_upper_first
-function string_lower() {
+string_lower() {
 	local string=${1-$(cat)}
-	echo "${string,,}"
+	if [[ -n "${BASH_VERSION:-}" ]] && ((BASH_VERSINFO[0] >= 4)); then
+		eval 'echo "${string'",,"'}"'
+		return
+	fi
+	printf '%s\n' "$string" | tr '[:upper:]' '[:lower:]'
 }
 
 # @NAME
@@ -130,10 +141,29 @@ function string_lower() {
 #     echo 'aBc' | string_upper_first
 # @SEE_ALSO
 #     string_lower, string_upper
-function string_upper_first() {
+string_upper_first() {
 	local string=${1-$(cat)}
-	local lower="${string,,}"
-	echo "${lower^}"
+	local lower first rest
+
+	if [[ -n "${BASH_VERSION:-}" ]] && ((BASH_VERSINFO[0] >= 4)); then
+		# Do not round-trip through command substitution: it strips the
+		# trailing newlines that the old Bash parameter expansion preserved.
+		eval 'lower="${string'",,"'}"'
+		eval 'echo "${lower'"^"'}"'
+		return
+	fi
+
+	lower="$(string_lower "$string")"
+	[[ -n "$lower" ]] || {
+		printf '\n'
+		return 0
+	}
+
+	# `${var^^}` / `${var,,}` / `${var^}` are Bash-specific.  Parameter
+	# prefix/suffix removal is shared by Bash and zsh.
+	rest="${lower#?}"
+	first="${lower%"$rest"}"
+	printf '%s%s\n' "$(string_upper "$first")" "$rest"
 }
 
 # @NAME
@@ -149,11 +179,37 @@ function string_upper_first() {
 #     string_sub 3 5 < temp_file.txt
 #     echo ' as fd ' | string_sub 2 4
 # @SEE_ALSO
-function string_sub() {
+string_sub() {
 	local startIndex=$1
 	local subStringLength=$2
 	local string="${3-$(cat)}"
-	echo "${string:$startIndex:$subStringLength}"
+	if [[ -n "${BASH_VERSION:-}" ]] && ((BASH_VERSINFO[0] >= 4)); then
+		# Keep Bash 4+/5+ substring and error behavior exactly as before.
+		# Bash 3.2 continues to use the portable negative-length fallback.
+		echo "${string:$startIndex:$subStringLength}"
+		return
+	fi
+	local totalLength=${#string}
+	local actualStart=$startIndex
+	local actualLength=$subStringLength
+
+	# Bash 3.2 cannot use a negative substring length.  Convert the
+	# documented negative start/end offsets to nonnegative bounds first.
+	if ((actualStart < 0)); then
+		actualStart=$((totalLength + actualStart))
+	fi
+	if ((actualLength < 0)); then
+		actualLength=$((totalLength + actualLength - actualStart))
+	fi
+	# Out-of-range starts produce an empty result (as in modern Bash).
+	if ((actualStart < 0 || actualStart > totalLength)); then
+		printf '\n'
+		return 0
+	fi
+	if ((actualLength < 0)); then
+		return 1
+	fi
+	printf '%s\n' "${string:$actualStart:$actualLength}"
 }
 
 # @NAME
@@ -167,7 +223,7 @@ function string_sub() {
 #     string_match 'name;+' "name;name;"
 # @SEE_ALSO
 #     string_index_first
-function string_match() {
+string_match() {
 	local value regExp
 	regExp=${1}
 	string="${2-$(cat)}"
@@ -185,10 +241,14 @@ function string_match() {
 #     escape_sed 'a$'
 # @SEE_ALSO
 #     string_replace
-function escape_sed() {
-	echo "${1}" | sed -e 's/\//\\\//g' -e 's/\&/\\\&/g' -e 's/\./\\\./g' -e 's/\^/\\\^/g' -e 's/\[/\\\[/g' -e 's/\$/\\\$/g'
+escape_sed() {
+	if [[ -n "${ZSH_VERSION:-}" ]]; then
+		printf '%s\n' "$1"
+	else
+		# Preserve historical Bash echo semantics.
+		echo "$1"
+	fi | sed -e 's/\//\\\//g' -e 's/\&/\\\&/g' -e 's/\./\\\./g' -e 's/\^/\\\^/g' -e 's/\[/\\\[/g' -e 's/\$/\\\$/g'
 }
-export -f escape_sed >/dev/null
 
 # @NAME
 #     string_replace -- replace literally the token string to new string, not support regular expression
@@ -204,11 +264,16 @@ export -f escape_sed >/dev/null
 #     string_replace '\*' 'b' 'a*a'  ==> 'aba'
 # @SEE_ALSO
 #     escape_sed, string_replace_regex
-function string_replace() {
+string_replace() {
 	local tokenString newString
 	tokenString=$(escape_sed "${1}")
 	newString=$(escape_sed "${2}")
-	echo "${3-$(cat)}" | sed -e "s/${tokenString}/${newString}/g"
+	if [[ -n "${ZSH_VERSION:-}" ]]; then
+		printf '%s\n' "${3-$(cat)}" | sed -e "s/${tokenString}/${newString}/g"
+	else
+		# Preserve historical Bash echo semantics.
+		echo "${3-$(cat)}" | sed -e "s/${tokenString}/${newString}/g"
+	fi
 }
 
 # @NAME
@@ -225,7 +290,7 @@ function string_replace() {
 #     string_replace_regex '*' 'b' 'a*a'  ==> 'aba'
 # @SEE_ALSO
 #     string_replace
-function string_replace_regex() {
+string_replace_regex() {
 	echo "${3-$(cat)}" | sed -E -e "s/$1/$2/g"
 }
 
@@ -242,11 +307,11 @@ function string_replace_regex() {
 #     echo " add " | string_index_first "token"
 # @SEE_ALSO
 #     string_before_first, string_after_first
-function string_index_first() {
+string_index_first() {
 	local tokenString=$1
 	local string="${2-$(cat)}"
 	local prefix="${string%%${tokenString}*}"
-	[ "${string}" == "${prefix}" ] && echo -1 || echo ${#prefix}
+	[[ "${string}" == "${prefix}" ]] && printf '%s\n' -1 || printf '%s\n' "${#prefix}"
 }
 
 # @NAME
@@ -262,7 +327,7 @@ function string_index_first() {
 #     echo " add " | string_before_first "dd"
 # @SEE_ALSO
 #     string_index_first, string_after_first
-function string_before_first() {
+string_before_first() {
 	local tokenString=$1
 	local string="${2-$(cat)}"
 	echo "${string%%${tokenString}*}" # Remove the first - and everything following it
@@ -281,7 +346,7 @@ function string_before_first() {
 #     echo " add " | string_after_first "dd"
 # @SEE_ALSO
 #     string_index_first, string_before_first
-function string_after_first() {
+string_after_first() {
 	local tokenString=$1
 	local string="${2-$(cat)}"
 	echo "${string#*${tokenString}}" # Remove everything up to and including first -
@@ -303,7 +368,7 @@ function string_after_first() {
 #     string_split_to_array $'\n' branchesToSelectArray "${branchesToSelectString}"
 # @SEE_ALSO
 #     array_join, array_describe, array_from_describe, string_pick_to_array
-function string_split_to_array() {
+string_split_to_array() {
 	local tokenString="$1"
 	local newArrayVarName="$2"
 	local string="${3-$(cat)}"
@@ -341,7 +406,7 @@ function string_split_to_array() {
 #     string_pick_to_array '{age:' '}' newArray "$str"
 # @SEE_ALSO
 #     array_join, array_describe, array_from_describe, string_split_to_array
-function string_pick_to_array() {
+string_pick_to_array() {
 	local startTokenString="$1"
 	local endTokenString="$2"
 	local newArrayVarName="$3"
