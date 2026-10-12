@@ -217,18 +217,32 @@ jobs:
           retention-days: 7
 
   semantic-release-preview:
+    # PR dry runs exit before verifying npm credentials; do not grant OIDC to PR jobs.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      id-token: write
     # Waits for test jobs to complete
     needs: [lint-commit,lint,test,coverage-macos]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: 'npm'
+          fetch-depth: 0
+
+      - name: Setup Node.js for npm OIDC
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+
+      - name: Install OIDC-compatible npm
+        run: |
+          npm install --global npm@11.21.0
+          node --version
+          npm --version
 
       - name: Install
         run: npm ci
@@ -236,7 +250,6 @@ jobs:
       - name: semantic-release dry run to preview of the pending release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: npx semantic-release --dry-run
@@ -250,6 +263,7 @@ jobs:
     permissions:
       contents: write
       packages: write
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -258,11 +272,18 @@ jobs:
           persist-credentials: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Node.js for npm OIDC
+        uses: actions/setup-node@v6
         with:
-          node-version: 22
-          cache: 'npm'
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+
+      - name: Install OIDC-compatible npm
+        run: |
+          npm install --global npm@11.21.0
+          node --version
+          npm --version
 
       - name: Install
         run: npm ci
@@ -278,7 +299,6 @@ jobs:
       - name: semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: npx semantic-release
