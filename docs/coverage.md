@@ -21,6 +21,98 @@ The separate Linux job continues to run compatibility/regression checks and
 collect diagnostic reports. Its reports are retained as an artifact but are
 not uploaded to Codecov or added to the strict macOS union.
 
+## CI test matrix
+
+This matrix describes the commands configured in
+[the workflow](../.github/workflows/cicd.yml) and
+[the strict verifier](../scripts/verify-final-coverage-v3.sh), not the outcome of
+an individual run. Read the logs for executed examples, skips, installed
+versions, source SHA and results. Update this section when those commands change.
+
+### Operating system, shell and execution location
+
+`ubuntu-22.04` and `macos-15` select the GitHub-hosted runner operating system.
+Bash and zsh are the interpreters running on that operating system. These are
+separate dimensions; macOS is not another name for zsh. The workflow's
+`shell: bash` runs the orchestration step, while ShellSpec's `--shell` selects
+the interpreter under test.
+
+`coverage-macos` checks out source on GitHub's macOS runner, installs its tools,
+and calls the verifier there. The verifier creates a fresh temporary report
+directory on that machine. The workflow uploads that run's validated union;
+it does not retrieve reports from a contributor's Mac. Running the verifier
+on a development Mac produces a separate local result and does not itself run
+the Codecov upload step.
+
+Keep `macOS` in operating-system requirements, runner labels, platform-specific
+notes and report-origin labels. Do not replace it globally with `zsh`. This
+matrix keeps the existing job IDs and release dependencies unchanged.
+
+### Configured tests and report destinations
+
+| Runner | Job | Interpreter or tool | Configured scope / entry point | Included in Codecov union? |
+| --- | --- | --- | --- | --- |
+| `ubuntu-22.04` | `test` | Installed Bash and zsh | `bash scripts/test.sh --kcov -f t`: the workflow's Bash/zsh compatibility entry point followed by the existing Bash ShellSpec regression suite. Compatibility cases are maintained by the test entry point, not redefined here. | No. Linux coverage remains diagnostic evidence. |
+| `ubuntu-22.04` | `test` | Installed zsh, via ShellSpec `--shell zsh` | Selected `spec/string.spec.sh` and `spec/reflection.spec.sh` tests; separate `coverage-zsh` report. | No. Retained with Linux diagnostics. |
+| `macos-15` | `coverage-macos` | `/bin/bash`, expected Bash 3.2 | ShellSpec over `spec/*.spec.sh`, subject to the suite's conditional skips; report label `bash32`. | Yes, as a full-inventory report. |
+| `macos-15` | `coverage-macos` | Homebrew Bash, expected Bash 5+ | ShellSpec over `spec/*.spec.sh`, subject to the suite's conditional skips; report label `bash5`. | Yes, as a full-inventory report. |
+| `macos-15` | `coverage-macos` | `/bin/zsh` | Four selected spec files listed below; report label `zsh`. This is not the complete ShellSpec suite. | Yes, as a full-inventory report. |
+| `macos-15` | `coverage-macos` | Python PTY driver launching `/bin/bash` | `bash_base_tty_probe_v3.py --shell /bin/bash --preload-input`; the verifier requires `TTY_COVERAGE_PASS 2/2`. | Yes, as the supplemental TTY report. |
+| `ubuntu-22.04` and `macos-15` | `test` and `coverage-macos`, respectively | Python 3 | `python3 -m unittest discover -s tests -p 'test_coverage_union_v3.py' -v`; synthetic report fixtures exercise validation and export. | No. These are tests of the coverage tooling, not additional production-source coverage. |
+
+The macOS zsh selection is exactly:
+
+```text
+spec/string.spec.sh
+spec/reflection.spec.sh
+spec/coverage_edges.spec.sh
+spec/coverage_zsh_array_map.spec.sh
+```
+
+The macOS job calls the strict verifier directly, not `scripts/test.sh`. Do not
+infer that the separate Bash/zsh compatibility entry point is also invoked on
+macOS merely because the strict verifier tests both interpreters.
+
+The Linux zsh probe's **coverage report** is diagnostic. The probe itself is
+not best-effort: the workflow propagates its test exit status and does not
+ignore a failing probe.
+
+### Limits, versions and evidence
+
+A **full-inventory report** contains the baseline measurable files and lines;
+it need not execute every spec file or cover every measured line. An unexecuted
+line remains in the inventory with zero hits. In particular, the zsh inventory
+must match the Bash inventories even though the zsh spec selection is smaller.
+
+The four macOS reports are collected sequentially from one checkout and merged
+as described below. This is a documented testing matrix, not a
+`strategy.matrix` expansion, a full operating-system-by-shell Cartesian product,
+or an average of coverage percentages. Linux reports are not merged into it.
+
+The configured checks do not establish a complete zsh ShellSpec run, an explicit
+Linux Bash 3.2 job, TTY testing under every interpreter, or testing across every
+macOS release and CPU architecture. A 100% union does not establish any of these
+claims. The compatibility contract remains in
+[Bash and zsh compatibility](bash-zsh-compatibility.md); this table records test
+scope rather than expanding the public support contract.
+
+ShellSpec is explicitly pinned to `0.28.1` in both collection jobs. Bash/zsh,
+Homebrew packages and the runner images are not all pinned to immutable versions.
+The verifier selects `/bin/bash`, `/bin/zsh` and `BASH5` (or Homebrew's Bash); its
+labels are not substitutes for checking actual version output. It is configured
+for the macOS tool layout, so running it unchanged on a different OS does not
+prove that its `bash32` row actually used Bash 3.2.
+
+For PRs, the strict job uses the PR head SHA and the Linux job uses the default
+PR merge checkout. Keep their evidence separate. For a run-specific result,
+record the source SHA, runner/image and architecture, actual interpreter versions,
+executed/skipped tests and validated line totals alongside the CI result.
+Historical local versions and line counts are not permanent CI guarantees.
+
+Runner labels and workflow shell semantics are documented in GitHub's
+[hosted-runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
+and [workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax).
+
 ## Validation and export
 
 [bash_base_coverage_union_v3.py](../bash_base_coverage_union_v3.py) uses the first

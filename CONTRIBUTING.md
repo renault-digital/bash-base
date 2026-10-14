@@ -7,6 +7,13 @@
 
 This project and everyone participating in it is governed by the [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
 
+## CI test matrix
+
+Use the [CI test matrix](docs/coverage.md#ci-test-matrix) to distinguish runner
+operating systems, tested interpreters, full-suite and selected test runs, and
+coverage report destinations. Keep it aligned with changes to the workflow and
+test entry points. A 100% line union is not a per-environment test guarantee.
+
 ## Submit an issue
 
 Search the existing issues before opening a report or suggestion on the
