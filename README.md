@@ -85,6 +85,9 @@ an older result visible.
 
 [![test coverage](https://codecov.io/gh/renault-digital/bash-base/graphs/tree.svg)](https://app.codecov.io/gh/renault-digital/bash-base/tree/master/src)
 
+See the [CI test matrix](docs/coverage.md#ci-test-matrix) for runner, interpreter,
+test scope and report destinations.
+
 See [coverage collection, validation and reporting](docs/coverage.md) for the
 report contract, authentication setup and troubleshooting. CI also retains the
 raw reports, source hashes and logs in the `strict-macos-coverage` artifact.
