@@ -11,11 +11,18 @@ failing full-versus-full validation without relaxing source-line identity.
 All reports must be generated against the same source bytes. Cobertura XML
 alone cannot prove that; invoke this on reports collected in one source-locked
 run (as done by verify-final-coverage-v3.sh).
+
+With --output-cobertura, export the validated baseline line inventory using
+repository-relative src/*.sh paths and binary union hits (0/1, not execution
+counts). Export happens after report validation, even when --require-100 fails
+only because genuine lines remain uncovered. This keeps reporting truthful
+without changing the coverage gate's nonzero result.
 """
 
 import argparse
 from pathlib import Path
 import sys
+import time
 import xml.etree.ElementTree as ET
 
 TARGETS = (
@@ -77,6 +84,57 @@ def collect_differences(baseline, reports, supplemental_last):
     return differences
 
 
+def write_cobertura(output: Path, baseline: dict, hits: dict) -> None:
+    """Write only observed baseline lines; never infer or remove missed lines."""
+    total = sum(map(len, baseline.values()))
+    covered = sum(map(len, hits.values()))
+    rate = f"{covered / total:.12f}"
+    root = ET.Element("coverage", {
+        "version": "bash-base-strict-union-v3",
+        "timestamp": str(int(time.time())),
+        "lines-valid": str(total), "lines-covered": str(covered),
+        "line-rate": rate,
+        # No branch instrumentation is claimed by this line-only report.
+        "branches-valid": "0", "branches-covered": "0",
+        "branch-rate": "0", "complexity": "0",
+    })
+    sources = ET.SubElement(root, "sources")
+    ET.SubElement(sources, "source").text = "."
+    packages = ET.SubElement(root, "packages")
+    package = ET.SubElement(packages, "package", {
+        "name": "src", "line-rate": rate,
+        "branch-rate": "0", "complexity": "0",
+    })
+    classes = ET.SubElement(package, "classes")
+    for filename in TARGETS:
+        measured = baseline[filename]
+        cls = ET.SubElement(classes, "class", {
+            "name": filename, "filename": f"src/{filename}",
+            "line-rate": f"{len(hits[filename]) / len(measured):.12f}",
+            "branch-rate": "0", "complexity": "0",
+        })
+        ET.SubElement(cls, "methods")
+        lines = ET.SubElement(cls, "lines")
+        for number in sorted(measured):
+            ET.SubElement(lines, "line", {
+                "number": str(number),
+                "hits": "1" if number in hits[filename] else "0",
+                "branch": "false",
+            })
+    output.parent.mkdir(parents=True, exist_ok=True)
+    created = False
+    try:
+        # Fail closed on an existing output, including a stale file or symlink.
+        with output.open("xb") as stream:
+            created = True
+            ET.ElementTree(root).write(stream, encoding="utf-8", xml_declaration=True)
+            stream.write(b"\n")
+    except OSError:
+        if created:
+            output.unlink(missing_ok=True)
+        raise
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-dir", type=Path, help="Current src directory, for snippets and file validation")
@@ -84,6 +142,8 @@ def main(argv=None):
     parser.add_argument("--supplemental-last", type=int, default=0, metavar="N",
                         help="Allow last N reports (such as PTY) to omit whole src files")
     parser.add_argument("--require-100", action="store_true", help="Fail unless validated union hits every baseline line")
+    parser.add_argument("--output-cobertura", type=Path, metavar="FILE",
+                        help="Export a validated line union; requires source-dir src and strict validation")
     parser.add_argument("reports", nargs="+", help="Full reports first, then optional supplemental reports")
     args = parser.parse_args(argv)
 
@@ -95,6 +155,20 @@ def main(argv=None):
         parser.error("--supplemental-last requires --strict-line-sets or --require-100")
     if len({str(Path(p).resolve()) for p in args.reports}) != len(args.reports):
         parser.error("Duplicate report path")
+
+    if args.output_cobertura:
+        if not args.source_dir or args.source_dir.resolve().name != "src":
+            parser.error("--output-cobertura requires --source-dir pointing to the repository src directory")
+        if not (args.strict_line_sets or args.require_100):
+            parser.error("--output-cobertura requires --strict-line-sets or --require-100")
+        if args.output_cobertura.exists() or args.output_cobertura.is_symlink():
+            parser.error(f"Refusing to overwrite existing output: {args.output_cobertura}")
+        try:
+            args.output_cobertura.resolve().relative_to(args.source_dir.resolve())
+        except ValueError:
+            pass
+        else:
+            parser.error("Coverage output must be outside the production src directory")
 
     source_lines = {}
     if args.source_dir:
@@ -118,6 +192,10 @@ def main(argv=None):
     if set(baseline) != set(TARGETS):
         print(f"ERROR: Full baseline must contain all 10 src files; "
               f"missing={sorted(set(TARGETS) - set(baseline))}", file=sys.stderr)
+        return 2
+    empty_files = sorted(name for name, lines in baseline.items() if not lines)
+    if empty_files:
+        print(f"ERROR: Empty measurable-line inventory: {empty_files}", file=sys.stderr)
         return 2
     if source_lines:
         for filename, hit_map in baseline.items():
@@ -165,6 +243,13 @@ def main(argv=None):
     if problems and (args.strict_line_sets or args.require_100):
         print("COVERAGE_GATE=FAIL_REPORT_VALIDATION")
         return 3
+    if args.output_cobertura:
+        try:
+            write_cobertura(args.output_cobertura, baseline, hits)
+        except OSError as exc:
+            print(f"ERROR: Cannot write validated Cobertura report: {exc}", file=sys.stderr)
+            return 5
+        print(f"VALIDATED_COBERTURA={args.output_cobertura}")
     if args.require_100:
         if missing_count:
             print(f"COVERAGE_GATE=FAIL_MISSING_{missing_count}")

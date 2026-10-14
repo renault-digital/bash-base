@@ -100,8 +100,11 @@ printf 'SOURCE_SHA256_UNCHANGED=yes\n'
 printf 'RUNNING=union\n'
 # Three exhaustive instrumentation inventories must be identical.
 # Independent PTY report may omit whole source files, but no new lines.
+# A structurally valid union is exported even when it is below 100%; the command
+# still fails. Invalid inputs / source changes never produce an uploadable union.
 if ! python3 bash_base_coverage_union_v3.py \
 	--strict-line-sets --supplemental-last 1 --require-100 --source-dir src \
+	--output-cobertura "$r/union/cobertura.xml" \
 	"$r/bash32/cobertura.xml" "$r/bash5/cobertura.xml" \
 	"$r/zsh/cobertura.xml" "$tty_report" \
 	>"$r/union.log" 2>&1; then

@@ -43,6 +43,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Test strict coverage union and Cobertura export
+        run: python3 -m unittest discover -s tests -p 'test_coverage_union_v3.py' -v
+
       # Run the actual Bash/zsh gate, then the existing Bash ShellSpec/kcov suite.
       - name: Bash/zsh compatibility and Bash ShellSpec coverage
         run: |
@@ -54,9 +57,6 @@ jobs:
           bash -c 'echo BASH_VERSION: $BASH_VERSION'
           zsh --version
           bash scripts/test.sh --kcov -f t
-
-      - name: codecov.io
-        run: bash <(curl -s https://codecov.io/bash)
 
       - name: Show uncovered source lines
         if: always()
@@ -115,9 +115,9 @@ jobs:
               )
           PY
 
-      # ShellSpec 0.28.1 supports --covdir. Collect zsh coverage separately
-      # without touching the Bash coverage/ report used by the 100% gate.
-      # Diagnostic only: do not merge unverified zsh coverage into that gate.
+      # Linux reports remain diagnostic artifacts only. The authoritative
+      # 100% gate and the sole Codecov upload use the validated macOS union.
+      # ShellSpec 0.28.1 supports --covdir for a separate zsh report.
       - name: Probe zsh coverage
         continue-on-error: false
         run: |
@@ -168,9 +168,20 @@ jobs:
   coverage-macos:
     runs-on: macos-15
     timeout-minutes: 45
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Codecov's PR report must describe the exact source revision tested.
+          # The separate Linux job still tests GitHub's default PR merge ref.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Test strict coverage union and Cobertura export
+        run: python3 -m unittest discover -s tests -p 'test_coverage_union_v3.py' -v
 
       - name: Install coverage tools (ShellSpec pinned to 0.28.1)
         shell: bash
@@ -192,18 +203,62 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
-          # Capture the original script exit status even when tee succeeds.
+          tested_sha="$(git rev-parse HEAD)" || exit 1
+          printf 'tested_sha=%s\n' "$tested_sha" >> "$GITHUB_OUTPUT"
+          printf 'SOURCE_COMMIT=%s\n' "$tested_sha"
+          # Retain both statuses immediately; neither tee nor an upload may
+          # turn a failed coverage gate into a successful check.
           set +e
           bash scripts/verify-final-coverage-v3.sh "$PWD" 2>&1 |
             tee "$RUNNER_TEMP/bash-base-coverage-gate.log"
-          gate_status=${PIPESTATUS[0]}
+          pipeline_status=("${PIPESTATUS[@]}")
+          gate_status=${pipeline_status[0]}
+          log_status=${pipeline_status[1]}
           set -e
-          coverage_root_line="$(grep -m 1 '^COVERAGE_ROOT='             "$RUNNER_TEMP/bash-base-coverage-gate.log" || true)"
+          if [[ "$log_status" -ne 0 ]]; then
+            echo "::error::Cannot save strict coverage evidence."
+            exit 1
+          fi
+          log="$RUNNER_TEMP/bash-base-coverage-gate.log"
+          coverage_root_line="$(grep -m 1 '^COVERAGE_ROOT=' "$log" || true)"
           report_dir="${coverage_root_line#COVERAGE_ROOT=}"
+          upload_report=""
           if [[ -n "$report_dir" ]]; then
             printf 'coverage_root=%s\n' "$report_dir" >> "$GITHUB_OUTPUT"
+            printf '%s\n' "$tested_sha" > "$report_dir/source.commit"
+            # Reporting a real coverage decrease is allowed; publishing an
+            # unvalidated report or swallowing the gate failure is not.
+            if [[ -s "$report_dir/union/cobertura.xml" ]] &&
+              grep -qx 'SOURCE_SHA256_UNCHANGED=yes' "$log" &&
+              grep -qx 'MEASURABLE_LINE_SETS=PASS full_reports=3 supplemental_reports=1' "$log" &&
+              grep -Eq '^COVERAGE_GATE=(PASS_100_PERCENT|FAIL_MISSING_[1-9][0-9]*)$' "$log"; then
+              upload_report="$report_dir/union/cobertura.xml"
+              printf 'upload_report=%s\n' "$upload_report" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+          if [[ "$gate_status" -eq 0 && -z "$upload_report" ]]; then
+            echo "::error::Coverage gate passed without a validated upload report."
+            exit 1
           fi
           exit "$gate_status"
+
+      - name: Upload validated strict union to Codecov
+        # Include genuine <100% results, while leaving strict_coverage failed.
+        if: ${{ !cancelled() && steps.strict_coverage.outputs.upload_report != '' }}
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ steps.strict_coverage.outputs.upload_report }}
+          disable_search: true
+          disable_file_fixes: true
+          plugins: noop
+          flags: strict-union
+          name: strict-macos-union
+          override_commit: ${{ steps.strict_coverage.outputs.tested_sha }}
+          override_pr: ${{ github.event.pull_request.number }}
+          fail_ci_if_error: true
+          handle_no_reports_found: false
+          verbose: true
 
       - name: Upload strict coverage evidence
         if: always()
