@@ -1,21 +1,39 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
+about: Describe a recurring Shell scripting problem or propose an improvement
 
 ---
 
-## Summary
+## Problem and use case
 
-<!-- One paragraph explanation of the feature. -->
+<!-- What task are you trying to accomplish? Include a small example where
+possible. What research, implementation, testing or maintenance work repeats?
+Remove credentials and other sensitive information. -->
 
-## Motivation
+## Existing approaches and their limitations
 
-<!-- Why are we doing this? What use cases does it support? What is the expected outcome? -->
+<!-- What have you tried or considered: Shell built-ins, existing Bash-base
+helpers, external tools, examples or another approach? What remains difficult?
+It is fine to state that alternatives have not yet been investigated. -->
 
-## Describe alternatives you've considered
+## Desired behavior
 
-<!-- A clear and concise description of the alternative solutions you've considered. -->
+<!-- Describe the outcome you need. A new function is only one possible solution;
+a documentation improvement, an example or a correction may be sufficient.
+A complete API design or implementation is not required to open this issue. -->
+
+## Environment and constraints
+
+<!-- Relevant Shell/version, operating system, external tools and installation
+method, where known. Note any offline, fixed-version or compatibility needs. -->
+
+## Contract and verification notes (optional)
+
+<!-- Known requirements for arguments/stdin, stdout/stderr, exit statuses,
+side effects, empty values, special characters, ordering or composition.
+Mention useful test cases or compatibility concerns. Leave unknowns explicit;
+contributors and maintainers will resolve these before an implementation merges. -->
 
 ## Additional context
 
-<!-- Add any other context or screenshots about the feature request here. -->
+<!-- Related issues, examples, prior behavior or other supporting information. -->
