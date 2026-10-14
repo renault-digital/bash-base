@@ -48,12 +48,29 @@ jobs:
 
       # Run the actual Bash/zsh gate, then the existing Bash ShellSpec/kcov suite.
       - name: Bash/zsh compatibility and Bash ShellSpec coverage
+        shell: bash
         run: |
+          set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y bash zsh kcov netcat-openbsd lsof
           command -v kcov
-          curl -fsSL https://git.io/shellspec | sh -s 0.28.1 --yes
+          # Fetch the versioned installer directly; do not stream a short URL to sh.
+          installer="$(mktemp "$RUNNER_TEMP/shellspec-install.XXXXXX")"
+          trap 'rm -f "$installer"' EXIT
+          installer_url="https://raw.githubusercontent.com/shellspec/shellspec/0.28.1/install.sh"
+          printf 'SHELLSPEC_INSTALLER_URL=%s\n' "$installer_url"
+          curl --fail --silent --show-error --location \
+            --retry 3 --connect-timeout 15 --max-time 120 \
+            --output "$installer" "$installer_url"
+          test -s "$installer"
+          sh "$installer" 0.28.1 --yes
           export PATH="$HOME/.local/bin:$PATH"
+          shellspec_version="$("$HOME/.local/bin/shellspec" --version)"
+          printf 'SHELLSPEC_VERSION=%s\n' "$shellspec_version"
+          if [[ "$shellspec_version" != '0.28.1' ]]; then
+            echo "::error::Expected ShellSpec 0.28.1, got $shellspec_version"
+            exit 1
+          fi
           bash -c 'echo BASH_VERSION: $BASH_VERSION'
           zsh --version
           bash scripts/test.sh --kcov -f t
@@ -188,12 +205,27 @@ jobs:
         run: |
           set -euo pipefail
           brew install bash kcov
-          curl -fsSL https://git.io/shellspec | sh -s 0.28.1 --yes
+          # Fetch the versioned installer directly; do not stream a short URL to sh.
+          installer="$(mktemp "$RUNNER_TEMP/shellspec-install.XXXXXX")"
+          trap 'rm -f "$installer"' EXIT
+          installer_url="https://raw.githubusercontent.com/shellspec/shellspec/0.28.1/install.sh"
+          printf 'SHELLSPEC_INSTALLER_URL=%s\n' "$installer_url"
+          curl --fail --silent --show-error --location \
+            --retry 3 --connect-timeout 15 --max-time 120 \
+            --output "$installer" "$installer_url"
+          test -s "$installer"
+          sh "$installer" 0.28.1 --yes
+          export PATH="$HOME/.local/bin:$PATH"
+          shellspec_version="$("$HOME/.local/bin/shellspec" --version)"
+          printf 'SHELLSPEC_VERSION=%s\n' "$shellspec_version"
+          if [[ "$shellspec_version" != '0.28.1' ]]; then
+            echo "::error::Expected ShellSpec 0.28.1, got $shellspec_version"
+            exit 1
+          fi
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           /bin/bash -c 'printf "BASH32=%s\n" "$BASH_VERSION"'
           "$(brew --prefix)/bin/bash" -c 'printf "BASH5=%s\n" "$BASH_VERSION"'
           /bin/zsh --version
-          "$HOME/.local/bin/shellspec" --version
           kcov --version
           command -v nc
           command -v lsof
