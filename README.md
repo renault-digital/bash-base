@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/github/license/renault-digital/bash-base.svg)](https://github.com/renault-digital/bash-base/blob/master/LICENSE)
 [![GitHub top language](https://img.shields.io/github/languages/top/renault-digital/bash-base.svg)](https://github.com/renault-digital/bash-base/search?l=Shell)
 [![codecov](https://codecov.io/gh/renault-digital/bash-base/branch/master/graph/badge.svg)](https://codecov.io/gh/renault-digital/bash-base)
-[![GitHub Actions Status](https://img.shields.io/github/workflow/status/renault-digital/bash-base/cicd?label=GithubActions)](https://github.com/renault-digital/bash-base/actions)
+[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/renault-digital/bash-base/cicd.yml?branch=master&event=push&label=GitHub%20Actions)](https://github.com/renault-digital/bash-base/actions/workflows/cicd.yml)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 [![GitHub release](https://img.shields.io/github/release/renault-digital/bash-base.svg)](https://github.com/renault-digital/bash-base/releases/latest)
@@ -70,7 +70,24 @@ contract, array portability boundary and test model.
 
 
 ## Test coverage report
-[![test coverage](https://codecov.io/gh/renault-digital/bash-base/graphs/tree.svg)](https://codecov.io/gh/renault-digital/bash-base)
+
+The `coverage-macos` CI job requires **100% of the measurable `src/*.sh` lines**
+to be covered by the validated union of Bash 3.2, Bash 5+, zsh and TTY runs on
+one source revision. This is **union line coverage**, not 100% coverage in each
+shell or a claim of complete branch/input coverage.
+
+Only that validated union is uploaded to Codecov. Invalid reports are rejected;
+a valid result below 100% is still reported, while the strict CI gate fails.
+The badge shows Codecov's latest processed result for `master`, not a hard-coded
+percentage. Click the tree below for file and line details, and check the commit
+SHA when comparing it with CI. Processing delays or a missing upload may leave
+an older result visible.
+
+[![test coverage](https://codecov.io/gh/renault-digital/bash-base/graphs/tree.svg)](https://app.codecov.io/gh/renault-digital/bash-base/tree/master/src)
+
+See [coverage collection, validation and reporting](docs/coverage.md) for the
+report contract, authentication setup and troubleshooting. CI also retains the
+raw reports, source hashes and logs in the `strict-macos-coverage` artifact.
 
 
 ## Quick start

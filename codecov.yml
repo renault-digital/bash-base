@@ -1,0 +1,29 @@
+# The authoritative gate is scripts/verify-final-coverage-v3.sh.
+# This config controls Codecov's reporting, not collection or gate exit codes.
+codecov:
+  require_ci_to_pass: false
+  notify:
+    after_n_builds: 1
+    wait_for_ci: false
+
+coverage:
+  precision: 2
+  round: down
+  status:
+    project:
+      default:
+        target: 100%
+        threshold: 0%
+    patch:
+      default:
+        target: 100%
+        threshold: 0%
+
+flags:
+  strict-union:
+    carryforward: false
+
+# Do not add ignore/path filters to conceal measurable source lines.
+# require_ci_to_pass / wait_for_ci affect notifications only: Codecov may show
+# a real coverage regression even while CI is red. The strict gate and existing
+# release-job dependencies remain authoritative and are not bypassed.
