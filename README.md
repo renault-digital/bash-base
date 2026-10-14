@@ -14,11 +14,44 @@
 
 ## Goal
 
-No more spending time searching the special ways of bash for basic operations like "how to replace a string in bash", then compare, choose, and test among many potential solutions.
+**Reusable Bash/zsh utilities for reliable command composition and automation.**
 
-Bash-base does this for you, you can just call the function here which is well tested and stable, and only focus you on the high level logic. Writing your script with less time, but more readability.
+Bash-base helps developers focus on what their shell scripts do, rather than
+repeatedly researching how every low-level operation should work.
 
-Available on [GitHub](https://github.com/renault-digital/bash-base), [NPM](https://www.npmjs.com/package/@renault-digital/bash-base) and [Docker Hub](https://hub.docker.com/r/renaultdigital/bash-base).
+Its starting point is a recurring cost: searching for a Shell implementation,
+comparing alternatives, experimenting with edge cases, and testing the result
+across supported environments. Saving a few lines is useful; avoiding that
+repeated implementation and verification work is the more important goal.
+
+Bash-base provides reusable, tested functions for expressing command-oriented
+logic through higher-level APIs. String and array operations support this goal:
+organizing command arguments, transforming outputs, and expressing automation
+logic. They are means to compose commands, not an attempt to build a complete
+general-purpose application framework in Shell.
+
+### Design priorities
+
+- **Pain-driven:** address recurring scripting problems, not a target number of
+  functions.
+- **Contract-driven:** make inputs, outputs, exit statuses and side effects
+  explicit, with interfaces that are understandable and work well together.
+- **Evidence-driven:** use regression and cross-shell tests to support
+  reliability claims within the documented compatibility boundary.
+- **Predictable reuse:** preserve existing behavior and favor fixed-version,
+  local loading where reproducible or offline execution matters.
+
+These priorities guide maintenance and new API design; they do not assert that
+every existing helper is side-effect-free or safe for arbitrary input. Read the
+[design principles](docs/design-principles.md),
+[API reference](docs/references.md), and
+[Bash/zsh compatibility contract](docs/bash-zsh-compatibility.md) for scope and
+boundaries. Proposed data types or helpers are not available APIs until they
+have been implemented, tested and documented.
+
+Available on [GitHub](https://github.com/renault-digital/bash-base),
+[NPM](https://www.npmjs.com/package/@renault-digital/bash-base), and
+[Docker Hub](https://hub.docker.com/r/renaultdigital/bash-base).
 
 
 ## Bash and zsh compatibility
@@ -67,6 +100,11 @@ Run it:
 
 
 ## Installation
+
+For reproducible or offline workflows, prefer a reviewed, fixed-version local
+copy. The methods below have different network and update behavior; read the
+Web installer and direct GitHub import notes before choosing a loading method.
+A remote-loading example is not an offline configuration.
 
 #### 1. Import from [docker hub](https://hub.docker.com/r/renaultdigital/bash-base)
 

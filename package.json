@@ -1,7 +1,7 @@
 {
   "name": "@renault-digital/bash-base",
   "version": "2.3.2",
-  "description": "A common lib for creating bash script easily.",
+  "description": "Reusable Bash/zsh utilities for reliable command composition and automation.",
   "private": false,
   "publishConfig": {
     "access": "public"
