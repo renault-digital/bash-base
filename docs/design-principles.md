@@ -171,4 +171,6 @@ APIs when only one well-defined operation is needed.
 
 Keep this document focused on design decisions. The API reference belongs to
 the existing source-comment generation workflow; specific enhancement proposals
-and scheduling decisions belong in issues and pull requests.
+and scheduling decisions belong in issues and pull requests. The
+[roadmap](roadmap.md) tracks possible future directions and their acceptance
+criteria; it does not override existing API contracts or these principles.
