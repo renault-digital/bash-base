@@ -1,3 +1,15 @@
+# [2.5.0](https://github.com/renault-digital/bash-base/compare/v2.4.0...v2.5.0) (2026-10-16)
+
+
+### Bug Fixes
+
+* remove not exsited reference ([e134d94](https://github.com/renault-digital/bash-base/commit/e134d949757cb04f9290fab7cc05242588de3da7))
+
+
+### Features
+
+* **shell:** support Bash and zsh shared sourcing ([ce3586f](https://github.com/renault-digital/bash-base/commit/ce3586f4b925c44043b66ad2316ebf786e75ee09))
+
 # [2.4.0](https://github.com/renault-digital/bash-base/compare/v2.3.2...v2.4.0) (2025-11-05)
 
 

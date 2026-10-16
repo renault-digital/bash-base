@@ -4,6 +4,72 @@
 .hy
 .SS NAME
 .PP
+aliases need different non-interactive expansion rules in Bash and zsh,
+while functions work identically when this library is sourced by either
+shell.
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
+args_confirm \[en] show the name and value of variables, and continue
+execute if args_confirm by user, or exit if not
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+args_confirm variableName...
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B]variableName\&...\f[R] some existed variable names to show its
+value
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+a=\[dq]correct value\[dq]
+b=\[dq]wrong value\[dq]
+args_confirm a b
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+args_print, stop_if_failed
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
+args_print \[en] if LOG_LEVEL<=$LOG_LEVEL_WARN, show the name and value
+of variables
+.SS SYNOPSIS
+.IP
+.nf
+\f[C]
+args_print variableName...
+\f[R]
+.fi
+.SS DESCRIPTION
+.IP \[bu] 2
+\f[B]variableName\&...\f[R] some existed variable names to show its
+value
+.SS EXAMPLES
+.IP
+.nf
+\f[C]
+var1=\[dq]value 1\[dq]
+var2=\[dq]value 2\[dq]
+args_print var1 var2
+\f[R]
+.fi
+.SS SEE_ALSO
+.PP
+print_header, print_error, print_success, print_warn, print_info,
+print_debug
+.PP
+   *   *   *   *   *
+.SS NAME
+.PP
 args_parse \[en] parse the script argument values to positional variable
 names, process firstly the optional param help(-h) / quiet(-q) if
 existed
@@ -247,7 +313,8 @@ string_split_to_array, array_describe, array_from_describe
    *   *   *   *   *
 .SS NAME
 .PP
-array_describe \[en] convert the array to its string representation
+array_describe \[en] convert the array to its shell-native string
+representation
 .SS SYNOPSIS
 .IP
 .nf
@@ -443,8 +510,8 @@ array_length myArray ==> 3
    *   *   *   *   *
 .SS NAME
 .PP
-array_reset_index \[en] reset the indexes of array to the sequence
-0,1,2\&..., save the result to original variable name
+array_reset_index \[en] reset indexes to the shell-native contiguous
+sequence, save the result to original variable name
 .SS SYNOPSIS
 .IP
 .nf
@@ -459,7 +526,7 @@ array_reset_index arrayVarName
 .IP
 .nf
 \f[C]
-myArray=([2]=\[aq]a\[aq] [5]=\[aq]c\[aq] [11]=\[aq]dd\[aq])
+Bash example: myArray=([2]=\[aq]a\[aq] [5]=\[aq]c\[aq] [11]=\[aq]dd\[aq])
 array_reset_index myArray ==> ([0]=\[aq]a\[aq] [1]=\[aq]c\[aq] [2]=\[aq]dd\[aq])
 \f[R]
 .fi
@@ -1914,7 +1981,7 @@ wait_for \[aq]test -f /tmp/output.txt\[aq] \[aq]file existed\[aq] 3
 .fi
 .SS SEE_ALSO
 .PP
-confirm_to_continue, stop_if_failed, is_http_ok
+confirm_to_continue, stop_if_failed
 .PP
    *   *   *   *   *
 .SS NAME

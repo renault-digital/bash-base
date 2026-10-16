@@ -1,11 +1,51 @@
 #!/usr/bin/env bash
 
-shopt -s expand_aliases 2>/dev/null # This file is for compatibility with previous versions
+#     Backward-compatible command names.  Use wrapper functions rather than aliases:
+#     aliases need different non-interactive expansion rules in Bash and zsh, while
+#     functions work identically when this library is sourced by either shell.
 
-alias args_confirm='confirm_to_continue'
-alias args_print='print_args'
+# @NAME
+#     args_confirm -- show the name and value of variables, and continue execute if args_confirm by user, or exit if not
+# @SYNOPSIS
+#     args_confirm variableName...
+# @DESCRIPTION
+#     **variableName...** some existed variable names to show its value
+# @EXAMPLES
+#     a="correct value"
+#     b="wrong value"
+#     args_confirm a b
+# @SEE_ALSO
+#     args_print, stop_if_failed
+args_confirm() {
+	confirm_to_continue "$@"
+}
 
-THIS_SCRIPT_NAME="$(basename "$0")" # the main script name
+# @NAME
+#     args_print -- if LOG_LEVEL<=$LOG_LEVEL_WARN, show the name and value of variables
+# @SYNOPSIS
+#     args_print variableName...
+# @DESCRIPTION
+#     **variableName...** some existed variable names to show its value
+# @EXAMPLES
+#     var1="value 1"
+#     var2="value 2"
+#     args_print var1 var2
+# @SEE_ALSO
+#     print_header, print_error, print_success, print_warn, print_info, print_debug
+args_print() {
+	print_args "$@"
+}
+
+if [[ -n "${ZSH_VERSION:-}" ]]; then
+	# zsh may temporarily replace $0 with the sourced filename when
+	# FUNCTION_ARGZERO is enabled. ZSH_ARGZERO always keeps the invocation name.
+	_bash_base_argzero="${ZSH_ARGZERO:-$0}"
+else
+	_bash_base_argzero="$0"
+fi
+THIS_SCRIPT_PATH="$_bash_base_argzero"               # script source path for args_valid_* lookup
+THIS_SCRIPT_NAME="$(basename "$_bash_base_argzero")" # the main script name
+unset _bash_base_argzero
 
 SHORT_DESC="${THIS_SCRIPT_NAME%%.*}"
 SHORT_DESC="${SHORT_DESC/[\-_]/ }" # redefine it to show your script short description in the 'NAME' field of generated -h response
@@ -20,9 +60,14 @@ USAGE=''                           # redefine it in your script only if the gene
 # @EXAMPLES
 #     args_parse $# "$@" newVar1 newVar2 newVar3
 # @SEE_ALSO
-function args_parse() {
-	local nbArgValues nbPositionalVarNames option showUsage OPTARG OPTIND nbPositionalArgValues positionalArgValues positionalVarNames
-	local element validCommand description defaultUsage strPositionalVarNames strPositionalValuesExamples
+args_parse() {
+	local nbArgValues nbPositionalVarNames option OPTARG OPTIND nbPositionalArgValues
+	local showUsage=false
+	local element validCommand description defaultUsage
+	local strPositionalVarNames="" strPositionalValuesExamples=""
+	local -a positionalArgValues positionalVarNames
+	# Bash legacy contract: prompt, possibleValues, i, descriptions and
+	# onlyPositionalVarNames were caller-visible, not function-local.
 
 	nbArgValues=$1
 	shift 1
@@ -45,79 +90,103 @@ function args_parse() {
 	shift $((OPTIND - 1))
 
 	nbPositionalArgValues=$((nbArgValues - OPTIND + 1))
-	positionalArgValues=("${@:1:nbPositionalArgValues}")
-	positionalVarNames=("${@:nbPositionalArgValues+1:nbPositionalVarNames}")
+	positionalArgValues=()
+	# Split positional values from destination names without a new local
+	# counter; the historical Bash `i` global is handled below.
+	while (($# > nbPositionalVarNames)); do
+		positionalArgValues+=("$1")
+		shift
+	done
+	positionalVarNames=("$@")
 
 	onlyPositionalVarNames=()
 	descriptions=''
-	if ((nbPositionalVarNames > 0)); then
-		for i in $(seq 0 $((nbPositionalVarNames - 1))); do
-			element=${positionalVarNames[i]}
 
+	# Pair values with variable names without relying on Bash's 0-based array
+	# indexes (zsh uses a different default array index base).
+	set -- "${positionalArgValues[@]}"
+	for element in "${positionalVarNames[@]}"; do
+		# Do not introduce a local value variable: callers may legally name
+		# their destination positionalValue (or prompt).  Save it only in $1.
+
+		# zsh FUNCTION_ARGZERO may change $0 to the current function name.
+		# Only scan a caller script when there is an actual script file.
+		validCommand=''
+		if [[ -f "${THIS_SCRIPT_PATH:-}" ]]; then
 			validCommand="$(
-				grep -E "^\s*args_valid.*\s+${element}\s+" "$0" | head -1 |
+				grep -E "^[[:space:]]*args_valid.*[[:space:]]+${element}[[:space:]]+" "$THIS_SCRIPT_PATH" | head -1 |
 					awk -F "'" -v OFS="'" '{
-                for (i=2; i<=NF; i+=2) {
-                    gsub(/ /, "_SPACE_", $i);
-                    gsub(/\$/, "_DOLLAR_", $i);
-                    gsub(/\(/, "_PARENTHESES_LEFT_", $i);
-                    gsub(/\)/, "_PARENTHESES_RIGHT_", $i);
-                }
-                print
-            }' |
+                    for (i=2; i<=NF; i+=2) {
+                        gsub(/ /, "_SPACE_", $i);
+                        gsub(/\$/, "_DOLLAR_", $i);
+                        gsub(/\(/, "_PARENTHESES_LEFT_", $i);
+                        gsub(/\)/, "_PARENTHESES_RIGHT_", $i);
+                    }
+                    print
+                }' |
 					sed -e "s/\'//g"
 			)"
+		fi
 
-			if [[ -z ${validCommand} ]]; then
-				eval "${positionalVarNames[i]}='${positionalArgValues[i]}'"
+		if [[ -z $validCommand ]]; then
+			eval "${element}=\"\${1-}\""
+			onlyPositionalVarNames+=("${element}")
+			description="a valid value for ${element}"
+		else
+			if [[ "$validCommand" == *args_valid_or_select_pipe* ]]; then
+				eval "${element}=\"\${1-}\""
 				onlyPositionalVarNames+=("${element}")
-				description="a valid value for ${element}"
-			else
-				if [[ "${validCommand}" =~ 'args_valid_or_select_pipe' ]]; then
-					eval "${positionalVarNames[i]}='${positionalArgValues[i]}'"
-					onlyPositionalVarNames+=("${element}")
-					prompt="$(reflect_nth_arg 4 "${validCommand}")"
-					possibleValues=", possible values: $(reflect_nth_arg 3 "$validCommand")"
-				elif [[ "${validCommand}" =~ 'args_valid_or_select_args' ]]; then
-					eval "${positionalVarNames[i]}='${positionalArgValues[i]}'"
-					onlyPositionalVarNames+=("${element}")
-					prompt="$(reflect_nth_arg 3 "${validCommand}")"
-					possibleValues=", you can select one using wizard if you do not know which value is valid"
-				elif [[ "${validCommand}" =~ 'args_valid_or_select' ]]; then
-					eval "${positionalVarNames[i]}='${positionalArgValues[i]}'"
-					onlyPositionalVarNames+=("${element}")
-					prompt="$(reflect_nth_arg 4 "${validCommand}")"
-					possibleValues=", you can select one using wizard if you do not know which value is valid"
-				elif [[ "${validCommand}" =~ args_valid_or_read ]]; then
-					eval "${positionalVarNames[i]}='${positionalArgValues[i]}'"
-					onlyPositionalVarNames+=("${element}")
-					prompt="$(reflect_nth_arg 4 "${validCommand}")"
-					if [[ -n $(reflect_nth_arg 5 "${validCommand}") ]]; then
-						prompt="${prompt}, proposed value: $(reflect_nth_arg 5 "${validCommand}")"
-					fi
-					possibleValues=""
-				elif [[ "${validCommand}" =~ args_valid_or_default ]]; then
-					prompt="optional, $(reflect_nth_arg 4 "${validCommand}"). should be set like '${element}=value' before ${THIS_SCRIPT_NAME} or export to OS environment"
-					if [[ -n $(reflect_nth_arg 5 "${validCommand}") ]]; then
-						prompt="${prompt}. if absent, fallback to: $(reflect_nth_arg 5 "${validCommand}")"
-					else
-						prompt="${prompt}, empty if absent"
-					fi
-					possibleValues=""
+				prompt="$(reflect_nth_arg 4 "$validCommand")"
+				possibleValues=", possible values: $(reflect_nth_arg 3 "$validCommand")"
+			elif [[ "$validCommand" == *args_valid_or_select_args* ]]; then
+				eval "${element}=\"\${1-}\""
+				onlyPositionalVarNames+=("${element}")
+				prompt="$(reflect_nth_arg 3 "$validCommand")"
+				possibleValues=", you can select one using wizard if you do not know which value is valid"
+			elif [[ "$validCommand" == *args_valid_or_select* ]]; then
+				eval "${element}=\"\${1-}\""
+				onlyPositionalVarNames+=("${element}")
+				prompt="$(reflect_nth_arg 4 "$validCommand")"
+				possibleValues=", you can select one using wizard if you do not know which value is valid"
+			elif [[ "$validCommand" == *args_valid_or_read* ]]; then
+				eval "${element}=\"\${1-}\""
+				onlyPositionalVarNames+=("${element}")
+				prompt="$(reflect_nth_arg 4 "$validCommand")"
+				if [[ -n $(reflect_nth_arg 5 "$validCommand") ]]; then
+					prompt="${prompt}, proposed value: $(reflect_nth_arg 5 "$validCommand")"
 				fi
-
-				prompt="$(
-					echo "${prompt}" |
-						string_replace "_SPACE_" " " |
-						string_replace "_DOLLAR_" "$" |
-						string_replace "_PARENTHESES_LEFT_" "(" |
-						string_replace "_PARENTHESES_RIGHT_" ")"
-				)"
-
-				description="${prompt}${possibleValues}"
+				possibleValues=""
+			elif [[ "$validCommand" == *args_valid_or_default* ]]; then
+				prompt="optional, $(reflect_nth_arg 4 "$validCommand"). should be set like ${element}=value before ${THIS_SCRIPT_NAME} or export to OS environment"
+				if [[ -n $(reflect_nth_arg 5 "$validCommand") ]]; then
+					prompt="${prompt}. if absent, fallback to: $(reflect_nth_arg 5 "$validCommand")"
+				else
+					prompt="${prompt}, empty if absent"
+				fi
+				possibleValues=""
 			fi
-			descriptions+="$(printf "\n    %-20s%s" "${element} " "${description}")"
-		done
+
+			prompt="$(
+				printf '%s\n' "${prompt}" |
+					string_replace "_SPACE_" " " |
+					string_replace "_DOLLAR_" "$" |
+					string_replace "_PARENTHESES_LEFT_" "(" |
+					string_replace "_PARENTHESES_RIGHT_" ")"
+			)"
+
+			description="${prompt}${possibleValues}"
+		fi
+		descriptions+="$(printf "\n    %-20s%s" "${element} " "${description}")"
+		if (($# > 0)); then
+			shift
+		fi
+	done
+	if [[ -n "${BASH_VERSION:-}" && $nbPositionalVarNames -gt 0 ]]; then
+		# The original Bash implementation used a caller-visible `i` as
+		# a loop counter over output names. Respect a destination named i.
+		if ! array_in i "${positionalVarNames[@]}"; then
+			i=$((nbPositionalVarNames - 1))
+		fi
 	fi
 
 	if [ ${#onlyPositionalVarNames[@]} -gt 0 ]; then
@@ -125,36 +194,36 @@ function args_parse() {
 		strPositionalValuesExamples=" \"$(array_join 'Value" "' onlyPositionalVarNames)Value\""
 	fi
 
-	declare_heredoc defaultUsage <<-EOF
-		${COLOR_BOLD_YELLOW}NAME${COLOR_END}
-		    ${THIS_SCRIPT_NAME} -- ${SHORT_DESC}
+	declare_heredoc defaultUsage <<EOF
+${COLOR_BOLD_YELLOW}NAME${COLOR_END}
+    ${THIS_SCRIPT_NAME} -- ${SHORT_DESC}
 
-		${COLOR_BOLD_YELLOW}SYNOPSIS${COLOR_END}
-		    [optionalVariable=value ...] ./${THIS_SCRIPT_NAME} [-qh]${strPositionalVarNames}
+${COLOR_BOLD_YELLOW}SYNOPSIS${COLOR_END}
+    [optionalVariable=value ...] ./${THIS_SCRIPT_NAME} [-qh]${strPositionalVarNames}
 
-		${COLOR_BOLD_YELLOW}DESCRIPTION${COLOR_END}
-		    [-h]                help, print the usage
-		    [-q]                optional, Run quietly, no confirmation
-		${descriptions}
+${COLOR_BOLD_YELLOW}DESCRIPTION${COLOR_END}
+    [-h]                help, print the usage
+    [-q]                optional, Run quietly, no confirmation
+${descriptions}
 
-		${COLOR_BOLD_YELLOW}EXAMPLES${COLOR_END}
-		    help, print the usage:
-		        ./${THIS_SCRIPT_NAME} -h
+${COLOR_BOLD_YELLOW}EXAMPLES${COLOR_END}
+    help, print the usage:
+        ./${THIS_SCRIPT_NAME} -h
 
-		    run with all params, if run in quiet mode with -q, be sure all the params are valid:
-		        ./${THIS_SCRIPT_NAME} [-q]${strPositionalValuesExamples}
+    run with all params, if run in quiet mode with -q, be sure all the params are valid:
+        ./${THIS_SCRIPT_NAME} [-q]${strPositionalValuesExamples}
 
-		    run using wizard, input value for params step by step:
-		        ./${THIS_SCRIPT_NAME}
+    run using wizard, input value for params step by step:
+        ./${THIS_SCRIPT_NAME}
 
-		    run with optional variables, example:
-		        myOpt1=myValue1 myOpt2=myValue2 ./${THIS_SCRIPT_NAME}
+    run with optional variables, example:
+        myOpt1=myValue1 myOpt2=myValue2 ./${THIS_SCRIPT_NAME}
 
-		    or you can run with some params, and input value for other params using wizard.
-	EOF
+    or you can run with some params, and input value for other params using wizard.
+EOF
 
-	if [ "$showUsage" == true ]; then
-		echo -e "${USAGE:-$defaultUsage}"
+	if [[ "$showUsage" == true ]]; then
+		printf '%b\n' "${USAGE:-$defaultUsage}"
 		exit 0
 	fi
 }
@@ -175,26 +244,38 @@ function args_parse() {
 #     args_valid_or_select varEmpty arr "Which app"
 # @SEE_ALSO
 #     args_valid_or_select_pipe, args_valid_or_read, args_valid_or_default
-function args_valid_or_select() {
-	local valueVarName validValuesVarName prompt value validValues PS3
-	valueVarName="${1}"
-	validValuesVarName=$2
-	validValues="$2[@]"
-	prompt="${3}"
+args_valid_or_select() {
+	local valueVarName validValuesVarName prompt value PS3
+	local -a validValues
 
-	value=$(eval eval "echo '$'${valueVarName}")
+	valueVarName="${1}"
+	validValuesVarName="$2"
+	prompt="${3}"
+	eval 'value="${'"$valueVarName"'-}"'
+	if [[ -n "${BASH_VERSION:-}" ]]; then
+		# Preserve Bash's historical echo/word-splitting normalization, without
+		# reparsing the value with eval (which would execute input as code).
+		# shellcheck disable=SC2086,SC2116
+		value="$(echo $value)"
+	fi
+	eval "validValues=( \"\${${validValuesVarName}[@]}\" )"
 
 	while ! array_contains "${validValuesVarName}" "${value}"; do
-		echo -e "\n${prompt} ?"
+		printf '\n%s ?\n' "$prompt"
 		[[ -n "${value}" ]] && print_error "the input '${value}' is not valid."
 
 		PS3="choose one by ${COLOR_BOLD_YELLOW}number${COLOR_END} [1|2|...] ? "
-		select value in "${!validValues}"; do
+		select value in "${validValues[@]}"; do
 			break
 		done
 	done
-	eval "${valueVarName}='${value}'"
-	printf "Selected value: ${COLOR_BLUE}'%s'${COLOR_END}\n" "$(eval echo '$'"${valueVarName}")"
+
+	eval "${valueVarName}=\"\$value\""
+	if [[ -n "${BASH_VERSION:-}" ]]; then
+		# shellcheck disable=SC2086,SC2116
+		value="$(echo $value)"
+	fi
+	printf "Selected value: ${COLOR_BLUE}'%s'${COLOR_END}\n" "$value"
 }
 
 # @NAME
@@ -210,8 +291,9 @@ function args_valid_or_select() {
 #     args_valid_or_select_pipe sel "a|ab|d" "which value"
 # @SEE_ALSO
 #     args_valid_or_select, args_valid_or_select_args, args_valid_or_read, args_valid_or_default
-function args_valid_or_select_pipe() {
-	local valueVarName validValues prompt newArray
+args_valid_or_select_pipe() {
+	local valueVarName validValues prompt
+	local -a newArray
 	valueVarName="${1}"
 	validValues="${2}"
 	prompt="${3}"
@@ -233,15 +315,21 @@ function args_valid_or_select_pipe() {
 #     args_valid_or_select_args sel "which value" "a" "ab" "d"
 # @SEE_ALSO
 #     args_valid_or_select, args_valid_or_select_pipe, args_valid_or_read, args_valid_or_default
-function args_valid_or_select_args() {
+args_valid_or_select_args() {
 	local valueVarName value prompt PS3
 	valueVarName="${1}"
-	value=$(eval eval "echo '$'${valueVarName}")
+	eval 'value="${'"$valueVarName"'-}"'
+	if [[ -n "${BASH_VERSION:-}" ]]; then
+		# Preserve Bash's historical echo/word-splitting normalization, without
+		# reparsing the value with eval (which would execute input as code).
+		# shellcheck disable=SC2086,SC2116
+		value="$(echo $value)"
+	fi
 	prompt="${2}"
 	shift 2
 
 	while ! array_in "${value}" "$@"; do
-		echo -e "\n${prompt} ?"
+		printf '\n%s ?\n' "$prompt"
 		[[ -n "${value}" ]] && print_error "the input '${value}' is not valid."
 
 		PS3="choose one by ${COLOR_BOLD_YELLOW}number${COLOR_END} [1|2|...] ? "
@@ -249,8 +337,13 @@ function args_valid_or_select_args() {
 			break
 		done
 	done
-	eval "${valueVarName}='${value}'"
-	printf "Selected value: ${COLOR_BLUE}'%s'${COLOR_END}\n" "$(eval echo '$'"${valueVarName}")"
+
+	eval "${valueVarName}=\"\$value\""
+	if [[ -n "${BASH_VERSION:-}" ]]; then
+		# shellcheck disable=SC2086,SC2116
+		value="$(echo $value)"
+	fi
+	printf "Selected value: ${COLOR_BLUE}'%s'${COLOR_END}\n" "$value"
 }
 
 # @NAME
@@ -268,28 +361,48 @@ function args_valid_or_select_args() {
 #     args_valid_or_read destRootPackage '^.+$' "Destination root package" "${defaultDestRootPackage}"
 # @SEE_ALSO
 #     args_valid_or_select, args_valid_or_select_args, args_valid_or_select_pipe, args_valid_or_default
-function args_valid_or_read() {
-	local value regExp prompt proposedValue
-	value=$(eval eval "echo '$'$1")
-	regExp=${2}
-	prompt="${3}"
-	proposedValue="${4}"
+args_valid_or_read() {
+	local valueVarName="$1"
+	local regExp="${2}"
+	local prompt="${3}"
+	local proposedValue="${4-}"
+	local value
+
+	eval 'value="${'"$valueVarName"'-}"'
+	if [[ -n "${BASH_VERSION:-}" ]]; then
+		# Preserve Bash's historical echo/word-splitting normalization, without
+		# reparsing the value with eval (which would execute input as code).
+		# shellcheck disable=SC2086,SC2116
+		value="$(echo $value)"
+	fi
 
 	if [[ -n "${proposedValue}" ]]; then
 		prompt="${prompt} [${proposedValue}]"
-		if [[ -z "${value}" && "${modeQuiet}" == true ]]; then
+		if [[ -z "${value}" && "${modeQuiet:-false}" == true ]]; then
 			value="${proposedValue}"
 		fi
 	fi
-	while ! [[ ${value} =~ ${regExp} ]]; do
+
+	while ! [[ $value =~ $regExp ]]; do
 		[[ -n "${value}" ]] && print_error "the input '${value}' is not valid, please input again."
-		read -r -p "${prompt}: " value
+		if [[ -t 0 ]]; then
+			printf '%s: ' "$prompt" >&2
+		fi
+		read -r value || value=""
 		if [[ -z "${value}" ]]; then
 			value="${proposedValue}"
 		fi
 	done
-	eval "${1}='${value}'"
-	printf "Inputted value: ${COLOR_BLUE}'%s'${COLOR_END}\n" "$(eval echo '$'"${1}")"
+
+	eval "${valueVarName}=\"\$value\""
+	if [[ -n "${BASH_VERSION:-}" ]]; then
+		# Legacy Bash printed via `eval echo $name`: collapse display-only
+		# whitespace, but leave the actual assigned value unchanged.
+		# shellcheck disable=SC2086,SC2116
+		printf "Inputted value: ${COLOR_BLUE}'%s'${COLOR_END}\n" "$(echo $value)"
+	else
+		printf "Inputted value: ${COLOR_BLUE}'%s'${COLOR_END}\n" "$value"
+	fi
 }
 
 # @NAME
@@ -310,22 +423,38 @@ function args_valid_or_read() {
 #     args_valid_or_default destRootPackage '^.+$' "Destination root package" "${defaultDestRootPackage}"
 # @SEE_ALSO
 #     args_valid_or_select, args_valid_or_select_args, args_valid_or_select_pipe, args_valid_or_read
-function args_valid_or_default() {
-	local value regExp prompt defaultValue
-	value=$(eval eval "echo '$'$1")
-	regExp=${2}
-	prompt="${3}"
-	defaultValue="${4}"
+args_valid_or_default() {
+	local valueVarName="$1"
+	local regExp="${2}"
+	local prompt="${3}"
+	local defaultValue="${4-}"
+	local value
 
-	if [[ -z "${value}" || ! ${value} =~ ${regExp} ]]; then
-		prompt="for param ${1}:"
+	eval 'value="${'"$valueVarName"'-}"'
+	if [[ -n "${BASH_VERSION:-}" ]]; then
+		# Preserve Bash's historical echo/word-splitting normalization, without
+		# reparsing the value with eval (which would execute input as code).
+		# shellcheck disable=SC2086,SC2116
+		value="$(echo $value)"
+	fi
+
+	if [[ -z "${value}" || ! $value =~ $regExp ]]; then
+		prompt="for param ${valueVarName}:"
 		[[ -n "${value}" ]] && prompt+=" the input '${value}' is not valid" || prompt+=" no input"
 		[[ -n "${defaultValue}" ]] && prompt+=", fallback to default value '${defaultValue}'" || prompt+=", fallback to empty"
 		print_warn "${prompt}"
 		value="${defaultValue}"
 	fi
-	eval "${1}='${value}'"
-	printf "Inputted value: ${COLOR_BLUE}'%s'${COLOR_END}\n" "$(eval echo '$'"${1}")"
+
+	eval "${valueVarName}=\"\$value\""
+	if [[ -n "${BASH_VERSION:-}" ]]; then
+		# Legacy Bash printed via `eval echo $name`: collapse display-only
+		# whitespace, but leave the actual assigned value unchanged.
+		# shellcheck disable=SC2086,SC2116
+		printf "Inputted value: ${COLOR_BLUE}'%s'${COLOR_END}\n" "$(echo $value)"
+	else
+		printf "Inputted value: ${COLOR_BLUE}'%s'${COLOR_END}\n" "$value"
+	fi
 }
 
 # @NAME
@@ -340,25 +469,28 @@ function args_valid_or_default() {
 #     array_join '|' myArry ==> " a | b c "
 # @SEE_ALSO
 #     string_split_to_array, array_describe, array_from_describe
-function array_join() {
+array_join() {
 	local delimiter="$1"
-	local array="$2[@]"
+	local array="$2[@]" # Same local names as the pre-PR Bash implementation.
+	local element result="" delimiterLength
 
-	local element result delimiterLength
-	for element in "${!array}"; do
+	# Expand the named array directly into function positional parameters. This
+	# avoids introducing new local variables that shadow caller array names.
+	eval 'set -- "${'"$2"'[@]}"'
+	for element in "$@"; do
 		result="${result}${element}${delimiter}"
 	done
 
 	delimiterLength=$(string_length "${delimiter}")
 	if string_is_empty "${result}"; then
-		echo ''
+		printf '\n'
 	else
 		string_sub 0 $((0 - delimiterLength)) "${result}"
 	fi
 }
 
 # @NAME
-#     array_describe -- convert the array to its string representation
+#     array_describe -- convert the array to its shell-native string representation
 # @SYNOPSIS
 #     array_describe arrayVarName
 # @DESCRIPTION
@@ -368,8 +500,20 @@ function array_join() {
 #     array_describe myArray ==> ([0]='a' [1]='b')
 # @SEE_ALSO
 #     string_split_to_array, array_join, array_from_describe
-function array_describe() {
-	declare -p "$1" | string_after_first "=" | tr '"' "'"
+array_describe() {
+	local _bash_base_declaration _bash_base_values
+
+	_bash_base_declaration="$(typeset -p "$1")" || return 1
+	_bash_base_values="${_bash_base_declaration#*=}"
+
+	# macOS Bash 3.2 wraps array assignments in one outer single-quoted
+	# word. Newer Bash prints the compound assignment directly. Decode
+	# the outer shell quoting before preserving the existing output format.
+	if [[ -n "${BASH_VERSION:-}" && "$_bash_base_values" == \'*\' ]]; then
+		eval "_bash_base_values=$_bash_base_values" || return 1
+	fi
+
+	printf '%s\n' "$_bash_base_values" | tr '"' "'"
 }
 
 # @NAME
@@ -384,7 +528,7 @@ function array_describe() {
 #     array_from_describe myNewArray < fileNameContentString
 # @SEE_ALSO
 #     string_split_to_array, array_join, array_describe
-function array_from_describe() {
+array_from_describe() {
 	local newArrayVarName="$1"
 	local string="${2-$(cat)}"
 
@@ -405,11 +549,14 @@ function array_from_describe() {
 #     echo "ab" | array_contains arr
 # @SEE_ALSO
 #     array_remove, array_in
-function array_contains() {
+array_contains() {
 	local array="$1[@]"
 	local seeking="${2-$(cat)}"
 
-	array_in "${seeking}" "${!array}"
+	# Use the same locals as before; adding a `values` or `arrayVarName`
+	# local here would hide callers' arrays with those legitimate names.
+	eval 'set -- "${'"$1"'[@]}"'
+	array_in "${seeking}" "$@"
 }
 
 # @NAME
@@ -424,7 +571,7 @@ function array_contains() {
 #     array_in "a b" "a" "b" "c" "a b" "f" "g"
 # @SEE_ALSO
 #     array_remove, array_contains
-function array_in() {
+array_in() {
 	local seeking="$1"
 	shift
 	local element
@@ -446,16 +593,14 @@ function array_in() {
 #     array_sort myArray ==> ([0]='aa' [1]='aa' [2]='bb')
 # @SEE_ALSO
 #     array_sort_distinct
-function array_sort() {
+array_sort() {
 	local arrayVarName="$1"
 	local strSorted arrSorted
 
 	strSorted="$(array_join $'\n' "${arrayVarName}" | sort)"
 	string_split_to_array $'\n' arrSorted "${strSorted}"
 
-	local string="\${arrSorted[@]}"
-	local command="${arrayVarName}=(\"${string}\")"
-	eval "${command}"
+	eval "${arrayVarName}=( \"\${arrSorted[@]}\" )"
 }
 
 # @NAME
@@ -469,16 +614,14 @@ function array_sort() {
 #     array_sort_distinct myArray ==> ([0]='aa' [1]='bb')
 # @SEE_ALSO
 #     array_sort
-function array_sort_distinct() {
+array_sort_distinct() {
 	local arrayVarName="$1"
 	local strSorted arrSorted
 
 	strSorted="$(array_join $'\n' "${arrayVarName}" | sort -u)"
 	string_split_to_array $'\n' arrSorted "${strSorted}"
 
-	local string="\${arrSorted[@]}"
-	local command="${arrayVarName}=(\"${string}\")"
-	eval "${command}"
+	eval "${arrayVarName}=( \"\${arrSorted[@]}\" )"
 }
 
 # @NAME
@@ -491,38 +634,30 @@ function array_sort_distinct() {
 #     myArray=('aa' 'bb' 'aa')
 #     array_length myArray ==> 3
 # @SEE_ALSO
-function array_length() {
+array_length() {
 	local arrayVarName="$1"
-	local string command tmp
+	local -a tmp
 
-	eval "string='$'{${arrayVarName}[@]}"
-	command="tmp=(\"${string}\")"
-	eval "${command}"
-
-	echo "${#tmp[@]}"
+	eval "tmp=( \"\${${arrayVarName}[@]}\" )"
+	printf '%s\n' "${#tmp[@]}"
 }
 
 # @NAME
-#     array_reset_index -- reset the indexes of array to the sequence 0,1,2..., save the result to original variable name
+#     array_reset_index -- reset indexes to the shell-native contiguous sequence, save the result to original variable name
 # @SYNOPSIS
 #     array_reset_index arrayVarName
 # @DESCRIPTION
 #     **arrayVarName** the variable name of the array to be processed
 # @EXAMPLES
-#     myArray=([2]='a' [5]='c' [11]='dd')
+#     Bash example: myArray=([2]='a' [5]='c' [11]='dd')
 #     array_reset_index myArray ==> ([0]='a' [1]='c' [2]='dd')
 # @SEE_ALSO
-function array_reset_index() {
+array_reset_index() {
 	local arrayVarName="$1"
-	local string command tmp
+	local -a tmp
 
-	eval "string='$'{${arrayVarName}[@]}"
-	command="tmp=(\"${string}\")"
-	eval "${command}"
-
-	string="\${tmp[@]}"
-	command="${arrayVarName}=(\"${string}\")"
-	eval "${command}"
+	eval "tmp=( \"\${${arrayVarName}[@]}\" )"
+	eval "${arrayVarName}=( \"\${tmp[@]}\" )"
 }
 
 # @NAME
@@ -540,7 +675,7 @@ function array_reset_index() {
 #     array_equals myArray1 myArray2 false && echo Y || echo N ==> N
 #     array_equals myArray1 myArray2 true && echo Y || echo N ==> Y
 # @SEE_ALSO
-function array_equals() {
+array_equals() {
 	local arrayVarName1="$1"
 	local arrayVarName2="$2"
 	local ignoreOrder=${3:-true}
@@ -563,7 +698,7 @@ function array_equals() {
 		array_reset_index tmp2
 	fi
 
-	[ "$(array_describe tmp1)" == "$(array_describe tmp2)" ]
+	[[ "$(array_describe tmp1)" == "$(array_describe tmp2)" ]]
 }
 
 # @NAME
@@ -582,25 +717,23 @@ function array_equals() {
 #     array_intersection myArray1 myArray2 newArray false
 # @SEE_ALSO
 #     array_subtract, array_union
-function array_intersection() {
+array_intersection() {
 	local array1="$1[@]"
 	local arrayVarName2="$2"
 	local newArrayVarName="$3"
 	local ignoreOrderAndDuplicated=${4:-true}
-
 	local tmp element2 string command
+
+	eval 'set -- "${'"$1"'[@]}"'
 	tmp=()
-	for element2 in "${!array1}"; do
+	for element2 in "$@"; do
 		array_contains "$arrayVarName2" "$element2" && array_append tmp "$element2"
 	done
 
 	if [ "${ignoreOrderAndDuplicated}" = true ]; then
 		array_sort_distinct tmp
 	fi
-
-	string="\${tmp[@]}"
-	command="${newArrayVarName}=(\"${string}\")"
-	eval "${command}"
+	eval "${newArrayVarName}=( \"\${tmp[@]}\" )"
 }
 
 # @NAME
@@ -619,25 +752,23 @@ function array_intersection() {
 #     array_subtract myArray1 myArray2 newArray false
 # @SEE_ALSO
 #     array_intersection, array_union
-function array_subtract() {
+array_subtract() {
 	local array1="$1[@]"
 	local arrayVarName2="$2"
 	local newArrayVarName="$3"
 	local ignoreOrderAndDuplicated=${4:-true}
-
 	local tmp element2 string command
+
+	eval 'set -- "${'"$1"'[@]}"'
 	tmp=()
-	for element2 in "${!array1}"; do
+	for element2 in "$@"; do
 		array_contains "$arrayVarName2" "$element2" || array_append tmp "$element2"
 	done
 
 	if [ "${ignoreOrderAndDuplicated}" = true ]; then
 		array_sort_distinct tmp
 	fi
-
-	string="\${tmp[@]}"
-	command="${newArrayVarName}=(\"${string}\")"
-	eval "${command}"
+	eval "${newArrayVarName}=( \"\${tmp[@]}\" )"
 }
 
 # @NAME
@@ -656,28 +787,25 @@ function array_subtract() {
 #     array_union myArray1 myArray2 newArray false
 # @SEE_ALSO
 #     array_intersection, array_union
-function array_union() {
+array_union() {
 	local array1="$1[@]"
 	local array2="$2[@]"
 	local newArrayVarName="$3"
 	local ignoreOrderAndDuplicated=${4:-true}
-
 	local tmp element2 string command
+
+	# Union consumes both arrays as a single ordered sequence. Both are
+	# expanded before positional arguments are replaced.
+	eval 'set -- "${'"$1"'[@]}" "${'"$2"'[@]}"'
 	tmp=()
-	for element2 in "${!array1}"; do
-		array_append tmp "$element2"
-	done
-	for element2 in "${!array2}"; do
+	for element2 in "$@"; do
 		array_append tmp "$element2"
 	done
 
 	if [ "${ignoreOrderAndDuplicated}" = true ]; then
 		array_sort_distinct tmp
 	fi
-
-	string="\${tmp[@]}"
-	command="${newArrayVarName}=(\"${string}\")"
-	eval "${command}"
+	eval "${newArrayVarName}=( \"\${tmp[@]}\" )"
 }
 
 # @NAME
@@ -692,14 +820,15 @@ function array_union() {
 #     array_append myArray "ele ment1" "ele ment2"
 # @SEE_ALSO
 #     array_remove
-function array_append() {
+array_append() {
 	local arrayVarName="$1"
 	shift
 
-	local elementToAppend command
+	local elementToAppend
 	for elementToAppend in "$@"; do
-		command="$arrayVarName+=(\"${elementToAppend}\")"
-		eval "${command}"
+		# Keep the value out of the eval program text; expand it only after eval
+		# has selected the destination array name.
+		eval "${arrayVarName}+=( \"\$elementToAppend\" )"
 	done
 }
 
@@ -715,24 +844,19 @@ function array_append() {
 #     array_remove arr "ab"
 # @SEE_ALSO
 #     array_contains, array_append
-function array_remove() {
+array_remove() {
 	local arrayVarName="$1"
 	local element="$2"
-
 	local string command tmp index
-	eval "string='$'{${arrayVarName}[@]}"
-	command="tmp=(\"${string}\")"
-	eval "${command}"
 
-	for index in "${!tmp[@]}"; do
-		if [[ "${tmp[$index]}" == "${element}" ]]; then
-			unset tmp["${index}"]
+	eval 'set -- "${'"$arrayVarName"'[@]}"'
+	tmp=()
+	for index in "$@"; do
+		if [[ "$index" != "$element" ]]; then
+			tmp+=("$index")
 		fi
 	done
-
-	string="\${tmp[@]}"
-	command="${arrayVarName}=(\"${string}\")"
-	eval "${command}"
+	eval "${arrayVarName}=( \"\${tmp[@]}\" )"
 }
 
 # @NAME
@@ -746,7 +870,7 @@ function array_remove() {
 #     arr=(" a " " b c ")
 #     array_clone arr newArray
 # @SEE_ALSO
-function array_clone() {
+array_clone() {
 	local arrayVarName="$1"
 	local arrayVarName2="$2"
 
@@ -765,23 +889,27 @@ function array_clone() {
 #     arr=(" a " " b c ")
 #     array_map arr "string_trim | wc -m | string_trim" newArray
 # @SEE_ALSO
-function array_map() {
+array_map() {
 	local array="$1[@]"
 	local pipedOperators="$2"
-	local newArrayVarName="$3"
-
+	local newArrayVarName="${3-}"
 	local tmp element mapped_value string command
+
+	eval 'set -- "${'"$1"'[@]}"'
 	tmp=()
-	for element in "${!array}"; do
-		escaped="${element//\'/\'"\'"\'}" # escape the single quote
-		mapped_value="$(eval "echo '${escaped}' | ${pipedOperators}")"
+	for element in "$@"; do
+		if [[ -n "${BASH_VERSION:-}" ]]; then
+			# Retain the original Bash echo semantics for values such as -n,
+			# but never evaluate an input element as shell source.
+			mapped_value="$(echo "$element" | eval "$pipedOperators")"
+		else
+			mapped_value="$(printf '%s\n' "$element" | eval "$pipedOperators")"
+		fi
 		tmp+=("${mapped_value}")
 	done
 
 	if [[ -n "${newArrayVarName}" ]]; then
-		string="\${tmp[@]}"
-		command="${newArrayVarName}=(\"${string}\")"
-		eval "${command}"
+		eval "${newArrayVarName}=( \"\${tmp[@]}\" )"
 	else
 		array_join $'\n' tmp
 	fi
@@ -799,29 +927,28 @@ function array_map() {
 #     arr=("NAME A" "NAME B" "OTHER")
 #     array_filter arr 'NAME' newArray
 # @SEE_ALSO
-function array_filter() {
+array_filter() {
 	local array="$1[@]"
 	local regExp="$2"
-	local newArrayVarName="$3"
-
+	local newArrayVarName="${3-}"
 	local tmp element string command
+
+	eval 'set -- "${'"$1"'[@]}"'
 	tmp=()
-	for element in "${!array}"; do
-		if [[ ${element} =~ ${regExp} ]]; then
+	for element in "$@"; do
+		if [[ $element =~ $regExp ]]; then
 			array_append tmp "${element}"
 		fi
 	done
 
 	if [[ -n "${newArrayVarName}" ]]; then
-		string="\${tmp[@]}"
-		command="${newArrayVarName}=(\"${string}\")"
-		eval "${command}"
+		eval "${newArrayVarName}=( \"\${tmp[@]}\" )"
 	else
 		array_join $'\n' tmp
 	fi
 }
 
-NEW_LINE_SED="\\$(echo -e '\r\n')" # Constant: the return and new line character, used with sed
+NEW_LINE_SED="\\$(printf '\r\n')" # Constant: the return and new line character, used with sed
 export NEW_LINE_SED
 
 COLOR_BOLD_MAGENTA=$'\e[1;35m' # Constant: color for printing Header
@@ -853,9 +980,10 @@ export LOG_LEVEL_DEBUG LOG_LEVEL_INFO LOG_LEVEL_WARN LOG_LEVEL_ERROR
 #     doc_lint_script_comment "${shellScriptFile}"
 # @SEE_ALSO
 #     doc_comment_to_markdown
-function doc_lint_script_comment() {
+doc_lint_script_comment() {
 	local shellScriptFile="$1"
-	local element strAllFunctionsAndTheirTags arrAllFunctionsAndTheirTags manTags strFunctionAndItsTags arrFunctionAndItsTags intersection counter
+	local element strAllFunctionsAndTheirTags arrAllFunctionsAndTheirTags manTags strFunctionAndItsTags arrFunctionAndItsTags intersection
+	local counter=0 lastFunction=""
 
 	# format the comment
 	sed -E -i'.bk' \
@@ -863,22 +991,27 @@ function doc_lint_script_comment() {
 		-e "s/^#/#     /g" \
 		-e "s/^#[[:space:]]+$/#/g" \
 		-e "s/^#[[:space:]]*!/#!/g" \
-		-e "s/^#[[:space:]]*(@|-|#+)/# \1/g" \
+		-e "s/^#[[:space:]]*(@|-|#+)/# \\1/g" \
 		"${shellScriptFile}"
 	rm -fr "${shellScriptFile}.bk"
 
-	# valid comment tags by man page convention
-	strAllFunctionsAndTheirTags=$(grep -e '^# @' -e '^function ' "${shellScriptFile}" | string_replace_regex '\(\)|#' '' | string_trim)
+	# Accept both historical `function name()` declarations and the shared
+	# Bash/zsh `name()` form.
+	strAllFunctionsAndTheirTags=$(grep -E -e '^# @' -e '^[[:space:]]*(function[[:space:]]+)?[0-9A-Za-z_-]+[[:space:]]*\(\)[[:space:]]*\{' "${shellScriptFile}" | string_replace_regex '\(\)|#' '' | string_trim)
 	string_split_to_array "{" arrAllFunctionsAndTheirTags "${strAllFunctionsAndTheirTags}"
-	local manTags=('@NAME' '@SYNOPSIS' '@DESCRIPTION' '@EXAMPLES' '@SEE_ALSO')
+	manTags=('@NAME' '@SYNOPSIS' '@DESCRIPTION' '@EXAMPLES' '@SEE_ALSO')
 	for strFunctionAndItsTags in "${arrAllFunctionsAndTheirTags[@]}"; do
 		string_split_to_array $'\n' arrFunctionAndItsTags "${strFunctionAndItsTags}"
 		array_intersection manTags arrFunctionAndItsTags intersection false
 		array_equals manTags intersection false
 		if [[ $? -ne 0 ]]; then
-			((counter++))
-			declare -p manTags intersection
-			print_error "the comments is not the same as template for ${arrFunctionAndItsTags[-1]}"
+			counter=$((counter + 1))
+			typeset -p manTags intersection
+			lastFunction=""
+			for element in "${arrFunctionAndItsTags[@]}"; do
+				lastFunction="$element"
+			done
+			print_error "the comments is not the same as template for ${lastFunction}"
 		fi
 	done
 
@@ -899,7 +1032,7 @@ function doc_lint_script_comment() {
 #     doc_comment_to_markdown src/reflection.sh docs/references.md
 # @SEE_ALSO
 #     doc_lint_script_comment
-function doc_comment_to_markdown() {
+doc_comment_to_markdown() {
 	local fromShellFile="$1"
 	local toMarkdownFile="$2"
 
@@ -918,7 +1051,7 @@ function doc_comment_to_markdown() {
 			string_replace_regex '^(\*\*)' "- \1"
 	)"
 
-	echo -e "@NAME\n${md//${NEW_LINE_SED}/\\n}" | #NEW_LINE_SED is not compatible by pandoc
+	printf '%b\n' "@NAME\n${md//${NEW_LINE_SED}/\\n}" | # NEW_LINE_SED is not compatible by pandoc
 		string_replace_regex '@([A-Z]+)' "##### \1" >"${toMarkdownFile}"
 }
 
@@ -934,9 +1067,9 @@ LOG_LEVEL=${LOG_LEVEL:-$LOG_LEVEL_INFO} # the default value INFO will be used if
 #     print_info "my message"
 # @SEE_ALSO
 #     print_header, print_error, print_success, print_warn, print_args, print_info
-function print_debug() {
+print_debug() {
 	if [[ $LOG_LEVEL -le $LOG_LEVEL_DEBUG ]]; then
-		echo -e "${COLOR_GRAY}DEBUG: ${1-$(cat)}${COLOR_END}"
+		printf '%b\n' "${COLOR_GRAY}DEBUG: ${1-$(cat)}${COLOR_END}"
 	fi
 }
 
@@ -950,9 +1083,9 @@ function print_debug() {
 #     print_info "my message"
 # @SEE_ALSO
 #     print_header, print_error, print_success, print_warn, print_args, print_debug
-function print_info() {
+print_info() {
 	if [[ $LOG_LEVEL -le $LOG_LEVEL_INFO ]]; then
-		echo -e "${COLOR_END}INFO: ${1-$(cat)}"
+		printf '%b\n' "${COLOR_END}INFO: ${1-$(cat)}"
 	fi
 }
 
@@ -966,9 +1099,9 @@ function print_info() {
 #     print_warn "my message"
 # @SEE_ALSO
 #     print_header, print_error, print_success, print_info, print_args, print_debug
-function print_warn() {
+print_warn() {
 	if [[ $LOG_LEVEL -le $LOG_LEVEL_WARN ]]; then
-		echo -e "${COLOR_BOLD_YELLOW}WARN: ${1-$(cat)} ${COLOR_END}"
+		printf '%b\n' "${COLOR_BOLD_YELLOW}WARN: ${1-$(cat)} ${COLOR_END}"
 	fi
 }
 
@@ -982,9 +1115,9 @@ function print_warn() {
 #     print_error "my error message"
 # @SEE_ALSO
 #     print_header, print_success, print_warn, print_info, print_args, print_debug
-function print_error() {
+print_error() {
 	if [[ $LOG_LEVEL -le $LOG_LEVEL_ERROR ]]; then
-		echo -e "${COLOR_BOLD_RED}ERROR: ${1-$(cat)} ${COLOR_END}"
+		printf '%b\n' "${COLOR_BOLD_RED}ERROR: ${1-$(cat)} ${COLOR_END}"
 	fi
 }
 
@@ -998,9 +1131,9 @@ function print_error() {
 #     print_success "my message"
 # @SEE_ALSO
 #     print_header, print_error, print_warn, print_info, print_args, print_debug
-function print_success() {
+print_success() {
 	if [[ $LOG_LEVEL -le $LOG_LEVEL_WARN ]]; then
-		echo -e "${COLOR_BOLD_GREEN}OK: ${1-$(cat)} ${COLOR_END}"
+		printf '%b\n' "${COLOR_BOLD_GREEN}OK: ${1-$(cat)} ${COLOR_END}"
 	fi
 }
 
@@ -1016,12 +1149,23 @@ function print_success() {
 #     print_args var1 var2
 # @SEE_ALSO
 #     print_header, print_error, print_success, print_warn, print_info, print_debug
-function print_args() {
+print_args() {
 	if [[ $LOG_LEVEL -le $LOG_LEVEL_WARN ]]; then
 		local varName varValue varValueOutput
 		for varName in "$@"; do
-			varValue=$(eval echo '$'"${varName}")
-			varValueOutput=$([[ -z "${varValue}" ]] && echo "<EMPTY>" || echo "${COLOR_BLUE}${varValue}${COLOR_END}")
+			eval 'varValue="${'"$varName"'-}"'
+			if [[ -n "${BASH_VERSION:-}" ]]; then
+				# Historical Bash print_args used `eval echo $name`, which
+				# normalized whitespace and echo options in displayed values.
+				# Echo expanded DATA, never eval it as new shell source.
+				# shellcheck disable=SC2086,SC2116
+				varValue="$(echo $varValue)"
+			fi
+			if [[ -z "$varValue" ]]; then
+				varValueOutput="<EMPTY>"
+			else
+				varValueOutput="${COLOR_BLUE}${varValue}${COLOR_END}"
+			fi
 			printf "%-30.30s%s\n" "${varName}:" "${varValueOutput}"
 		done
 	fi
@@ -1037,9 +1181,9 @@ function print_args() {
 #     print_header "My header1"
 # @SEE_ALSO
 #     print_error, print_success, print_warn, print_info, print_args, print_debug
-function print_header() {
+print_header() {
 	if [[ $LOG_LEVEL -le $LOG_LEVEL_ERROR ]]; then
-		echo -e "${COLOR_BOLD_MAGENTA}\n### ${1-$(cat)} ${COLOR_END}"
+		printf '%b\n' "${COLOR_BOLD_MAGENTA}\n### ${1-$(cat)} ${COLOR_END}"
 	fi
 }
 
@@ -1053,7 +1197,7 @@ function print_header() {
 #     prc_filter_by_port 9090
 # @SEE_ALSO
 #     prc_kill_by_port
-function prc_filter_by_port() {
+prc_filter_by_port() {
 	if [ $# -eq 0 ]; then
 		lsof -iTCP -sTCP:LISTEN -n -P
 	elif [ $# -eq 1 ]; then
@@ -1072,7 +1216,7 @@ function prc_filter_by_port() {
 #     prc_kill_by_port 9090
 # @SEE_ALSO
 #     prc_filter_by_port
-function prc_kill_by_port() {
+prc_kill_by_port() {
 	local port="$1"
 	local signal="${2-15}"
 
@@ -1095,7 +1239,7 @@ function prc_kill_by_port() {
 #     prc_filter_by_cmd node
 # @SEE_ALSO
 #     prc_kill_by_cmd
-function prc_filter_by_cmd() {
+prc_filter_by_cmd() {
 	if [ $# -eq 0 ]; then
 		ps
 	elif [ $# -eq 1 ]; then
@@ -1114,7 +1258,7 @@ function prc_filter_by_cmd() {
 #     prc_kill_by_cmd my-app
 # @SEE_ALSO
 #     prc_filter_by_cmd
-function prc_kill_by_cmd() {
+prc_kill_by_cmd() {
 	local cmd="$1"
 	local signal="${2-15}"
 
@@ -1140,15 +1284,50 @@ function prc_kill_by_cmd() {
 #     string="args_valid_or_read myVar '^[0-9a-z]{3,3}$' \"SIA\""
 #     reflect_nth_arg 4 $string ==> "SIA"
 # @SEE_ALSO
-function reflect_nth_arg() {
-	local index string args
+reflect_nth_arg() {
+	local index string word position
 
-	string="$(echo "$@" | string_replace_regex '(\\|\||\{|>|<|&)' '\\\1')"
-	args=()
-	eval 'for word in '"${string}"'; do args+=("$word"); done'
+	if [[ -n "${ZSH_VERSION:-}" ]]; then
+		# zsh's lexer splits shell-quoted words without executing their contents.
+		# Keep this expansion in eval so Bash can still parse the source file.
+		string="$*"
+		local -a __bash_base_reflect_words
+		eval '__bash_base_reflect_words=( "${(@Q)${(z)string}}" )' || return 1
+		set -- "${__bash_base_reflect_words[@]}"
+	else
+		string="$(printf '%s\n' "$*" | string_replace_regex '(\\|\||\{|>|<|&)' '\\\1')"
 
-	index="${args[0]}"
-	echo "${args[$index]}"
+		# Parse the same shell-like argument string as the historical implementation,
+		# but use positional parameters instead of an indexed array so Bash/zsh array
+		# index bases cannot change the result.
+		eval "set -- ${string}"
+	fi
+	index="${1-}"
+	if [[ -n "${BASH_VERSION:-}" ]]; then
+		# Bash legacy indexing addressed the entire parsed list, including
+		# the index argument at [0]; missing indexes printed a blank line.
+		# Keep that behavior, including Bash's native negative indexes.
+		local -a __bash_base_legacy_reflect_words
+		__bash_base_legacy_reflect_words=("$@")
+		echo "${__bash_base_legacy_reflect_words[$index]}"
+		return 0
+	fi
+	shift || true
+
+	if ! [[ "$index" =~ ^[0-9]+$ ]] || ((index < 1)); then
+		return 1
+	fi
+
+	position=1
+	for word in "$@"; do
+		if ((position == index)); then
+			printf '%s\n' "$word"
+			return 0
+		fi
+		position=$((position + 1))
+	done
+
+	return 1
 }
 
 # @NAME
@@ -1161,9 +1340,9 @@ function reflect_nth_arg() {
 #     reflect_get_function_definition confirm_to_continue
 # @SEE_ALSO
 #     reflect_function_names_of_file
-function reflect_get_function_definition() {
+reflect_get_function_definition() {
 	local functionName="$1"
-	declare -f "$functionName"
+	typeset -f "$functionName"
 }
 
 # @NAME
@@ -1177,9 +1356,14 @@ function reflect_get_function_definition() {
 #     reflect_function_names_of_file scripts/my_script.sh
 # @SEE_ALSO
 #     reflect_get_function_definition
-function reflect_function_names_of_file() {
+reflect_function_names_of_file() {
 	local shellScriptFile="$1"
-	grep -E '^[[:space:]]*(function)?[[:space:]]*[0-9A-Za-z_\-]+[[:space:]]*\(\)[[:space:]]*\{?' "${shellScriptFile}" | cut -d'(' -f1 | sed -e "s/function//"
+	if [[ -n "${BASH_VERSION:-}" ]]; then
+		# Existing Bash callers may rely on the original output spelling.
+		grep -E '^[[:space:]]*(function)?[[:space:]]*[0-9A-Za-z_\-]+[[:space:]]*\(\)[[:space:]]*\{?' "$shellScriptFile" | cut -d'(' -f1 | sed -e 's/function//'
+		return
+	fi
+	grep -E '^[[:space:]]*(function[[:space:]]+)?[0-9A-Za-z_-]+[[:space:]]*\(\)[[:space:]]*\{?' "$shellScriptFile" | sed -E -e 's/^[[:space:]]*function[[:space:]]+//' -e 's/[[:space:]]*\(\).*//' -e 's/[[:space:]]+$//'
 }
 
 # @NAME
@@ -1193,9 +1377,13 @@ function reflect_function_names_of_file() {
 #     reflect_function_definitions_of_file scripts/my_script.sh
 # @SEE_ALSO
 #     reflect_get_function_definition
-function reflect_function_definitions_of_file() {
+reflect_function_definitions_of_file() {
 	local shellScriptFile="$1"
-	sed -E -n '/^[[:space:]]*(function)?[[:space:]]*[0-9A-Za-z_\-]+[[:space:]]*\(\)[[:space:]]*\{?/,/^[[:space:]]*}/p' "${shellScriptFile}"
+	if [[ -n "${BASH_VERSION:-}" ]]; then
+		sed -E -n '/^[[:space:]]*(function)?[[:space:]]*[0-9A-Za-z_\-]+[[:space:]]*\(\)[[:space:]]*\{?/,/^[[:space:]]*}/p' "$shellScriptFile"
+		return
+	fi
+	sed -E -n '/^[[:space:]]*(function[[:space:]]+)?[0-9A-Za-z_-]+[[:space:]]*\(\)[[:space:]]*\{?/,/^[[:space:]]*}/p' "$shellScriptFile"
 }
 
 # @NAME
@@ -1209,9 +1397,17 @@ function reflect_function_definitions_of_file() {
 #     reflect_search_function '^args_.*'
 # @SEE_ALSO
 #     reflect_search_variable
-function reflect_search_function() {
+reflect_search_function() {
 	local functionNamePattern="$1"
-	declare -f | grep -E '\s+\(\)\s+' | sed -E 's/[(){ ]//g' | grep -Ei "${functionNamePattern}"
+
+	if [[ -n "${BASH_VERSION:-}" ]]; then
+		# Exact Bash legacy extraction/output (no new sorting or dedupe).
+		typeset -f | grep -E '\s+\(\)\s+' | sed -E 's/[(){ ]//g' | grep -Ei "$functionNamePattern"
+	elif [[ -n "${ZSH_VERSION:-}" ]]; then
+		# Hide zsh-only parameter-expansion flags inside eval so the file still
+		# parses in Bash.
+		eval 'printf "%s\\n" "${(k)functions[@]}"' | LC_ALL=C sort -u | grep -Ei "$functionNamePattern"
+	fi
 }
 
 # @NAME
@@ -1225,9 +1421,16 @@ function reflect_search_function() {
 #     reflect_search_variable '^COLOR'
 # @SEE_ALSO
 #     reflect_search_function
-function reflect_search_variable() {
+reflect_search_variable() {
 	local variableNamePattern="$1"
-	declare -p | grep -Eo '\s+\w+=' | sed -E 's/[= ]//g' | grep -Ei "${variableNamePattern}"
+
+	if [[ -n "${BASH_VERSION:-}" ]]; then
+		# Enumerate Bash variables directly. Parsing typeset -p using \s/\w
+		# depends on grep extensions unavailable on some macOS versions.
+		compgen -A variable | grep -Ei "$variableNamePattern"
+	elif [[ -n "${ZSH_VERSION:-}" ]]; then
+		eval 'printf "%s\\n" "${(k)parameters[@]}"' | LC_ALL=C sort -u | grep -Ei "$variableNamePattern"
+	fi
 }
 
 # @NAME
@@ -1241,7 +1444,7 @@ function reflect_search_variable() {
 #     string_trim < logfile
 #     echo " add " | string_trim
 # @SEE_ALSO
-function string_trim() {
+string_trim() {
 	local string="${1-$(cat)}"
 	echo "${string}" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' #trim ' '
 }
@@ -1257,7 +1460,7 @@ function string_trim() {
 #     string_repeat 'abc' 5
 #     echo 5 | string_repeat 'abc'
 # @SEE_ALSO
-function string_repeat() {
+string_repeat() {
 	local string="$1"
 	local nbTimes=${2-$(cat)}
 	printf "${string}%.0s" $(seq 1 "$nbTimes")
@@ -1274,7 +1477,7 @@ function string_repeat() {
 #     string_length < logfile
 #     echo " add " | string_length
 # @SEE_ALSO
-function string_length() {
+string_length() {
 	local string index
 	string="${1-$(cat)}"
 
@@ -1294,7 +1497,7 @@ function string_length() {
 #     echo " add " | string_is_empty
 # @SEE_ALSO
 #     string_length
-function string_is_empty() {
+string_is_empty() {
 	local string="${1-$(cat)}"
 
 	[[ $(string_length "$string") -eq 0 ]]
@@ -1310,7 +1513,7 @@ function string_is_empty() {
 #     string_revert 'aBc'
 #     echo 'aBc' | string_revert
 # @SEE_ALSO
-function string_revert() {
+string_revert() {
 	local string="${1-$(cat)}"
 	echo "${string}" | rev
 }
@@ -1326,9 +1529,16 @@ function string_revert() {
 #     echo 'abc' | string_upper
 # @SEE_ALSO
 #     string_upper_first, string_lower
-function string_upper() {
+string_upper() {
 	local string=${1-$(cat)}
-	echo "${string^^}"
+	if [[ -n "${BASH_VERSION:-}" ]] && ((BASH_VERSINFO[0] >= 4)); then
+		# Bash's case expansion is locale-aware (unlike many tr versions).
+		# Keep the Bash 4+/5+ echo behavior verbatim. Construct the expression
+		# at runtime so Bash 3.2 can source this file without evaluating it.
+		eval 'echo "${string'"^^"'}"'
+		return
+	fi
+	printf '%s\n' "$string" | tr '[:lower:]' '[:upper:]'
 }
 
 # @NAME
@@ -1342,9 +1552,13 @@ function string_upper() {
 #     echo 'aBc' | string_lower
 # @SEE_ALSO
 #     string_upper, string_upper_first
-function string_lower() {
+string_lower() {
 	local string=${1-$(cat)}
-	echo "${string,,}"
+	if [[ -n "${BASH_VERSION:-}" ]] && ((BASH_VERSINFO[0] >= 4)); then
+		eval 'echo "${string'",,"'}"'
+		return
+	fi
+	printf '%s\n' "$string" | tr '[:upper:]' '[:lower:]'
 }
 
 # @NAME
@@ -1358,10 +1572,29 @@ function string_lower() {
 #     echo 'aBc' | string_upper_first
 # @SEE_ALSO
 #     string_lower, string_upper
-function string_upper_first() {
+string_upper_first() {
 	local string=${1-$(cat)}
-	local lower="${string,,}"
-	echo "${lower^}"
+	local lower first rest
+
+	if [[ -n "${BASH_VERSION:-}" ]] && ((BASH_VERSINFO[0] >= 4)); then
+		# Do not round-trip through command substitution: it strips the
+		# trailing newlines that the old Bash parameter expansion preserved.
+		eval 'lower="${string'",,"'}"'
+		eval 'echo "${lower'"^"'}"'
+		return
+	fi
+
+	lower="$(string_lower "$string")"
+	[[ -n "$lower" ]] || {
+		printf '\n'
+		return 0
+	}
+
+	# `${var^^}` / `${var,,}` / `${var^}` are Bash-specific.  Parameter
+	# prefix/suffix removal is shared by Bash and zsh.
+	rest="${lower#?}"
+	first="${lower%"$rest"}"
+	printf '%s%s\n' "$(string_upper "$first")" "$rest"
 }
 
 # @NAME
@@ -1377,11 +1610,37 @@ function string_upper_first() {
 #     string_sub 3 5 < temp_file.txt
 #     echo ' as fd ' | string_sub 2 4
 # @SEE_ALSO
-function string_sub() {
+string_sub() {
 	local startIndex=$1
 	local subStringLength=$2
 	local string="${3-$(cat)}"
-	echo "${string:$startIndex:$subStringLength}"
+	if [[ -n "${BASH_VERSION:-}" ]] && ((BASH_VERSINFO[0] >= 4)); then
+		# Keep Bash 4+/5+ substring and error behavior exactly as before.
+		# Bash 3.2 continues to use the portable negative-length fallback.
+		echo "${string:$startIndex:$subStringLength}"
+		return
+	fi
+	local totalLength=${#string}
+	local actualStart=$startIndex
+	local actualLength=$subStringLength
+
+	# Bash 3.2 cannot use a negative substring length.  Convert the
+	# documented negative start/end offsets to nonnegative bounds first.
+	if ((actualStart < 0)); then
+		actualStart=$((totalLength + actualStart))
+	fi
+	if ((actualLength < 0)); then
+		actualLength=$((totalLength + actualLength - actualStart))
+	fi
+	# Out-of-range starts produce an empty result (as in modern Bash).
+	if ((actualStart < 0 || actualStart > totalLength)); then
+		printf '\n'
+		return 0
+	fi
+	if ((actualLength < 0)); then
+		return 1
+	fi
+	printf '%s\n' "${string:$actualStart:$actualLength}"
 }
 
 # @NAME
@@ -1395,7 +1654,7 @@ function string_sub() {
 #     string_match 'name;+' "name;name;"
 # @SEE_ALSO
 #     string_index_first
-function string_match() {
+string_match() {
 	local value regExp
 	regExp=${1}
 	string="${2-$(cat)}"
@@ -1413,10 +1672,14 @@ function string_match() {
 #     escape_sed 'a$'
 # @SEE_ALSO
 #     string_replace
-function escape_sed() {
-	echo "${1}" | sed -e 's/\//\\\//g' -e 's/\&/\\\&/g' -e 's/\./\\\./g' -e 's/\^/\\\^/g' -e 's/\[/\\\[/g' -e 's/\$/\\\$/g'
+escape_sed() {
+	if [[ -n "${ZSH_VERSION:-}" ]]; then
+		printf '%s\n' "$1"
+	else
+		# Preserve historical Bash echo semantics.
+		echo "$1"
+	fi | sed -e 's/\//\\\//g' -e 's/\&/\\\&/g' -e 's/\./\\\./g' -e 's/\^/\\\^/g' -e 's/\[/\\\[/g' -e 's/\$/\\\$/g'
 }
-export -f escape_sed >/dev/null
 
 # @NAME
 #     string_replace -- replace literally the token string to new string, not support regular expression
@@ -1432,11 +1695,16 @@ export -f escape_sed >/dev/null
 #     string_replace '\*' 'b' 'a*a'  ==> 'aba'
 # @SEE_ALSO
 #     escape_sed, string_replace_regex
-function string_replace() {
+string_replace() {
 	local tokenString newString
 	tokenString=$(escape_sed "${1}")
 	newString=$(escape_sed "${2}")
-	echo "${3-$(cat)}" | sed -e "s/${tokenString}/${newString}/g"
+	if [[ -n "${ZSH_VERSION:-}" ]]; then
+		printf '%s\n' "${3-$(cat)}" | sed -e "s/${tokenString}/${newString}/g"
+	else
+		# Preserve historical Bash echo semantics.
+		echo "${3-$(cat)}" | sed -e "s/${tokenString}/${newString}/g"
+	fi
 }
 
 # @NAME
@@ -1453,7 +1721,7 @@ function string_replace() {
 #     string_replace_regex '*' 'b' 'a*a'  ==> 'aba'
 # @SEE_ALSO
 #     string_replace
-function string_replace_regex() {
+string_replace_regex() {
 	echo "${3-$(cat)}" | sed -E -e "s/$1/$2/g"
 }
 
@@ -1470,11 +1738,11 @@ function string_replace_regex() {
 #     echo " add " | string_index_first "token"
 # @SEE_ALSO
 #     string_before_first, string_after_first
-function string_index_first() {
+string_index_first() {
 	local tokenString=$1
 	local string="${2-$(cat)}"
 	local prefix="${string%%${tokenString}*}"
-	[ "${string}" == "${prefix}" ] && echo -1 || echo ${#prefix}
+	[[ "${string}" == "${prefix}" ]] && printf '%s\n' -1 || printf '%s\n' "${#prefix}"
 }
 
 # @NAME
@@ -1490,7 +1758,7 @@ function string_index_first() {
 #     echo " add " | string_before_first "dd"
 # @SEE_ALSO
 #     string_index_first, string_after_first
-function string_before_first() {
+string_before_first() {
 	local tokenString=$1
 	local string="${2-$(cat)}"
 	echo "${string%%${tokenString}*}" # Remove the first - and everything following it
@@ -1509,7 +1777,7 @@ function string_before_first() {
 #     echo " add " | string_after_first "dd"
 # @SEE_ALSO
 #     string_index_first, string_before_first
-function string_after_first() {
+string_after_first() {
 	local tokenString=$1
 	local string="${2-$(cat)}"
 	echo "${string#*${tokenString}}" # Remove everything up to and including first -
@@ -1531,7 +1799,7 @@ function string_after_first() {
 #     string_split_to_array $'\n' branchesToSelectArray "${branchesToSelectString}"
 # @SEE_ALSO
 #     array_join, array_describe, array_from_describe, string_pick_to_array
-function string_split_to_array() {
+string_split_to_array() {
 	local tokenString="$1"
 	local newArrayVarName="$2"
 	local string="${3-$(cat)}"
@@ -1569,7 +1837,7 @@ function string_split_to_array() {
 #     string_pick_to_array '{age:' '}' newArray "$str"
 # @SEE_ALSO
 #     array_join, array_describe, array_from_describe, string_split_to_array
-function string_pick_to_array() {
+string_pick_to_array() {
 	local startTokenString="$1"
 	local endTokenString="$2"
 	local newArrayVarName="$3"
@@ -1605,7 +1873,7 @@ function string_pick_to_array() {
 #     stop_if_failed "ERROR: can't delete the directory '${destProjectPath}' !"
 # @SEE_ALSO
 #     confirm_to_continue
-function stop_if_failed() {
+stop_if_failed() {
 	if [[ $? -ne 0 ]]; then
 		print_error "$*"
 		exit 1
@@ -1624,19 +1892,25 @@ function stop_if_failed() {
 #     confirm_to_continue a b
 # @SEE_ALSO
 #     print_args, stop_if_failed
-function confirm_to_continue() {
+confirm_to_continue() {
 	local response
 	print_args "$@"
-	if ! [ "${modeQuiet}" == true ]; then
-		read -r -p "Continue ? [y/N] " response
 
-		case "${response}" in
-		[yY][eE][sS] | [yY])
-			echo -e "Continue..."
-			sleep 1s
+	if [[ "${modeQuiet:-false}" != true ]]; then
+		# Bash `read -p` and zsh `read "name?prompt"` are shell-specific.
+		# Match Bash read -p behavior by showing the prompt only for a TTY.
+		if [[ -t 0 ]]; then
+			printf '%s' 'Continue ? [y/N] ' >&2
+		fi
+		read -r response || response=""
+
+		case "$response" in
+		[yY] | [yY][eE][sS])
+			printf '%s\n' 'Continue...'
+			sleep 1
 			;;
 		*)
-			echo -e "Exiting..."
+			printf '%s\n' 'Exiting...'
 			exit 1
 			;;
 		esac
@@ -1654,8 +1928,8 @@ function confirm_to_continue() {
 # @EXAMPLES
 #     wait_for 'test -f /tmp/output.txt' 'file existed' 3
 # @SEE_ALSO
-#     confirm_to_continue, stop_if_failed, is_http_ok
-function wait_for() {
+#     confirm_to_continue, stop_if_failed
+wait_for() {
 	local predicate="${1}"
 	local subject="${2-${predicate}}"
 	local interval=${3-3}
@@ -1681,6 +1955,16 @@ function wait_for() {
 #     record2
 #     EOF
 # @SEE_ALSO
-function declare_heredoc() {
-	eval "$1='$(cat)'"
+declare_heredoc() {
+	local _bash_base_heredoc_target="${1-}"
+	local _bash_base_heredoc_content
+
+	# Only identifier names may appear as the left-hand side of an eval.
+	case "$_bash_base_heredoc_target" in
+	'' | [!a-zA-Z_]* | *[!a-zA-Z0-9_]*) return 2 ;;
+	esac
+
+	_bash_base_heredoc_content="$(cat)"
+	# Expand the content as a variable value, never parse it as shell code.
+	eval "${_bash_base_heredoc_target}=\"\$_bash_base_heredoc_content\""
 }

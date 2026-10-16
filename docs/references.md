@@ -2,73 +2,127 @@
 
 ### Functions:
 
-- args_parse
-- args_valid_or_select
-- args_valid_or_select_pipe
-- args_valid_or_select_args
-- args_valid_or_read
-- args_valid_or_default
-- array_join
-- array_describe
-- array_from_describe
-- array_contains
-- array_in
-- array_sort
-- array_sort_distinct
-- array_length
-- array_reset_index
-- array_equals
-- array_intersection
-- array_subtract
-- array_union
-- array_append
-- array_remove
-- array_clone
-- array_map
-- array_filter
-- doc_lint_script_comment
-- doc_comment_to_markdown
-- print_debug
-- print_info
-- print_warn
-- print_error
-- print_success
-- print_args
-- print_header
-- prc_filter_by_port
-- prc_kill_by_port
-- prc_filter_by_cmd
-- prc_kill_by_cmd
-- reflect_nth_arg
-- reflect_get_function_definition
-- reflect_function_names_of_file
-- reflect_function_definitions_of_file
-- reflect_search_function
-- reflect_search_variable
-- string_trim
-- string_repeat
-- string_length
-- string_is_empty
-- string_revert
-- string_upper
-- string_lower
-- string_upper_first
-- string_sub
-- string_match
-- escape_sed
-- string_replace
-- string_replace_regex
-- string_index_first
-- string_before_first
-- string_after_first
-- string_split_to_array
-- string_pick_to_array
-- stop_if_failed
-- confirm_to_continue
-- wait_for
-- declare_heredoc
+-args_confirm
+-args_print
+-args_parse
+-args_valid_or_select
+-args_valid_or_select_pipe
+-args_valid_or_select_args
+-args_valid_or_read
+-args_valid_or_default
+-array_join
+-array_describe
+-array_from_describe
+-array_contains
+-array_in
+-array_sort
+-array_sort_distinct
+-array_length
+-array_reset_index
+-array_equals
+-array_intersection
+-array_subtract
+-array_union
+-array_append
+-array_remove
+-array_clone
+-array_map
+-array_filter
+-doc_lint_script_comment
+-doc_comment_to_markdown
+-print_debug
+-print_info
+-print_warn
+-print_error
+-print_success
+-print_args
+-print_header
+-prc_filter_by_port
+-prc_kill_by_port
+-prc_filter_by_cmd
+-prc_kill_by_cmd
+-reflect_nth_arg
+-reflect_get__definition
+-reflect__names_of_file
+-reflect__definitions_of_file
+-reflect_search_
+-reflect_search_variable
+-string_trim
+-string_repeat
+-string_length
+-string_is_empty
+-string_revert
+-string_upper
+-string_lower
+-string_upper_first
+-string_sub
+-string_match
+-escape_sed
+-string_replace
+-string_replace_regex
+-string_index_first
+-string_before_first
+-string_after_first
+-string_split_to_array
+-string_pick_to_array
+-stop_if_failed
+-confirm_to_continue
+-wait_for
+-declare_heredoc
 
 ### Usage:
+
+##### NAME
+aliases need different non-interactive expansion rules in Bash and zsh, while
+functions work identically when this library is sourced by either shell.
+
+---
+
+##### NAME
+args_confirm -- show the name and value of variables, and continue execute if args_confirm by user, or exit if not
+
+##### SYNOPSIS
+```
+args_confirm variableName...
+```
+
+##### DESCRIPTION
+- **variableName...** some existed variable names to show its value
+
+##### EXAMPLES
+```
+a="correct value"
+b="wrong value"
+args_confirm a b
+```
+
+##### SEE_ALSO
+args_print, stop_if_failed
+
+---
+
+##### NAME
+args_print -- if LOG_LEVEL<=$LOG_LEVEL_WARN, show the name and value of variables
+
+##### SYNOPSIS
+```
+args_print variableName...
+```
+
+##### DESCRIPTION
+- **variableName...** some existed variable names to show its value
+
+##### EXAMPLES
+```
+var1="value 1"
+var2="value 2"
+args_print var1 var2
+```
+
+##### SEE_ALSO
+print_header, print_error, print_success, print_warn, print_info, print_debug
+
+---
 
 ##### NAME
 args_parse -- parse the script argument values to positional variable names, process firstly the optional param help(-h) / quiet(-q) if existed
@@ -244,7 +298,7 @@ string_split_to_array, array_describe, array_from_describe
 ---
 
 ##### NAME
-array_describe -- convert the array to its string representation
+array_describe -- convert the array to its shell-native string representation
 
 ##### SYNOPSIS
 ```
@@ -401,7 +455,7 @@ array_length myArray ==> 3
 ---
 
 ##### NAME
-array_reset_index -- reset the indexes of array to the sequence 0,1,2..., save the result to original variable name
+array_reset_index -- reset indexes to the shell-native contiguous sequence, save the result to original variable name
 
 ##### SYNOPSIS
 ```
@@ -413,7 +467,7 @@ array_reset_index arrayVarName
 
 ##### EXAMPLES
 ```
-myArray=([2]='a' [5]='c' [11]='dd')
+Bash example: myArray=([2]='a' [5]='c' [11]='dd')
 array_reset_index myArray ==> ([0]='a' [1]='c' [2]='dd')
 ```
 
@@ -1541,7 +1595,7 @@ wait_for 'test -f /tmp/output.txt' 'file existed' 3
 ```
 
 ##### SEE_ALSO
-confirm_to_continue, stop_if_failed, is_http_ok
+confirm_to_continue, stop_if_failed
 
 ---
 
