@@ -306,6 +306,14 @@ See [spec](spec) folder. Run `npm test` to execute the Bash/zsh compatibility ga
 ## Latest Update
 See [change log](CHANGELOG.md)
 
+## Roadmap
+
+See the [project roadmap](docs/roadmap.md) for prioritized investigation and
+future evolution of command composition, API contracts, shell portability,
+security, testing and distribution. The roadmap is not a commitment to ship
+particular features or versions. New proposals follow the
+[design principles](docs/design-principles.md).
+
 ## Contributing
 See [How to contribute](CONTRIBUTING.md)
 

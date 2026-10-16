@@ -30,6 +30,11 @@ implementation details are not a reason to withhold a useful use case.
 
 ## Proposing a feature
 
+Consult the [roadmap](docs/roadmap.md) for current priorities, dependencies and
+acceptance criteria. A roadmap entry is an investigation direction, not an
+approved API or a guaranteed release. Record actionable tasks and results in
+issues and pull requests.
+
 Start with the [design principles](docs/design-principles.md). Bash-base accepts
 features to reduce recurring command-composition and scripting costs, not to
 maximize the number of helpers or reproduce another language's standard library.
