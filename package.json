@@ -1,6 +1,6 @@
 {
   "name": "@renault-digital/bash-base",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "Reusable Bash/zsh utilities for reliable command composition and automation.",
   "private": false,
   "publishConfig": {

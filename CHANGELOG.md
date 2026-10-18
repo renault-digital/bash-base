@@ -1,3 +1,10 @@
+## [2.5.2](https://github.com/renault-digital/bash-base/compare/v2.5.1...v2.5.2) (2026-10-18)
+
+
+### Bug Fixes
+
+* **argument:** handle login-shell invocation names safely ([1991453](https://github.com/renault-digital/bash-base/commit/1991453fe270b679988c6895729c5b16e7110486))
+
 ## [2.5.1](https://github.com/renault-digital/bash-base/compare/v2.5.0...v2.5.1) (2026-10-16)
 
 # [2.5.0](https://github.com/renault-digital/bash-base/compare/v2.4.0...v2.5.0) (2026-10-16)
