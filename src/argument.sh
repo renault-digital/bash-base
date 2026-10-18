@@ -9,8 +9,9 @@ if [[ -n "${ZSH_VERSION:-}" ]]; then
 else
 	_bash_base_argzero="$0"
 fi
-THIS_SCRIPT_PATH="$_bash_base_argzero"               # script source path for args_valid_* lookup
-THIS_SCRIPT_NAME="$(basename "$_bash_base_argzero")" # the main script name
+THIS_SCRIPT_PATH="$_bash_base_argzero"       # script source path for args_valid_* lookup
+THIS_SCRIPT_NAME="${_bash_base_argzero##*/}" # the main script name
+THIS_SCRIPT_NAME="${THIS_SCRIPT_NAME#-}"     # login shells may expose argv[0] as -bash/-zsh
 unset _bash_base_argzero
 
 SHORT_DESC="${THIS_SCRIPT_NAME%%.*}"
